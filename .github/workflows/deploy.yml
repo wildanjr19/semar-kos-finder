@@ -3,7 +3,7 @@ name: Deploy Unskosfinder to VPS
 on:
   push:
     branches:
-      - main  
+      - main
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -23,30 +23,35 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-
-            # Masuk ke folder root
+            # Masuk ke direktori project
             cd /home/ubuntu/semar-kos-finder
 
-            echo "📥 Ambil kode terbaru..."
+            # Ambil kode terbaru
             git pull origin main
 
-            # Masuk ke folder frontend
+            # Masuk ke folder frontend (sesuaikan jika folder bernama 'web' atau 'frontend')
             cd frontend
 
-            echo "📦 Install dependencies..."
+            # Install dependencies
             npm install
 
-            echo "🧹 Bersihkan build lama"
-            rm -rf .next
-
-            echo "🏗️ Build project"
+            # Build project
+            # .next otomatis tertimpa saat build, tidak wajib rm -rf tapi boleh dipertahankan
             npm run build
             
-            # Jalankan ulang dengan env port yang jelas
-            pm2 start npm --name "semarkosfinder" -- start -- -p 3002
+            # Cek apakah proses sudah ada di PM2
+            # Jika ada, restart. Jika tidak ada, start baru.
+            pm2 describe semarkosfinder > /dev/null
+            if [ $? -eq 0 ]; then
+              echo "Aplikasi ditemukan, melakukan restart..."
+              pm2 restart semarkosfinder
+            else
+              echo "Aplikasi baru, melakukan start..."
+              pm2 start npm --name "semarkosfinder" -- start -- -p 3002
+            fi
 
-            # Simpan agar tetap jalan saat VPS reboot
+            # Simpan konfigurasi PM2
             pm2 save
 
-            echo "✅ Deployment selesai! Status PM2:"
+            echo "Deployment selesai. Status PM2:"
             pm2 list
