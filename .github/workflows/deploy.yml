@@ -1,0 +1,52 @@
+name: Deploy Unskosfinder to VPS
+
+on:
+  push:
+    branches:
+      - main  
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Executing remote ssh commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+
+            # Masuk ke folder root
+            cd /home/ubuntu/semar-kos-finder
+
+            echo "📥 Ambil kode terbaru..."
+            git pull origin main
+
+            # Masuk ke folder frontend
+            cd frontend
+
+            echo "📦 Install dependencies..."
+            npm install
+
+            echo "🧹 Bersihkan build lama"
+            rm -rf .next
+
+            echo "🏗️ Build project"
+            npm run build
+            
+            # Jalankan ulang dengan env port yang jelas
+            pm2 start npm --name "semarkosfinder" -- start -- -p 3002
+
+            # Simpan agar tetap jalan saat VPS reboot
+            pm2 save
+
+            echo "✅ Deployment selesai! Status PM2:"
+            pm2 list

@@ -1,0 +1,28 @@
+# --- Python & Data Science (Root) ---
+.venv/
+data/
+dump/
+log/
+notebooks/
+notes/
+*.log
+TODO.md
+PROJECT_BRIEF.md
+
+# --- Frontend (Next.js) ---
+# Menggunakan **/ agar mencari ke semua sub-folder
+**/node_modules/
+**/.next/
+**/out/
+
+# --- Sensitive Data ---
+.env
+.env.local
+
+# Mengabaikan semua JSON di folder data kost (sesuai request kamu)
+frontend/public/data/data_kost_geo.json
+frontend/public/data/master_uns.json
+
+# --- OS Junk ---
+.DS_Store
+Thumbs.db
