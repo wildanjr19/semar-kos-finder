@@ -23,35 +23,25 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Masuk ke direktori project
+            # Memuat environment agar npm dan pm2 terbaca
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            
+            # Tambahkan path npm/node secara manual jika tidak pakai NVM
+            export PATH=$PATH:/usr/bin:/usr/local/bin
+
             cd /home/ubuntu/semar-kos-finder
-
-            # Ambil kode terbaru
             git pull origin main
-
-            # Masuk ke folder frontend (sesuaikan jika folder bernama 'web' atau 'frontend')
+            
             cd frontend
-
-            # Install dependencies
             npm install
-
-            # Build project
-            # .next otomatis tertimpa saat build, tidak wajib rm -rf tapi boleh dipertahankan
             npm run build
             
-            # Cek apakah proses sudah ada di PM2
-            # Jika ada, restart. Jika tidak ada, start baru.
+            # Cek PM2 dengan path lengkap atau setelah source nvm
             pm2 describe semarkosfinder > /dev/null
             if [ $? -eq 0 ]; then
-              echo "Aplikasi ditemukan, melakukan restart..."
               pm2 restart semarkosfinder
             else
-              echo "Aplikasi baru, melakukan start..."
               pm2 start npm --name "semarkosfinder" -- start -- -p 3002
             fi
-
-            # Simpan konfigurasi PM2
             pm2 save
-
-            echo "Deployment selesai. Status PM2:"
-            pm2 list
