@@ -1,3 +1,7 @@
+'''
+Ekstraksi data dari dokumen PDF menggunakan pdfplumber.
+'''
+
 import logging
 
 import pandas as pd
