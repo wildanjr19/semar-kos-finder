@@ -135,7 +135,7 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 
 ## Kontribusi
 
-Terbuka untuk kolaborasi dan atau pull-request, baik dalam pengembangan maupun adanya bug. Untuk kolaborasi harap hubungi creator untuk mendapatkan akses data. Jika terdapat titik kos atau informasi yang kurang benar dan tidak akurat, mohon untuk menghubungi creator
+Terbuka untuk kolaborasi dan atau pull-request, baik dalam pengembangan maupun adanya bug. Untuk kolaborasi harap hubungi creator untuk mendapatkan akses data. Jika terdapat titik kos atau informasi yang kurang benar dan tidak akurat, mohon untuk menghubungi creator.
 
 ## Acknowledgement
 Terima kasih untuk pihak BEM UNS dan collaborator lainnya dalam menyediakan data.
