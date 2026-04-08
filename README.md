@@ -4,7 +4,8 @@ Aplikasi web peta interaktif untuk mencari dan menemukan kos (indekos) di sekita
 
 ## Deskripsi
 
-UNSKosFinder adalah platform berbasis peta yang membantu mahasiswa dan calon penghuni menemukan kos yang sesuai di sekitar kampus UNS. Aplikasi ini menampilkan lokasi kos pada peta interaktif lengkap dengan informasi detail seperti harga, fasilitas, peraturan, dan kontak pemilik.
+**Semar Kos Finder** adalah platform berbasis peta yang membantu mahasiswa dan calon penghuni menemukan kos yang sesuai di sekitar kampus UNS. Aplikasi ini menampilkan lokasi kos pada peta interaktif lengkap dengan informasi detail seperti harga, fasilitas, peraturan, dan kontak pemilik.  
+Aplikasi ini ditujukan untuk mahasiswa terutama mahasiswa baru agar mudah dalam mencari kos secara visual. Proyek ini menawarkan kemudahan dan akurasi, dimana titik-titik kos 95% terdapat pada titik-titik yang akurat sesuai lokasi asli kos tersebut berada
 
 ## Fitur
 
@@ -118,17 +119,23 @@ python src/get_new_data.py
 | `lat` | Latitude |
 | `long` | Longitude |
 
+## Log Update Data
+Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru akan memakan waktu. Jika ingin menambahkan kos kalian, bisa hubungi creator. Pembaruan data akan dilakukan secara batch atau gelombang.
+|Date|Total Data|Update|Version|
+|----|----------|------|-------|
+|8/4/2026|310|0|v1|
+
 ## Future Work
 
-- [ ] Parsing harga yang lebih baik
+- [ ] Parsing harga yang lebih baik.
 - [ ] Tambah filter di frontend (harga, jenis, fasilitas)
-- [ ] Tampilkan rute dari kos ke fakultas/kampus
-- [ ] Hitung jarak dari kos ke tujuan
-- [ ] Tambah titik-titik landmark di peta
+- [ ] Fitur comparison antar kos.
+- [x] Tampilkan rute dari kos ke fakultas/kampus.
+- [x] Hitung jarak dari kos ke tujuan.
 
 ## Kontribusi
 
-Terbuka untuk kolaborasi dan atau pull-request, baik dalam pengembangan maupun adanya bug. Untuk kolaborasi harap hubungi creator.
+Terbuka untuk kolaborasi dan atau pull-request, baik dalam pengembangan maupun adanya bug. Untuk kolaborasi harap hubungi creator untuk mendapatkan akses data. Jika terdapat titik kos atau informasi yang kurang benar dan tidak akurat, mohon untuk menghubungi creator
 
 ## Acknowledgement
-Terima kasih untuk pihak BEM UNS dalam menyediakan data.
+Terima kasih untuk pihak BEM UNS dan collaborator lainnya dalam menyediakan data.
