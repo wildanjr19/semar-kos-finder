@@ -341,7 +341,7 @@ export default function Map() {
 
       const kontak = document.createElement("div");
       const contactLabel = document.createElement("span");
-      contactLabel.textContent = "Kontak WAAA: ";
+      contactLabel.textContent = "Kontak: ";
 
       const parsedContact = parseContact(kos.kontak);
       if (parsedContact.href) {
