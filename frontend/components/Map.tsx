@@ -5,6 +5,7 @@ import maplibregl from "maplibre-gl";
 
 type Kos = {
   nama: string;
+  jenis: string;
   lat: number;
   lon: number;
   harga: string;
@@ -21,6 +22,7 @@ type Destination = {
 
 type RawKos = {
   "Nama kos"?: string;
+  "Jenis kos"?: string;
   "Harga"?: string;
   Fasilitas?: string;
   Narahubung?: string;
@@ -167,6 +169,30 @@ function parseContact(raw: string): ParsedContact {
   return { href: null, label: cleaned };
 }
 
+function normalizeJenisKos(raw: string): string {
+  const cleaned = raw.trim().toLowerCase();
+  if (cleaned.includes("putri")) return "Putri";
+  if (cleaned.includes("putra")) return "Putra";
+  if (cleaned.includes("campur")) return "Campuran";
+  return "Tidak diketahui";
+}
+
+function getJenisBadgeColor(jenis: string): { bg: string; text: string; border: string } {
+  if (jenis === "Putri") {
+    return { bg: "#FCE7F3", text: "#9D174D", border: "#F9A8D4" };
+  }
+
+  if (jenis === "Putra") {
+    return { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" };
+  }
+
+  if (jenis === "Campuran") {
+    return { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" };
+  }
+
+  return { bg: "#E2E8F0", text: "#334155", border: "#CBD5E1" };
+}
+
 export default function Map() {
   const [data, setData] = useState<Kos[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
@@ -282,6 +308,7 @@ export default function Map() {
         const mapped = res
           .map((item) => ({
             nama: item["Nama kos"] ?? "Tanpa Nama",
+            jenis: item["Jenis kos"] ?? "Tidak diketahui",
             lat: toNumber(item.lat),
             lon: toNumber(item.long),
             harga: item["Harga"] ?? "-",
@@ -344,13 +371,38 @@ export default function Map() {
       popupNode.style.boxShadow = "0 10px 24px rgba(47, 63, 57, 0.14)";
       popupNode.style.color = "#2f3a2f";
 
+      const header = document.createElement("div");
+      header.style.display = "flex";
+      header.style.alignItems = "center";
+      header.style.justifyContent = "space-between";
+      header.style.gap = "10px";
+      header.style.marginBottom = "10px";
+
       const title = document.createElement("strong");
       title.textContent = kos.nama;
-      title.style.display = "block";
+      title.style.display = "inline-block";
       title.style.fontSize = "16px";
       title.style.lineHeight = "1.35";
-      title.style.marginBottom = "10px";
+      title.style.marginBottom = "0";
       title.style.color = "#2e3c2a";
+
+      const jenis = normalizeJenisKos(kos.jenis);
+      const jenisColor = getJenisBadgeColor(jenis);
+
+      const jenisBadge = document.createElement("span");
+      jenisBadge.textContent = jenis;
+      jenisBadge.style.display = "inline-flex";
+      jenisBadge.style.alignItems = "center";
+      jenisBadge.style.padding = "4px 10px";
+      jenisBadge.style.borderRadius = "999px";
+      jenisBadge.style.fontSize = "11px";
+      jenisBadge.style.fontWeight = "700";
+      jenisBadge.style.whiteSpace = "nowrap";
+      jenisBadge.style.backgroundColor = jenisColor.bg;
+      jenisBadge.style.color = jenisColor.text;
+      jenisBadge.style.border = `1px solid ${jenisColor.border}`;
+
+      header.append(title, jenisBadge);
 
       const harga = document.createElement("div");
       harga.textContent = `Harga: ${kos.harga}`;
@@ -588,7 +640,7 @@ export default function Map() {
         routeResult,
       );
 
-      popupNode.append(title, harga, fasilitas, kontak, routeSection);
+      popupNode.append(header, harga, fasilitas, kontak, routeSection);
 
       const popup = new maplibregl.Popup({ offset: 25, className: "kos-popup" }).setDOMContent(popupNode);
       popup.on("close", clearRoute);
