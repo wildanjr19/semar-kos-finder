@@ -57,10 +57,10 @@ Aplikasi ini ditujukan untuk mahasiswa terutama mahasiswa baru agar mudah dalam 
 
 ## Data Pipeline
 
-1. **Ekstraksi** (`extract_pdf.py`) - Ekstrak data dari dokumen PDF
-2. **Cleaning** (`notebooks/cleaning.ipynb`) - Bersihkan dan normalisasi data
-3. **Geocoding** (`geocoding_location.py`) - Konversi alamat ke koordinat
-4. **Konversi** (`csv_to_json.py`) - Ubah CSV ke JSON untuk frontend
+1. **Ekstraksi** (`extract_pdf.py`) - Ekstrak data dari dokumen PDF.
+2. **Cleaning** (`notebooks/cleaning.ipynb`) - Bersihkan dan normalisasi data.
+3. **Geocoding** (`geocoding_location.py`) - Konversi alamat ke koordinat.
+4. **Konversi** (`csv_to_json.py`) - Ubah CSV ke JSON untuk frontend.
 
 ## Statistik Data
 Data diperloleh dari hasil survei kos yang dilakukan BEM UNS pada tahun 2024 dan 2025. Data ini akan terus diupdate dan disesuaikan.
