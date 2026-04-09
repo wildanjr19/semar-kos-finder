@@ -360,6 +360,23 @@ export default function Map() {
         peach: "#D9AE94",
       };
 
+      // Tentukan icon marker berdasarkan jenis kos
+      const jenis = normalizeJenisKos(kos.jenis);
+      let iconUrl = "/marker_campuran.png";
+      if (jenis === "Putra") iconUrl = "/marker_putra.png";
+      else if (jenis === "Putri") iconUrl = "/marker_putri.png";
+
+      // Buat elemen img untuk marker
+      const el = document.createElement("img");
+      el.src = iconUrl;
+      el.alt = jenis + " marker";
+      el.style.width = "38px";
+      el.style.height = "38px";
+      el.style.objectFit = "contain";
+      el.style.display = "block";
+      el.style.transform = "translateY(-10%)";
+
+      // ...existing code for popupNode, header, badge, etc...
       const popupNode = document.createElement("div");
       popupNode.style.maxWidth = "280px";
       popupNode.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
@@ -386,7 +403,6 @@ export default function Map() {
       title.style.marginBottom = "0";
       title.style.color = "#2e3c2a";
 
-      const jenis = normalizeJenisKos(kos.jenis);
       const jenisColor = getJenisBadgeColor(jenis);
 
       const jenisBadge = document.createElement("span");
@@ -645,7 +661,8 @@ export default function Map() {
       const popup = new maplibregl.Popup({ offset: 25, className: "kos-popup" }).setDOMContent(popupNode);
       popup.on("close", clearRoute);
 
-      return new maplibregl.Marker()
+      // Gunakan custom marker element (el)
+      return new maplibregl.Marker({ element: el })
         .setLngLat([kos.lon, kos.lat])
         .setPopup(popup)
         .addTo(map);

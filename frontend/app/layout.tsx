@@ -20,6 +20,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="id">
+      <head>
+        <link rel="icon" href="/web_logo.png" type="image/png" />
+      </head>
       <body
         className={plusJakartaSans.variable}
         style={{
