@@ -19,7 +19,7 @@ Aplikasi ini ditujukan untuk mahasiswa terutama mahasiswa baru agar mudah dalam 
 - **Geocoding Otomatis** - Konversi alamat menjadi koordinat latitude/longitude
 - **Integrasi WhatsApp** - Link langsung ke WhatsApp pemilik kos
 
-## Teknologi
+## Tech Stack
 
 ### Frontend
 - **Next.js 16** - Framework React untuk production
@@ -76,9 +76,6 @@ Data diperloleh dari hasil survei kos yang dilakukan BEM UNS pada tahun 2024 dan
 ### Setup Environment
 
 ```bash
-# Install dependencies Python
-pip install -r requirements.txt
-
 # Setup environment variables
 cp .env.example .env
 # Edit .env dan tambahkan GMAPS_API_KEY
@@ -100,8 +97,13 @@ npm run dev
 
 ### Menambah Data Kos Baru
 
+#### Untuk mendapatkan titik koordinat dari data baru 
 ```bash
 python src/get_new_data.py
+```
+#### Untuk ingest/menambahkan data ke frontend
+``` bash
+python src/ingest_data.py
 ```
 
 ## Data Schema
@@ -125,13 +127,22 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 |----|----------|------|-------|
 |8/4/2026|310|0|v1|
 
-## Future Work
+## Future Work and To Do
 
-- [ ] Parsing harga yang lebih baik.
+### UI
+- [ ] Tambah web logo.
+- [ ] Logo untuk tiap titik by jenis.
+- [ ] Mobile-friendly.
+
+### UX
 - [ ] Tambah filter di frontend (harga, jenis, fasilitas)
 - [ ] Fitur comparison antar kos.
 - [x] Tampilkan rute dari kos ke fakultas/kampus.
 - [x] Hitung jarak dari kos ke tujuan.
+
+### Data
+- [ ] Parsing harga yang lebih baik.
+
 
 ## Kontribusi
 
