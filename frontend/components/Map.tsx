@@ -610,7 +610,7 @@ export default function Map() {
             body: JSON.stringify({
               origin: { lat: kos.lat, lon: kos.lon },
               destination: { lat: selectedDestination.lat, lon: selectedDestination.lon },
-              travelMode: "TWO_WHEELER"
+              travelMode: "WALK"
             }),
           });
 
@@ -628,7 +628,7 @@ export default function Map() {
             map.once("load", () => drawRoute(coordinates));
           }
 
-          routeResult.textContent = `Jarak: ${formatDistanceMeters(routeData.distanceMeters)} | Estimasi: ${formatDuration(routeData.duration)}`;
+          routeResult.textContent = `Jarak: ${formatDistanceMeters(routeData.distanceMeters)} | Estimasi (Walking): ${formatDuration(routeData.duration)}`;
           routeResult.style.color = "#2f5133";
         } catch (error) {
           routeResult.textContent =
