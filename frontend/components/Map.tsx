@@ -610,7 +610,7 @@ export default function Map() {
             body: JSON.stringify({
               origin: { lat: kos.lat, lon: kos.lon },
               destination: { lat: selectedDestination.lat, lon: selectedDestination.lon },
-              travelMode: "WALK"
+              travelMode: "TWO_WHEELER"
             }),
           });
 

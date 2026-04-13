@@ -143,6 +143,10 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 ### Data
 - [ ] Parsing harga yang lebih baik.
 
+### Other
+- [ ] Create staging area.
+- [ ] Migration to dedicated db.
+
 
 ## Kontribusi
 
