@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 
-INPUT_CSV = Path("data/final/data_kos_geo.csv")
+INPUT_CSV = Path("data/final/data_kost_geo_v2.csv")
 OUTPUT_JSON = Path("frontend/public/data/data_kost_geo.json")
 
 

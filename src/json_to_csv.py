@@ -9,8 +9,8 @@ import json
 from pathlib import Path
 
 
-INPUT_JSON = Path("../frontend/public/data/data_kost_geo.json")
-OUTPUT_CSV = Path("../data/final/data_kos_geo_full.csv")
+INPUT_JSON = Path("dump/backup/data_kost_geo.json")
+OUTPUT_CSV = Path("data/final/data_kost_v1_geo.csv")
 
 
 def json_to_csv(input_json: Path, output_csv: Path) -> int:

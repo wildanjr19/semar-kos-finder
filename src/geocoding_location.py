@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = PROJECT_ROOT / ".env"
-INPUT_CSV = PROJECT_ROOT / "data" / "preprocessed" / "data_kos_cleaned_fixed.csv"
-OUTPUT_CSV = PROJECT_ROOT / "data" / "final" / "data_kos_geo.csv"
+INPUT_CSV = PROJECT_ROOT / "data" / "preprocessed" / "data_kost_2023_fixed.csv"
+OUTPUT_CSV = PROJECT_ROOT / "data" / "final" / "data_kost_2023_geo.csv"
 LOG_DIR = PROJECT_ROOT / "log"
 GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
