@@ -196,11 +196,40 @@ function getJenisBadgeColor(jenis: string): { bg: string; text: string; border: 
 export default function Map() {
   const [data, setData] = useState<Kos[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const routeSourceId = "route-source";
   const routeLayerId = "route-layer";
+  const welcomeStorageKey = "unskosfinder_welcome_seen";
+
+  const closeWelcome = () => {
+    setShowWelcome(false);
+    window.sessionStorage.setItem(welcomeStorageKey, "1");
+  };
+
+  useEffect(() => {
+    setIsHydrated(true);
+    const hasSeenWelcome = window.sessionStorage.getItem(welcomeStorageKey) === "1";
+    setShowWelcome(!hasSeenWelcome);
+  }, []);
+
+  useEffect(() => {
+    if (!showWelcome) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeWelcome();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showWelcome]);
 
   const clearRoute = () => {
     const map = mapRef.current;
@@ -669,5 +698,127 @@ export default function Map() {
     });
   }, [data, destinations]);
 
-  return <div ref={mapContainerRef} style={{ height: "100vh", width: "100%" }} />;
+  return (
+    <div style={{ position: "relative", height: "100vh", width: "100%" }}>
+      <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
+
+      {isHydrated && showWelcome && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(15, 23, 42, 0.32)",
+            padding: "20px",
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Informasi awal UNSKosFinder"
+            style={{
+              width: "100%",
+              maxWidth: "540px",
+              borderRadius: "18px",
+              border: "1px solid #c4d1bc",
+              background: "linear-gradient(150deg, #ffffff 0%, #eef4ea 60%, #f7eee8 100%)",
+              boxShadow: "0 16px 38px rgba(15, 23, 42, 0.24)",
+              color: "#2f3a2f",
+              padding: "18px",
+              position: "relative",
+              fontFamily: "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif",
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Tutup informasi awal"
+              onClick={closeWelcome}
+              style={{
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                width: "30px",
+                height: "30px",
+                borderRadius: "999px",
+                border: "1px solid #b7c6ac",
+                backgroundColor: "#ffffff",
+                color: "#334155",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              X
+            </button>
+
+            <h2 style={{ margin: "0 36px 8px 0", fontSize: "22px", color: "#2e3c2a" }}>
+              Selamat datang di UNSKosFinder
+            </h2>
+            <p style={{ margin: "0 0 12px 0", lineHeight: "1.55", color: "#3f4f3c" }}>
+              Cari kos sekitar UNS jadi lebih cepat lewat peta interaktif.
+            </p>
+
+            <div style={{ marginBottom: "10px" }}>
+              <strong style={{ display: "block", marginBottom: "6px", color: "#334155" }}>
+                Cara pakai:
+              </strong>
+              <ul style={{ margin: 0, paddingLeft: "18px", lineHeight: "1.6", color: "#334155" }}>
+                <li>Klik pin kos di peta untuk lihat detail.</li>
+                <li>Pilih tujuan kampus lalu klik Tampilkan Rute.</li>
+                <li>Gunakan kontak yang tertera untuk menghubungi pemilik.</li>
+              </ul>
+            </div>
+
+            <div
+              style={{
+                marginTop: "12px",
+                borderRadius: "12px",
+                padding: "10px 12px",
+                backgroundColor: "#fff7ed",
+                border: "1px solid #fdba74",
+                color: "#9a3412",
+                fontWeight: 700,
+              }}
+            >
+              Waspada Penipuan
+            </div>
+
+            <div
+              style={{
+                marginTop: "10px",
+                borderRadius: "12px",
+                padding: "10px 12px",
+                backgroundColor: "#e8eef3",
+                border: "1px solid #c5d4e2",
+                color: "#334155",
+                lineHeight: "1.5",
+              }}
+            >
+              Informasi harga dapat berubah sewaktu-waktu.
+            </div>
+
+            <button
+              type="button"
+              onClick={closeWelcome}
+              style={{
+                marginTop: "14px",
+                width: "100%",
+                border: "none",
+                borderRadius: "12px",
+                padding: "11px 12px",
+                background: "linear-gradient(145deg, #829AB1 0%, #9CAF88 100%)",
+                color: "#ffffff",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Saya mengerti
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
