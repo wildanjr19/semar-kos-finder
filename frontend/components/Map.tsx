@@ -331,19 +331,34 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    fetch("/data/data_kost_geo.json")
+    fetch("/api/kos")
       .then((res) => res.json())
-      .then((res: RawKos[]) => {
-        const mapped = res
-          .map((item) => ({
-            nama: item["Nama kos"] ?? "Tanpa Nama",
-            jenis: item["Jenis kos"] ?? "Tidak diketahui",
-            lat: toNumber(item.lat),
-            lon: toNumber(item.long),
-            harga: item["Harga"] ?? "-",
-            fasilitas: item["Fasilitas"] ?? "-",
-            kontak: item["Narahubung"] ?? "-",
-          }))
+      .then((res: Kos[] | RawKos[]) => {
+        const mapped = (Array.isArray(res) ? res : [])
+          .map((item) => {
+            // Backend DTO shape (KosOut): has id, nama, jenis, alamat, harga, fasilitas, peraturan, kontak, lat, lon
+            if ("id" in item && "alamat" in item) {
+              return {
+                nama: item.nama ?? "Tanpa Nama",
+                jenis: item.jenis ?? "Tidak diketahui",
+                lat: toNumber(item.lat),
+                lon: toNumber(item.lon),
+                harga: item.harga ?? "-",
+                fasilitas: item.fasilitas ?? "-",
+                kontak: item.kontak ?? "-",
+              };
+            }
+            // RawKos shape from static JSON
+            return {
+              nama: item["Nama kos"] ?? "Tanpa Nama",
+              jenis: item["Jenis kos"] ?? "Tidak diketahui",
+              lat: toNumber(item.lat),
+              lon: toNumber(item.long),
+              harga: item["Harga"] ?? "-",
+              fasilitas: item["Fasilitas"] ?? "-",
+              kontak: item["Narahubung"] ?? "-",
+            };
+          })
           .filter(
             (item) => Number.isFinite(item.lat) && Number.isFinite(item.lon),
           );

@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+motor
+pydantic
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic-settings
+orjson
+pytest
+pytest-asyncio

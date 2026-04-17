@@ -19,6 +19,13 @@ PROJECT_BRIEF.md
 .env
 .env.local
 
+# --- Sensitive Data (Docker/Compose) ---
+.env.*
+!.env.example
+!.env.production.example
+!.env.staging.example
+!.env.development.example
+
 # Mengabaikan semua JSON di folder data kost (sesuai request kamu)
 frontend/public/data/data_kost_geo.json
 frontend/public/data/master_uns.json

@@ -1,0 +1,33 @@
+=== Task 3: Docker Compose with Profiles ===
+
+Date: $(date)
+
+1. File Created: compose.yaml
+   - Profiles: production, staging, development
+   - Shared network: semar-kos-shared (prod + staging)
+   - Separate network: semar_dev (development)
+
+2. Validation:
+   $ docker compose config
+   Exit code: 0
+
+3. Services:
+   - web_prod: port 3002:3002, profile: production
+   - web_staging: port 3003:3002, profile: staging  
+   - web_dev: port 3000:3000, profile: development
+
+4. Network Verification:
+   Network: semar-kos-shared
+   Containers:
+   - semar-kos-finder-web_prod-1
+   - semar-kos-finder-web_staging-1
+
+5. Health Check:
+   - Port 3002 (prod): responding
+   - Port 3003 (staging): responding
+
+6. Features:
+   - TCP healthcheck (no /health route needed)
+   - restart: unless-stopped
+   - init: true
+   - Named volumes for dev node_modules and .next cache

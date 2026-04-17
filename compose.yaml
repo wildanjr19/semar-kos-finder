@@ -1,0 +1,190 @@
+name: semar-kos-finder
+
+services:
+  web_prod:
+    profiles: ["production"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: semar-kos-frontend:prod
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    networks:
+      - semar_shared
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3002,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  web_staging:
+    profiles: ["staging"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: semar-kos-frontend:staging
+    ports:
+      - "3003:3002"
+    env_file:
+      - ./.env.staging
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    networks:
+      - semar_shared
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3002,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  mongodb:
+    profiles: ["development"]
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - semar_dev
+
+  backend_dev:
+    profiles: ["development"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env.development
+    volumes:
+      - ./backend:/app
+      - ./frontend/public/data:/seed-data:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - semar_dev
+
+  admin_dev:
+    profiles: ["development"]
+    image: node:20-slim
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./.env.development
+    environment:
+      CHOKIDAR_USEPOLLING: "1"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./admin:/app
+      - admin_node_modules:/app/node_modules
+      - admin_next_cache:/app/.next
+    command: sh -lc "npm ci && npm run dev -- -p 3001 -H 0.0.0.0"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3001,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      backend_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+
+  web_dev:
+    profiles: ["development"]
+    image: node:20-slim
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env.development
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      CHOKIDAR_USEPOLLING: "1"
+      WATCHPACK_POLLING: "true"
+      API_INTERNAL_URL: "http://backend_dev:8000"
+    volumes:
+      - ./frontend:/app
+      - dev_node_modules:/app/node_modules
+      - dev_next_cache:/app/.next
+    command: >
+      sh -lc "test -x node_modules/.bin/next || npm ci; npm run dev -- -p 3000 -H 0.0.0.0"
+    depends_on:
+      backend_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+
+  admin_e2e:
+    profiles: ["development"]
+    image: mcr.microsoft.com/playwright
+    working_dir: /work
+    volumes:
+      - ./admin:/work
+    command: sh -lc "npm ci && npx playwright test"
+    environment:
+      E2E_ADMIN_USERNAME: admin
+      E2E_ADMIN_PASSWORD: admin123
+      E2E_BACKEND_URL: "http://backend_dev:8000"
+    depends_on:
+      admin_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+
+networks:
+  semar_shared:
+    name: semar-kos-shared
+    driver: bridge
+  semar_dev:
+    driver: bridge
+
+volumes:
+  dev_node_modules:
+  dev_next_cache:
+  mongo_data:
+  admin_node_modules:
+  admin_next_cache:

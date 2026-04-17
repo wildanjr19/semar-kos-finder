@@ -1,0 +1,1786 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "next-env.d.ts",
+      "file_type": "code",
+      "source_file": "frontend/next-env.d.ts",
+      "source_location": "L1",
+      "id": "next_env_d",
+      "community": 11
+    },
+    {
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "frontend/app/layout.tsx",
+      "source_location": "L1",
+      "id": "layout",
+      "community": 9
+    },
+    {
+      "label": "RootLayout()",
+      "file_type": "code",
+      "source_file": "frontend/app/layout.tsx",
+      "source_location": "L20",
+      "id": "layout_rootlayout",
+      "community": 9
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "frontend/app/page.tsx",
+      "source_location": "L1",
+      "id": "page",
+      "community": 10
+    },
+    {
+      "label": "Home()",
+      "file_type": "code",
+      "source_file": "frontend/app/page.tsx",
+      "source_location": "L9",
+      "id": "page_home",
+      "community": 10
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L1",
+      "id": "route",
+      "community": 7
+    },
+    {
+      "label": "isFiniteCoordinate()",
+      "file_type": "code",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L9",
+      "id": "route_isfinitecoordinate",
+      "community": 7
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L13",
+      "id": "route_post",
+      "community": 7
+    },
+    {
+      "label": "Map.tsx",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L1",
+      "id": "map",
+      "community": 3
+    },
+    {
+      "label": "toNumber()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L46",
+      "id": "map_tonumber",
+      "community": 3
+    },
+    {
+      "label": "decodeEncodedPolyline()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L56",
+      "id": "map_decodeencodedpolyline",
+      "community": 3
+    },
+    {
+      "label": "formatDistanceMeters()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L92",
+      "id": "map_formatdistancemeters",
+      "community": 3
+    },
+    {
+      "label": "formatDuration()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L100",
+      "id": "map_formatduration",
+      "community": 3
+    },
+    {
+      "label": "normalizeWaHref()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L126",
+      "id": "map_normalizewahref",
+      "community": 3
+    },
+    {
+      "label": "parseContact()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L151",
+      "id": "map_parsecontact",
+      "community": 3
+    },
+    {
+      "label": "normalizeJenisKos()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L172",
+      "id": "map_normalizejeniskos",
+      "community": 3
+    },
+    {
+      "label": "getJenisBadgeColor()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L180",
+      "id": "map_getjenisbadgecolor",
+      "community": 3
+    },
+    {
+      "label": "Map()",
+      "file_type": "code",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L196",
+      "id": "map_map",
+      "community": 3
+    },
+    {
+      "label": "geocoding_location.py",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L1",
+      "id": "geocoding_location",
+      "community": 2
+    },
+    {
+      "label": "_build_log_path()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L31",
+      "id": "geocoding_location_build_log_path",
+      "community": 2
+    },
+    {
+      "label": "is_inside_surakarta()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L36",
+      "id": "geocoding_location_is_inside_surakarta",
+      "community": 2
+    },
+    {
+      "label": "is_surakarta_address()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L43",
+      "id": "geocoding_location_is_surakarta_address",
+      "community": 2
+    },
+    {
+      "label": "_do_request()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L49",
+      "id": "geocoding_location_do_request",
+      "community": 2
+    },
+    {
+      "label": "geocode_address()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L102",
+      "id": "geocoding_location_geocode_address",
+      "community": 2
+    },
+    {
+      "label": "_ensure_surakarta_suffix()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L126",
+      "id": "geocoding_location_ensure_surakarta_suffix",
+      "community": 2
+    },
+    {
+      "label": "pick_query()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L134",
+      "id": "geocoding_location_pick_query",
+      "community": 2
+    },
+    {
+      "label": "run_geocoding()",
+      "file_type": "code",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L157",
+      "id": "geocoding_location_run_geocoding",
+      "community": 2
+    },
+    {
+      "label": "Validasi apakah formatted_address mengandung keyword Surakarta/Solo.",
+      "file_type": "rationale",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L44",
+      "id": "geocoding_location_rationale_44",
+      "community": 2
+    },
+    {
+      "label": "Kirim satu request ke Google Geocoding API.     - Pakai `components=locality:Sur",
+      "file_type": "rationale",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L52",
+      "id": "geocoding_location_rationale_52",
+      "community": 2
+    },
+    {
+      "label": "Strategi multi-tahap untuk memastikan hasil geocoding ada di Surakarta:       1.",
+      "file_type": "rationale",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L103",
+      "id": "geocoding_location_rationale_103",
+      "community": 2
+    },
+    {
+      "label": "Tambahkan suffix Surakarta jika belum ada.",
+      "file_type": "rationale",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L127",
+      "id": "geocoding_location_rationale_127",
+      "community": 2
+    },
+    {
+      "label": "Susun query dari nama kos, alamat, dan plus code. Selalu sertakan konteks Suraka",
+      "file_type": "rationale",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L135",
+      "id": "geocoding_location_rationale_135",
+      "community": 2
+    },
+    {
+      "label": "csv_to_json.py",
+      "file_type": "code",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L1",
+      "id": "csv_to_json",
+      "community": 4
+    },
+    {
+      "label": "csv_to_json()",
+      "file_type": "code",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L16",
+      "id": "csv_to_json_csv_to_json",
+      "community": 4
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L29",
+      "id": "csv_to_json_main",
+      "community": 4
+    },
+    {
+      "label": "Convert a CSV file into JSON for frontend consumption.",
+      "file_type": "rationale",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L1",
+      "id": "csv_to_json_rationale_1",
+      "community": 4
+    },
+    {
+      "label": "Read CSV rows and write them as a JSON array.",
+      "file_type": "rationale",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L17",
+      "id": "csv_to_json_rationale_17",
+      "community": 4
+    },
+    {
+      "label": "get_new_data.py",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L1",
+      "id": "get_new_data",
+      "community": 1
+    },
+    {
+      "label": "_build_log_path()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L30",
+      "id": "get_new_data_build_log_path",
+      "community": 1
+    },
+    {
+      "label": "is_inside_surakarta()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L35",
+      "id": "get_new_data_is_inside_surakarta",
+      "community": 1
+    },
+    {
+      "label": "is_surakarta_address()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L42",
+      "id": "get_new_data_is_surakarta_address",
+      "community": 1
+    },
+    {
+      "label": "_do_request()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L48",
+      "id": "get_new_data_do_request",
+      "community": 1
+    },
+    {
+      "label": "geocode_address()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L101",
+      "id": "get_new_data_geocode_address",
+      "community": 1
+    },
+    {
+      "label": "_ensure_surakarta_suffix()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L125",
+      "id": "get_new_data_ensure_surakarta_suffix",
+      "community": 1
+    },
+    {
+      "label": "build_query()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L133",
+      "id": "get_new_data_build_query",
+      "community": 1
+    },
+    {
+      "label": "save_to_csv()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L152",
+      "id": "get_new_data_save_to_csv",
+      "community": 1
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L166",
+      "id": "get_new_data_main",
+      "community": 1
+    },
+    {
+      "label": "Validasi apakah formatted_address mengandung keyword Surakarta/Solo.",
+      "file_type": "rationale",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L43",
+      "id": "get_new_data_rationale_43",
+      "community": 1
+    },
+    {
+      "label": "Kirim satu request ke Google Geocoding API.     - Pakai `components=locality:Sur",
+      "file_type": "rationale",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L51",
+      "id": "get_new_data_rationale_51",
+      "community": 1
+    },
+    {
+      "label": "Strategi multi-tahap untuk memastikan hasil geocoding ada di Surakarta:       1.",
+      "file_type": "rationale",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L102",
+      "id": "get_new_data_rationale_102",
+      "community": 1
+    },
+    {
+      "label": "Tambahkan suffix Surakarta jika belum ada.",
+      "file_type": "rationale",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L126",
+      "id": "get_new_data_rationale_126",
+      "community": 1
+    },
+    {
+      "label": "Susun query dari nama kos, alamat, dan plus code. Selalu sertakan konteks Suraka",
+      "file_type": "rationale",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L134",
+      "id": "get_new_data_rationale_134",
+      "community": 1
+    },
+    {
+      "label": "get_addres_plus_code.py",
+      "file_type": "code",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L1",
+      "id": "get_addres_plus_code",
+      "community": 5
+    },
+    {
+      "label": "get_address_and_plus_code()",
+      "file_type": "code",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L38",
+      "id": "get_addres_plus_code_get_address_and_plus_code",
+      "community": 5
+    },
+    {
+      "label": "process_kos_data()",
+      "file_type": "code",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L102",
+      "id": "get_addres_plus_code_process_kos_data",
+      "community": 5
+    },
+    {
+      "label": "Mendapatkan alamat lengkap dan plus code dari Google Maps Geocoding API.",
+      "file_type": "rationale",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L39",
+      "id": "get_addres_plus_code_rationale_39",
+      "community": 5
+    },
+    {
+      "label": "Memproses data kos dari CSV dan menambahkan alamat lengkap serta plus code.",
+      "file_type": "rationale",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L103",
+      "id": "get_addres_plus_code_rationale_103",
+      "community": 5
+    },
+    {
+      "label": "extract_pdf.py",
+      "file_type": "code",
+      "source_file": "src/extract_pdf.py",
+      "source_location": "L1",
+      "id": "extract_pdf",
+      "community": 8
+    },
+    {
+      "label": "ekstrak_kolom_pilihan()",
+      "file_type": "code",
+      "source_file": "src/extract_pdf.py",
+      "source_location": "L16",
+      "id": "extract_pdf_ekstrak_kolom_pilihan",
+      "community": 8
+    },
+    {
+      "label": "Ekstraksi data dari dokumen PDF menggunakan pdfplumber.",
+      "file_type": "rationale",
+      "source_file": "src/extract_pdf.py",
+      "source_location": "L1",
+      "id": "extract_pdf_rationale_1",
+      "community": 8
+    },
+    {
+      "label": "json_to_csv.py",
+      "file_type": "code",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L1",
+      "id": "json_to_csv",
+      "community": 6
+    },
+    {
+      "label": "json_to_csv()",
+      "file_type": "code",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L16",
+      "id": "json_to_csv_json_to_csv",
+      "community": 6
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L34",
+      "id": "json_to_csv_main",
+      "community": 6
+    },
+    {
+      "label": "Convert a JSON file into CSV format.",
+      "file_type": "rationale",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L1",
+      "id": "json_to_csv_rationale_1",
+      "community": 6
+    },
+    {
+      "label": "Read JSON array and write rows to CSV.",
+      "file_type": "rationale",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L17",
+      "id": "json_to_csv_rationale_17",
+      "community": 6
+    },
+    {
+      "label": "Semar Kos Finder",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_semarkosfind",
+      "community": 0
+    },
+    {
+      "label": "Next.js 16",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_nextjs16",
+      "community": 0
+    },
+    {
+      "label": "React 19",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_react19",
+      "community": 0
+    },
+    {
+      "label": "MapLibre GL",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_maplibre",
+      "community": 0
+    },
+    {
+      "label": "TypeScript",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_typescript",
+      "community": 0
+    },
+    {
+      "label": "Python 3.11",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_python",
+      "community": 0
+    },
+    {
+      "label": "pdfplumber",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_pdfplumber",
+      "community": 0
+    },
+    {
+      "label": "pandas",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_pandas",
+      "community": 0
+    },
+    {
+      "label": "Google Maps Geocoding API",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_gmaps_api",
+      "community": 0
+    },
+    {
+      "label": "Interactive Map Feature",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_interactive_map",
+      "community": 0
+    },
+    {
+      "label": "Geocoding Feature",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_geocoding",
+      "community": 0
+    },
+    {
+      "label": "WhatsApp Integration",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_whatsapp",
+      "community": 0
+    },
+    {
+      "label": "Data Pipeline",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_data_pipeline",
+      "community": 0
+    },
+    {
+      "label": "Universitas Sebelas Maret",
+      "file_type": "document",
+      "source_file": "README.md",
+      "id": "readme_uns",
+      "community": 0
+    },
+    {
+      "label": "Frontend Directory",
+      "file_type": "document",
+      "source_file": "PROJECT_STRUCTURE.MD",
+      "id": "structure_frontend",
+      "community": 0
+    },
+    {
+      "label": "Src Directory",
+      "file_type": "document",
+      "source_file": "PROJECT_STRUCTURE.MD",
+      "id": "structure_src",
+      "community": 0
+    },
+    {
+      "label": "Data Directory",
+      "file_type": "document",
+      "source_file": "PROJECT_STRUCTURE.MD",
+      "id": "structure_data",
+      "community": 12
+    },
+    {
+      "label": "Notebooks Directory",
+      "file_type": "document",
+      "source_file": "PROJECT_STRUCTURE.MD",
+      "id": "structure_notebooks",
+      "community": 13
+    },
+    {
+      "label": "Campuran Marker Icon",
+      "file_type": "image",
+      "source_file": "frontend/public/marker_campuran.png",
+      "id": "img_marker_campuran",
+      "community": 0
+    },
+    {
+      "label": "Putri Marker Icon",
+      "file_type": "image",
+      "source_file": "frontend/public/marker_putri.png",
+      "id": "img_marker_putri",
+      "community": 0
+    },
+    {
+      "label": "Putra Marker Icon",
+      "file_type": "image",
+      "source_file": "frontend/public/marker_putra.png",
+      "id": "img_marker_putra",
+      "community": 0
+    },
+    {
+      "label": "Web Logo",
+      "file_type": "image",
+      "source_file": "frontend/public/web_logo.png",
+      "id": "img_web_logo",
+      "community": 0
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/app/layout.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "layout",
+      "_tgt": "layout_rootlayout",
+      "source": "layout",
+      "target": "layout_rootlayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/app/page.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "page",
+      "_tgt": "page_home",
+      "source": "page",
+      "target": "page_home",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "route",
+      "_tgt": "route_isfinitecoordinate",
+      "source": "route",
+      "target": "route_isfinitecoordinate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_src": "route",
+      "_tgt": "route_post",
+      "source": "route",
+      "target": "route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/app/api/directions/route.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "_src": "route_post",
+      "_tgt": "route_isfinitecoordinate",
+      "source": "route_isfinitecoordinate",
+      "target": "route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_tonumber",
+      "source": "map",
+      "target": "map_tonumber",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_decodeencodedpolyline",
+      "source": "map",
+      "target": "map_decodeencodedpolyline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_formatdistancemeters",
+      "source": "map",
+      "target": "map_formatdistancemeters",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_formatduration",
+      "source": "map",
+      "target": "map_formatduration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_normalizewahref",
+      "source": "map",
+      "target": "map_normalizewahref",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L151",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_parsecontact",
+      "source": "map",
+      "target": "map_parsecontact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L172",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_normalizejeniskos",
+      "source": "map",
+      "target": "map_normalizejeniskos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L180",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_getjenisbadgecolor",
+      "source": "map",
+      "target": "map_getjenisbadgecolor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_src": "map",
+      "_tgt": "map_map",
+      "source": "map",
+      "target": "map_map",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/Map.tsx",
+      "source_location": "L160",
+      "weight": 1.0,
+      "_src": "map_parsecontact",
+      "_tgt": "map_normalizewahref",
+      "source": "map_normalizewahref",
+      "target": "map_parsecontact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_build_log_path",
+      "source": "geocoding_location",
+      "target": "geocoding_location_build_log_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_is_inside_surakarta",
+      "source": "geocoding_location",
+      "target": "geocoding_location_is_inside_surakarta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_is_surakarta_address",
+      "source": "geocoding_location",
+      "target": "geocoding_location_is_surakarta_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L49",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_do_request",
+      "source": "geocoding_location",
+      "target": "geocoding_location_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_geocode_address",
+      "source": "geocoding_location",
+      "target": "geocoding_location_geocode_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_ensure_surakarta_suffix",
+      "source": "geocoding_location",
+      "target": "geocoding_location_ensure_surakarta_suffix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_pick_query",
+      "source": "geocoding_location",
+      "target": "geocoding_location_pick_query",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L157",
+      "weight": 1.0,
+      "_src": "geocoding_location",
+      "_tgt": "geocoding_location_run_geocoding",
+      "source": "geocoding_location",
+      "target": "geocoding_location_run_geocoding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L179",
+      "weight": 1.0,
+      "_src": "geocoding_location_run_geocoding",
+      "_tgt": "geocoding_location_build_log_path",
+      "source": "geocoding_location_build_log_path",
+      "target": "geocoding_location_run_geocoding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "_src": "geocoding_location_do_request",
+      "_tgt": "geocoding_location_is_inside_surakarta",
+      "source": "geocoding_location_is_inside_surakarta",
+      "target": "geocoding_location_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "_src": "geocoding_location_do_request",
+      "_tgt": "geocoding_location_is_surakarta_address",
+      "source": "geocoding_location_is_surakarta_address",
+      "target": "geocoding_location_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_src": "geocoding_location_rationale_44",
+      "_tgt": "geocoding_location_is_surakarta_address",
+      "source": "geocoding_location_is_surakarta_address",
+      "target": "geocoding_location_rationale_44",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "_src": "geocoding_location_geocode_address",
+      "_tgt": "geocoding_location_do_request",
+      "source": "geocoding_location_do_request",
+      "target": "geocoding_location_geocode_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_src": "geocoding_location_rationale_52",
+      "_tgt": "geocoding_location_do_request",
+      "source": "geocoding_location_do_request",
+      "target": "geocoding_location_rationale_52",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L115",
+      "weight": 1.0,
+      "_src": "geocoding_location_geocode_address",
+      "_tgt": "geocoding_location_ensure_surakarta_suffix",
+      "source": "geocoding_location_geocode_address",
+      "target": "geocoding_location_ensure_surakarta_suffix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L196",
+      "weight": 1.0,
+      "_src": "geocoding_location_run_geocoding",
+      "_tgt": "geocoding_location_geocode_address",
+      "source": "geocoding_location_geocode_address",
+      "target": "geocoding_location_run_geocoding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_src": "geocoding_location_rationale_103",
+      "_tgt": "geocoding_location_geocode_address",
+      "source": "geocoding_location_geocode_address",
+      "target": "geocoding_location_rationale_103",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_src": "geocoding_location_pick_query",
+      "_tgt": "geocoding_location_ensure_surakarta_suffix",
+      "source": "geocoding_location_ensure_surakarta_suffix",
+      "target": "geocoding_location_pick_query",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_src": "geocoding_location_rationale_127",
+      "_tgt": "geocoding_location_ensure_surakarta_suffix",
+      "source": "geocoding_location_ensure_surakarta_suffix",
+      "target": "geocoding_location_rationale_127",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L193",
+      "weight": 1.0,
+      "_src": "geocoding_location_run_geocoding",
+      "_tgt": "geocoding_location_pick_query",
+      "source": "geocoding_location_pick_query",
+      "target": "geocoding_location_run_geocoding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/geocoding_location.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "_src": "geocoding_location_rationale_135",
+      "_tgt": "geocoding_location_pick_query",
+      "source": "geocoding_location_pick_query",
+      "target": "geocoding_location_rationale_135",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "csv_to_json",
+      "_tgt": "csv_to_json_csv_to_json",
+      "source": "csv_to_json",
+      "target": "csv_to_json_csv_to_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "csv_to_json",
+      "_tgt": "csv_to_json_main",
+      "source": "csv_to_json",
+      "target": "csv_to_json_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "csv_to_json_rationale_1",
+      "_tgt": "csv_to_json",
+      "source": "csv_to_json",
+      "target": "csv_to_json_rationale_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "csv_to_json_main",
+      "_tgt": "csv_to_json_csv_to_json",
+      "source": "csv_to_json_csv_to_json",
+      "target": "csv_to_json_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/csv_to_json.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "csv_to_json_rationale_17",
+      "_tgt": "csv_to_json_csv_to_json",
+      "source": "csv_to_json_csv_to_json",
+      "target": "csv_to_json_rationale_17",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_build_log_path",
+      "source": "get_new_data",
+      "target": "get_new_data_build_log_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_is_inside_surakarta",
+      "source": "get_new_data",
+      "target": "get_new_data_is_inside_surakarta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_is_surakarta_address",
+      "source": "get_new_data",
+      "target": "get_new_data_is_surakarta_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_do_request",
+      "source": "get_new_data",
+      "target": "get_new_data_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L101",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_geocode_address",
+      "source": "get_new_data",
+      "target": "get_new_data_geocode_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L125",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_ensure_surakarta_suffix",
+      "source": "get_new_data",
+      "target": "get_new_data_ensure_surakarta_suffix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L133",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_build_query",
+      "source": "get_new_data",
+      "target": "get_new_data_build_query",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L152",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_save_to_csv",
+      "source": "get_new_data",
+      "target": "get_new_data_save_to_csv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "_src": "get_new_data",
+      "_tgt": "get_new_data_main",
+      "source": "get_new_data",
+      "target": "get_new_data_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L173",
+      "weight": 1.0,
+      "_src": "get_new_data_main",
+      "_tgt": "get_new_data_build_log_path",
+      "source": "get_new_data_build_log_path",
+      "target": "get_new_data_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_src": "get_new_data_do_request",
+      "_tgt": "get_new_data_is_inside_surakarta",
+      "source": "get_new_data_is_inside_surakarta",
+      "target": "get_new_data_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_src": "get_new_data_do_request",
+      "_tgt": "get_new_data_is_surakarta_address",
+      "source": "get_new_data_is_surakarta_address",
+      "target": "get_new_data_do_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "_src": "get_new_data_rationale_43",
+      "_tgt": "get_new_data_is_surakarta_address",
+      "source": "get_new_data_is_surakarta_address",
+      "target": "get_new_data_rationale_43",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "_src": "get_new_data_geocode_address",
+      "_tgt": "get_new_data_do_request",
+      "source": "get_new_data_do_request",
+      "target": "get_new_data_geocode_address",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "_src": "get_new_data_rationale_51",
+      "_tgt": "get_new_data_do_request",
+      "source": "get_new_data_do_request",
+      "target": "get_new_data_rationale_51",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L114",
+      "weight": 1.0,
+      "_src": "get_new_data_geocode_address",
+      "_tgt": "get_new_data_ensure_surakarta_suffix",
+      "source": "get_new_data_geocode_address",
+      "target": "get_new_data_ensure_surakarta_suffix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L210",
+      "weight": 1.0,
+      "_src": "get_new_data_main",
+      "_tgt": "get_new_data_geocode_address",
+      "source": "get_new_data_geocode_address",
+      "target": "get_new_data_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_src": "get_new_data_rationale_102",
+      "_tgt": "get_new_data_geocode_address",
+      "source": "get_new_data_geocode_address",
+      "target": "get_new_data_rationale_102",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L149",
+      "weight": 1.0,
+      "_src": "get_new_data_build_query",
+      "_tgt": "get_new_data_ensure_surakarta_suffix",
+      "source": "get_new_data_ensure_surakarta_suffix",
+      "target": "get_new_data_build_query",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_src": "get_new_data_rationale_126",
+      "_tgt": "get_new_data_ensure_surakarta_suffix",
+      "source": "get_new_data_ensure_surakarta_suffix",
+      "target": "get_new_data_rationale_126",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L206",
+      "weight": 1.0,
+      "_src": "get_new_data_main",
+      "_tgt": "get_new_data_build_query",
+      "source": "get_new_data_build_query",
+      "target": "get_new_data_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "_src": "get_new_data_rationale_134",
+      "_tgt": "get_new_data_build_query",
+      "source": "get_new_data_build_query",
+      "target": "get_new_data_rationale_134",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_new_data.py",
+      "source_location": "L239",
+      "weight": 1.0,
+      "_src": "get_new_data_main",
+      "_tgt": "get_new_data_save_to_csv",
+      "source": "get_new_data_save_to_csv",
+      "target": "get_new_data_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_src": "get_addres_plus_code",
+      "_tgt": "get_addres_plus_code_get_address_and_plus_code",
+      "source": "get_addres_plus_code",
+      "target": "get_addres_plus_code_get_address_and_plus_code",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_src": "get_addres_plus_code",
+      "_tgt": "get_addres_plus_code_process_kos_data",
+      "source": "get_addres_plus_code",
+      "target": "get_addres_plus_code_process_kos_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L156",
+      "weight": 1.0,
+      "_src": "get_addres_plus_code_process_kos_data",
+      "_tgt": "get_addres_plus_code_get_address_and_plus_code",
+      "source": "get_addres_plus_code_get_address_and_plus_code",
+      "target": "get_addres_plus_code_process_kos_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_src": "get_addres_plus_code_rationale_39",
+      "_tgt": "get_addres_plus_code_get_address_and_plus_code",
+      "source": "get_addres_plus_code_get_address_and_plus_code",
+      "target": "get_addres_plus_code_rationale_39",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/get_addres_plus_code.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_src": "get_addres_plus_code_rationale_103",
+      "_tgt": "get_addres_plus_code_process_kos_data",
+      "source": "get_addres_plus_code_process_kos_data",
+      "target": "get_addres_plus_code_rationale_103",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/extract_pdf.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "extract_pdf",
+      "_tgt": "extract_pdf_ekstrak_kolom_pilihan",
+      "source": "extract_pdf",
+      "target": "extract_pdf_ekstrak_kolom_pilihan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/extract_pdf.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "extract_pdf_rationale_1",
+      "_tgt": "extract_pdf",
+      "source": "extract_pdf",
+      "target": "extract_pdf_rationale_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "json_to_csv",
+      "_tgt": "json_to_csv_json_to_csv",
+      "source": "json_to_csv",
+      "target": "json_to_csv_json_to_csv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "_src": "json_to_csv",
+      "_tgt": "json_to_csv_main",
+      "source": "json_to_csv",
+      "target": "json_to_csv_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "json_to_csv_rationale_1",
+      "_tgt": "json_to_csv",
+      "source": "json_to_csv",
+      "target": "json_to_csv_rationale_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_src": "json_to_csv_main",
+      "_tgt": "json_to_csv_json_to_csv",
+      "source": "json_to_csv_json_to_csv",
+      "target": "json_to_csv_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "src/json_to_csv.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_src": "json_to_csv_rationale_17",
+      "_tgt": "json_to_csv_json_to_csv",
+      "source": "json_to_csv_json_to_csv",
+      "target": "json_to_csv_rationale_17",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_nextjs16",
+      "source": "readme_semarkosfind",
+      "target": "readme_nextjs16"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_react19",
+      "source": "readme_semarkosfind",
+      "target": "readme_react19"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_maplibre",
+      "source": "readme_semarkosfind",
+      "target": "readme_maplibre"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_typescript",
+      "source": "readme_semarkosfind",
+      "target": "readme_typescript"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_python",
+      "source": "readme_semarkosfind",
+      "target": "readme_python"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_pdfplumber",
+      "source": "readme_semarkosfind",
+      "target": "readme_pdfplumber"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_pandas",
+      "source": "readme_semarkosfind",
+      "target": "readme_pandas"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_gmaps_api",
+      "source": "readme_semarkosfind",
+      "target": "readme_gmaps_api"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_interactive_map",
+      "source": "readme_semarkosfind",
+      "target": "readme_interactive_map"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_geocoding",
+      "source": "readme_semarkosfind",
+      "target": "readme_geocoding"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_whatsapp",
+      "source": "readme_semarkosfind",
+      "target": "readme_whatsapp"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_data_pipeline",
+      "source": "readme_semarkosfind",
+      "target": "readme_data_pipeline"
+    },
+    {
+      "relation": "targets",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_semarkosfind",
+      "_tgt": "readme_uns",
+      "source": "readme_semarkosfind",
+      "target": "readme_uns"
+    },
+    {
+      "relation": "brands",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "frontend/public/web_logo.png",
+      "_src": "img_web_logo",
+      "_tgt": "readme_semarkosfind",
+      "source": "readme_semarkosfind",
+      "target": "img_web_logo"
+    },
+    {
+      "relation": "contains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "PROJECT_STRUCTURE.MD",
+      "_src": "structure_frontend",
+      "_tgt": "readme_nextjs16",
+      "source": "readme_nextjs16",
+      "target": "structure_frontend"
+    },
+    {
+      "relation": "used_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend/public/marker_putra.png",
+      "_src": "img_marker_putra",
+      "_tgt": "readme_interactive_map",
+      "source": "readme_interactive_map",
+      "target": "img_marker_putra"
+    },
+    {
+      "relation": "used_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend/public/marker_putri.png",
+      "_src": "img_marker_putri",
+      "_tgt": "readme_interactive_map",
+      "source": "readme_interactive_map",
+      "target": "img_marker_putri"
+    },
+    {
+      "relation": "used_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "frontend/public/marker_campuran.png",
+      "_src": "img_marker_campuran",
+      "_tgt": "readme_interactive_map",
+      "source": "readme_interactive_map",
+      "target": "img_marker_campuran"
+    },
+    {
+      "relation": "located_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "_src": "readme_data_pipeline",
+      "_tgt": "structure_src",
+      "source": "readme_data_pipeline",
+      "target": "structure_src"
+    }
+  ],
+  "hyperedges": []
+}

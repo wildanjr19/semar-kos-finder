@@ -149,6 +149,86 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 - [ ] Migration to dedicated db.
 
 
+## Port Matrix
+
+| Environment | Service    | URL                     | Profile       | Network           |
+|-------------|------------|-------------------------|---------------|-------------------|
+| Development | Frontend   | http://localhost:3000   | development   | semar_dev         |
+| Development | Admin      | http://localhost:3001   | development   | semar_dev         |
+| Development | Backend    | http://localhost:8000   | development   | semar_dev         |
+| Production  | Web        | http://localhost:3002   | production    | semar-kos-shared  |
+| Staging     | Web        | http://localhost:3003   | staging       | semar-kos-shared  |
+
+**Catatan**: VPS deployment masih menggunakan PM2 (tidak berubah). Docker hanya untuk local development.
+
+## Docker (Production/Staging)
+
+Jalankan production dan staging secara bersamaan menggunakan Docker Compose:
+
+```bash
+# Setup environment files
+cp .env.production.example .env.production
+cp .env.staging.example .env.staging
+
+# Start both environments
+docker compose --profile production --profile staging up -d --build
+```
+
+- Production: http://localhost:3002
+- Staging: http://localhost:3003
+- Shared network: `semar-kos-shared`
+
+Stop: `docker compose --profile production --profile staging down`
+
+## Docker (Development)
+
+Dev compose menjalankan 4 services: frontend, admin, backend (FastAPI), dan MongoDB.
+
+### Setup Environment
+
+```bash
+# Copy environment file
+cp .env.development.example .env.development
+
+# Edit .env.development dengan variabel berikut:
+# GOOGLE_MAPS_API_KEY=<google_maps_api_key>
+# API_INTERNAL_URL=http://backend_dev:8000
+# MONGO_URL=mongodb://mongodb:27017/semar_kos
+# JWT_SECRET=<random_secret_key>
+# JWT_EXPIRE_MINUTES=60
+# ADMIN_USERNAME=admin
+# ADMIN_PASSWORD_BCRYPT=<bcrypt_hash>
+#
+# Generate bcrypt hash:
+# docker compose --profile development run --rm backend_dev uv run python -c "from passlib.hash import bcrypt; print(bcrypt.hash('admin123'))"
+```
+
+### Start Development
+
+```bash
+# Start all 4 services dengan hot reload
+docker compose --profile development up -d --build
+```
+
+- Frontend: http://localhost:3000
+- Admin: http://localhost:3001
+- Backend API: http://localhost:8000
+
+### Seed Data
+
+```bash
+# Import data dari JSON ke MongoDB
+docker compose --profile development run --rm backend_dev uv run python -m app.seed
+```
+
+**Catatan**: Dataset bersifat close-source. Jika file data tidak tersedia, seed akan skip dengan pesan "seed skipped: dataset not present".
+
+### Stop
+
+```bash
+docker compose --profile development down
+```
+
 ## Kontribusi
 
 Terbuka untuk kolaborasi dan atau pull-request, baik dalam pengembangan maupun adanya bug. Untuk kolaborasi harap hubungi creator untuk mendapatkan akses data. Jika terdapat titik kos atau informasi yang kurang benar dan tidak akurat, mohon untuk menghubungi creator.

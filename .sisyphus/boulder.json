@@ -1,0 +1,23 @@
+{
+  "active_plan": "/home/evan/personal-projects/semar-kos-finder/.sisyphus/plans/4-containers-fastapi-admin-mongo.md",
+  "started_at": "2026-04-17T08:02:30.000Z",
+  "session_ids": [
+    "ses_2660ba69bffeTT54lX7xQcXAMn"
+  ],
+  "session_origins": {
+    "ses_2660ba69bffeTT54lX7xQcXAMn": "direct"
+  },
+  "plan_name": "4-containers-fastapi-admin-mongo",
+  "agent": "atlas",
+  "task_sessions": {
+    "todo:1": {
+      "task_key": "todo:1",
+      "task_label": "1",
+      "task_title": "Extend `compose.yaml` dev profile to 4 services",
+      "session_id": "ses_264bb5530ffeAmqCBzoHf0y2ft",
+      "agent": "Sisyphus-Junior",
+      "category": "deep",
+      "updated_at": "2026-04-17T11:52:43.191Z"
+    }
+  }
+}

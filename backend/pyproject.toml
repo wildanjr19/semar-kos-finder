@@ -1,0 +1,22 @@
+[project]
+name = "semar-kos-backend"
+version = "0.1.0"
+description = "Semar Kos Finder backend"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "motor",
+  "pydantic",
+  "python-dotenv",
+  "python-jose[cryptography]",
+  "bcrypt>=4.0,<5.0",
+  "pydantic-settings",
+  "orjson",
+  "pytest",
+  "pytest-asyncio",
+  "httpx>=0.28.1",
+]
+
+[tool.uv]
+dev-dependencies = []

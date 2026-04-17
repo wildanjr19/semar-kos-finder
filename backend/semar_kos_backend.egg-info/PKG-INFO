@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: semar-kos-backend
+Version: 0.1.0
+Summary: Semar Kos Finder backend
+Requires-Python: >=3.11
+Requires-Dist: fastapi
+Requires-Dist: uvicorn[standard]
+Requires-Dist: motor
+Requires-Dist: pydantic
+Requires-Dist: python-dotenv
+Requires-Dist: python-jose[cryptography]
+Requires-Dist: passlib[bcrypt]
+Requires-Dist: pydantic-settings
+Requires-Dist: orjson
+Requires-Dist: pytest
+Requires-Dist: pytest-asyncio
