@@ -1,13 +1,31 @@
 # --- Python & Data Science (Root) ---
 .venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
 data/
 dump/
 log/
+logs/
 notebooks/
 notes/
 *.log
 TODO.md
 PROJECT_BRIEF.md
+.ipynb_checkpoints/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
 
 # --- Frontend (Next.js) ---
 # Menggunakan **/ agar mencari ke semua sub-folder
@@ -33,3 +51,25 @@ frontend/public/data/master_uns.json
 # --- OS Junk ---
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+
+# --- IDE / Editor ---
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Testing ---
+test-results/
+coverage/
+
+# --- Misc ---
+*.bak
+*.tmp
+.cache/

@@ -110,7 +110,7 @@ async def seed() -> None:
 
         result = await col.update_one(
             {"source_id": parsed["source_id"]},
-            {"$set": parsed, "$setOnInsert": {"_id": parsed.pop("_id", None) or None}},
+            {"$set": parsed},
             upsert=True,
         )
         if result.upserted_id is not None:
