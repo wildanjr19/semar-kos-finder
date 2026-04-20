@@ -126,7 +126,7 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 |Date|Total Data|Update|Version|
 |----|----------|------|-------|
 |8/4/2026|310|0|v1|
-|14/04/2026|412|102|v2
+|14/04/2026|413|103|v2
 
 ## Future Work and To Do
 
