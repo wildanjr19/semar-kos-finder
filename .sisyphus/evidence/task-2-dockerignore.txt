@@ -1,3 +1,0 @@
-frontend/.dockerignore created
-docker build -f frontend/Dockerfile -t semar-kos-frontend:local frontend
-result: success

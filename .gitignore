@@ -76,3 +76,7 @@ coverage/
 # --- Agent Artifacts ---
 .sisyphus/
 skills-lock.json
+graphify-out/
+opencode.json
+.graphify_uncached.txt
+.opencode/
