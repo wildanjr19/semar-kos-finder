@@ -1,13 +1,31 @@
 # --- Python & Data Science (Root) ---
 .venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
 data/
 dump/
 log/
+logs/
 notebooks/
 notes/
 *.log
 TODO.md
 PROJECT_BRIEF.md
+.ipynb_checkpoints/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
 
 # --- Frontend (Next.js) ---
 # Menggunakan **/ agar mencari ke semua sub-folder
@@ -19,10 +37,46 @@ PROJECT_BRIEF.md
 .env
 .env.local
 
+# --- Sensitive Data (Docker/Compose) ---
+.env.*
+!.env.example
+!.env.production.example
+!.env.staging.example
+!.env.development.example
+
 # Mengabaikan semua JSON di folder data kost (sesuai request kamu)
-frontend/public/data/data_kost_geo.json
-frontend/public/data/master_uns.json
+frontend/public/data/
 
 # --- OS Junk ---
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+
+# --- IDE / Editor ---
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Testing ---
+test-results/
+coverage/
+
+# --- Misc ---
+*.bak
+*.tmp
+.cache/
+
+# --- Agent Artifacts ---
+.sisyphus/
+skills-lock.json
+graphify-out/
+opencode.json
+.graphify_uncached.txt
+.opencode/
