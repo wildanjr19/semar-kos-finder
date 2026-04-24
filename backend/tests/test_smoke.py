@@ -83,8 +83,8 @@ async def test_seed_missing_file_exits_ok():
 @pytest.mark.anyio
 async def test_master_uns_returns_list(app):
     async def _empty_cursor():
-        return
-        yield  # make it an async generator
+        if False:
+            yield  # pragma: no cover
 
     from unittest.mock import MagicMock
 
