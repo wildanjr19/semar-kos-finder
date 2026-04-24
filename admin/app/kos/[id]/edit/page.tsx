@@ -9,14 +9,16 @@ const JENIS_OPTIONS = ['Putra', 'Putri', 'Campuran', 'Tidak diketahui'] as const
 interface Kos {
   id: string;
   nama: string;
-  jenis: string;
+  jenis_kos: string;
   alamat: string;
+  plus_code: string;
   harga: string;
   fasilitas: string;
   peraturan: string;
-  kontak: string;
+  narahubung: string;
+  narahubung_nama: string;
   lat: number;
-  lon: number;
+  long: number;
 }
 
 export default function KosEdit() {
@@ -52,14 +54,16 @@ export default function KosEdit() {
     const form = new FormData(e.currentTarget);
     const body = {
       nama: form.get('nama') as string,
-      jenis: form.get('jenis') as string,
+      jenis: form.get('jenis_kos') as string,
       alamat: form.get('alamat') as string,
+      plus_code: form.get('plus_code') as string,
       harga: form.get('harga') as string,
       fasilitas: form.get('fasilitas') as string,
       peraturan: form.get('peraturan') as string,
-      kontak: form.get('kontak') as string,
+      kontak: form.get('narahubung') as string,
+      narahubung_nama: form.get('narahubung_nama') as string,
       lat: parseFloat(form.get('lat') as string),
-      lon: parseFloat(form.get('lon') as string),
+      lon: parseFloat(form.get('long') as string),
     };
 
     if (!body.nama || isNaN(body.lat) || isNaN(body.lon)) {
@@ -105,8 +109,8 @@ export default function KosEdit() {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="jenis">Jenis</label>
-          <select id="jenis" name="jenis" defaultValue={kos.jenis}>
+          <label htmlFor="jenis_kos">Jenis Kos</label>
+          <select id="jenis_kos" name="jenis_kos" defaultValue={kos.jenis_kos}>
             {JENIS_OPTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
@@ -114,6 +118,11 @@ export default function KosEdit() {
         <div className={styles.field}>
           <label htmlFor="alamat">Alamat</label>
           <input type="text" id="alamat" name="alamat" defaultValue={kos.alamat} />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="plus_code">Plus Code</label>
+          <input type="text" id="plus_code" name="plus_code" defaultValue={kos.plus_code} />
         </div>
 
         <div className={styles.field}>
@@ -132,8 +141,13 @@ export default function KosEdit() {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="kontak">Kontak</label>
-          <input type="text" id="kontak" name="kontak" defaultValue={kos.kontak} />
+          <label htmlFor="narahubung">Narahubung</label>
+          <input type="text" id="narahubung" name="narahubung" defaultValue={kos.narahubung} />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="narahubung_nama">Narahubung Nama</label>
+          <input type="text" id="narahubung_nama" name="narahubung_nama" defaultValue={kos.narahubung_nama} />
         </div>
 
         <div className={styles.row}>
@@ -142,8 +156,8 @@ export default function KosEdit() {
             <input type="number" step="any" id="lat" name="lat" required defaultValue={kos.lat} />
           </div>
           <div className={styles.field}>
-            <label htmlFor="lon">Longitude *</label>
-            <input type="number" step="any" id="lon" name="lon" required defaultValue={kos.lon} />
+            <label htmlFor="long">Longitude *</label>
+            <input type="number" step="any" id="long" name="long" required defaultValue={kos.long} />
           </div>
         </div>
 

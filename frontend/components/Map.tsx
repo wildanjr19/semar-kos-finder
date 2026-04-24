@@ -3,14 +3,32 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 
+type HargaVariant = {
+  per_bulan: number | null;
+  per_semester: number | null;
+  per_tahun: number | null;
+  deskripsi: string | null;
+  exclude: string[];
+};
+
+type Harga = {
+  raw: string;
+  variants: HargaVariant[];
+};
+
 type Kos = {
+  id: string;
   nama: string;
   jenis: string;
   lat: number;
   lon: number;
-  harga: string;
-  fasilitas: string;
-  kontak: string;
+  alamat: string;
+  plus_code: string;
+  harga: Harga;
+  fasilitas: string[];
+  peraturan: string[];
+  narahubung: string;
+  narahubung_nama: string;
 };
 
 type Destination = {
@@ -21,11 +39,16 @@ type Destination = {
 };
 
 type RawKos = {
-  "Nama kos"?: string;
-  "Jenis kos"?: string;
-  "Harga"?: string;
-  Fasilitas?: string;
-  Narahubung?: string;
+  id?: string;
+  nama?: string;
+  jenis_kos?: string;
+  alamat?: string;
+  plus_code?: string;
+  harga?: string;
+  fasilitas?: string;
+  peraturan?: string;
+  narahubung?: string;
+  narahubung_nama?: string;
   lat?: string | number;
   long?: string | number;
 };
@@ -333,30 +356,43 @@ export default function Map() {
   useEffect(() => {
     fetch("/api/kos")
       .then((res) => res.json())
-      .then((res: Kos[] | RawKos[]) => {
-        const mapped = (Array.isArray(res) ? res : [])
-          .map((item) => {
-            // Backend DTO shape (KosOut): has id, nama, jenis, alamat, harga, fasilitas, peraturan, kontak, lat, lon
-            if ("id" in item && "alamat" in item) {
-              return {
-                nama: item.nama ?? "Tanpa Nama",
-                jenis: item.jenis ?? "Tidak diketahui",
-                lat: toNumber(item.lat),
-                lon: toNumber(item.lon),
-                harga: item.harga ?? "-",
-                fasilitas: item.fasilitas ?? "-",
-                kontak: item.kontak ?? "-",
-              };
+      .then((res: unknown) => {
+        const arr = Array.isArray(res) ? res : [];
+        const mapped: Kos[] = arr
+          .map((item: any) => {
+            const hargaRaw = item.harga;
+            let harga: Harga;
+            if (typeof hargaRaw === "string") {
+              harga = { raw: hargaRaw, variants: [] };
+            } else if (hargaRaw && typeof hargaRaw === "object") {
+              harga = hargaRaw;
+            } else {
+              harga = { raw: "-", variants: [] };
             }
-            // RawKos shape from static JSON
+
+            const fasilitasStr = String(item.fasilitas ?? "");
+            const fasilitasArr = fasilitasStr
+              ? fasilitasStr.split(",").map((s: string) => s.trim()).filter(Boolean)
+              : [];
+
+            const peraturanStr = String(item.peraturan ?? "");
+            const peraturanArr = peraturanStr
+              ? peraturanStr.split(",").map((s: string) => s.trim()).filter(Boolean)
+              : [];
+
             return {
-              nama: item["Nama kos"] ?? "Tanpa Nama",
-              jenis: item["Jenis kos"] ?? "Tidak diketahui",
+              id: String(item.id ?? ""),
+              nama: String(item.nama ?? "Tanpa Nama"),
+              jenis: String(item.jenis_kos ?? "Tidak diketahui"),
+              alamat: String(item.alamat ?? ""),
+              plus_code: String(item.plus_code ?? ""),
               lat: toNumber(item.lat),
               lon: toNumber(item.long),
-              harga: item["Harga"] ?? "-",
-              fasilitas: item["Fasilitas"] ?? "-",
-              kontak: item["Narahubung"] ?? "-",
+              harga,
+              fasilitas: fasilitasArr,
+              peraturan: peraturanArr,
+              narahubung: String(item.narahubung ?? "-"),
+              narahubung_nama: String(item.narahubung_nama ?? ""),
             };
           })
           .filter(
@@ -464,46 +500,265 @@ export default function Map() {
 
       header.append(title, jenisBadge);
 
-      const harga = document.createElement("div");
-      harga.textContent = `Harga: ${kos.harga}`;
-      harga.style.fontSize = "13px";
-      harga.style.padding = "7px 10px";
-      harga.style.marginBottom = "6px";
-      harga.style.borderRadius = "10px";
-      harga.style.backgroundColor = "#ecf2e8";
-      harga.style.color = "#324030";
+      // --- HARGA SECTION ---
+      const hargaSection = document.createElement("div");
+      hargaSection.style.marginBottom = "8px";
 
-      const fasilitas = document.createElement("div");
-      fasilitas.textContent = `Fasilitas: ${kos.fasilitas}`;
-      fasilitas.style.fontSize = "13px";
-      fasilitas.style.padding = "7px 10px";
-      fasilitas.style.borderRadius = "10px";
-      fasilitas.style.backgroundColor = "#e8eef3";
-      fasilitas.style.color = "#2f3c4a";
+      const variants = kos.harga.variants;
+      const hasMultipleVariants = variants.length > 1;
+
+      const getYearlyPrice = (v: HargaVariant) => {
+        if (v.per_tahun) return v.per_tahun;
+        if (v.per_semester) return v.per_semester * 2;
+        if (v.per_bulan) return v.per_bulan * 12;
+        return 0;
+      };
+
+      // Format price helper
+      const formatPrice = (price: number) => {
+        if (price >= 1000000) {
+          return `${(price / 1000000).toFixed(1).replace(/\.0$/, '')}jt`;
+        }
+        return price.toLocaleString('id-ID');
+      };
+
+      // Helper to get display period
+      const getPeriodLabel = (v: HargaVariant) => {
+        if (v.per_tahun) return '/thn';
+        if (v.per_semester) return '/sem';
+        if (v.per_bulan) return '/bln';
+        return '';
+      };
+
+      if (hasMultipleVariants) {
+        // Price range header
+        const prices = variants.map(v => getYearlyPrice(v)).filter(p => p > 0);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        const priceRangeHeader = document.createElement("div");
+        priceRangeHeader.style.display = "flex";
+        priceRangeHeader.style.alignItems = "center";
+        priceRangeHeader.style.justifyContent = "space-between";
+        priceRangeHeader.style.padding = "6px 10px";
+        priceRangeHeader.style.marginBottom = "6px";
+        priceRangeHeader.style.borderRadius = "10px";
+        priceRangeHeader.style.backgroundColor = "#ecf2e8";
+        priceRangeHeader.style.color = "#324030";
+        priceRangeHeader.style.fontSize = "13px";
+        priceRangeHeader.style.gap = "8px";
+
+        const priceLabel = document.createElement("span");
+        priceLabel.style.fontWeight = "600";
+        priceLabel.textContent = `💰 ${formatPrice(minPrice)} - ${formatPrice(maxPrice)}/tahun`;
+        priceLabel.style.whiteSpace = "nowrap";
+
+        const variantCount = document.createElement("span");
+        variantCount.textContent = `${variants.length} opsi`;
+        variantCount.style.fontSize = "11px";
+        variantCount.style.opacity = "0.7";
+
+        priceRangeHeader.append(priceLabel, variantCount);
+        hargaSection.appendChild(priceRangeHeader);
+      }
+
+      // Variant cards
+      variants.forEach((variant, idx) => {
+        const yearlyPrice = getYearlyPrice(variant);
+        if (yearlyPrice <= 0) return;
+
+        const isFirst = idx === 0;
+        const isBestValue = isFirst && variant.deskripsi && (
+          variant.deskripsi.toLowerCase().includes('ac') || 
+          variant.deskripsi.toLowerCase().includes('dalam')
+        );
+
+        const variantCard = document.createElement("div");
+        variantCard.style.padding = "6px 10px";
+        variantCard.style.marginBottom = "4px";
+        variantCard.style.borderRadius = "8px";
+        variantCard.style.fontSize = "12px";
+        variantCard.style.backgroundColor = isBestValue ? "#fef3c7" : "#f0f4eb";
+        variantCard.style.border = isBestValue 
+          ? "1px solid #f59e0b55" 
+          : "1px solid #d1d5db55";
+        variantCard.style.color = "#374151";
+        variantCard.style.position = "relative";
+
+        if (isBestValue) {
+          const badge = document.createElement("span");
+          badge.textContent = "⭐ Best Value";
+          badge.style.position = "absolute";
+          badge.style.top = "4px";
+          badge.style.right = "6px";
+          badge.style.fontSize = "9px";
+          badge.style.fontWeight = "700";
+          badge.style.color = "#92400e";
+          variantCard.appendChild(badge);
+        }
+
+        const variantLine1 = document.createElement("div");
+        variantLine1.style.display = "flex";
+        variantLine1.style.justifyContent = "space-between";
+        variantLine1.style.alignItems = "center";
+        variantLine1.style.fontWeight = isBestValue ? "700" : "500";
+
+        const variantName = document.createElement("span");
+        variantName.textContent = isBestValue ? `⭐ ${variant.deskripsi || 'Standard'}` : (variant.deskripsi || 'Standard');
+        variantName.style.flexShrink = "1";
+        variantName.style.marginRight = "8px";
+        variantName.style.color = isBestValue ? "#78350f" : "#1f2937";
+
+        const variantPrice = document.createElement("span");
+        variantPrice.textContent = `Rp ${formatPrice(yearlyPrice)}${getPeriodLabel(variant)}`;
+        variantPrice.style.fontWeight = "700";
+        variantPrice.style.color = isBestValue ? "#b45309" : "#047857";
+        variantPrice.style.whiteSpace = "nowrap";
+
+        variantLine1.append(variantName, variantPrice);
+
+        const variantLine2 = document.createElement("div");
+        variantLine2.style.fontSize = "10px";
+        variantLine2.style.color = "#6b7280";
+        variantLine2.style.marginTop = "2px";
+
+        if (variant.exclude && variant.exclude.length > 0) {
+          variantLine2.textContent = `* Tidak termasuk: ${variant.exclude.join(', ')}`;
+        } else if (isBestValue) {
+          variantLine2.textContent = "Termasuk semua fasilitas";
+        }
+
+        variantCard.appendChild(variantLine1);
+        if (variantLine2.textContent) {
+          variantCard.appendChild(variantLine2);
+        }
+
+        hargaSection.appendChild(variantCard);
+      });
+
+      // --- FASILITAS SECTION (Grouped Pills) ---
+      const fasilitasSection = document.createElement("div");
+      fasilitasSection.style.marginBottom = "8px";
+
+      const fasilitasLabel = document.createElement("div");
+      fasilitasLabel.textContent = "Fasilitas";
+      fasilitasLabel.style.fontWeight = "600";
+      fasilitasLabel.style.marginBottom = "6px";
+      fasilitasLabel.style.fontSize = "12px";
+      fasilitasLabel.style.color = "#475569";
+      fasilitasSection.appendChild(fasilitasLabel);
+
+      const groupedFasilitas: Record<string, string[]> = {
+        "Kamar": [],
+        "KM": [],
+        "AC & Pendingin": [],
+        "Umum": [],
+      };
+
+      const categoryKeywords: Record<string, string[]> = {
+        "Kamar": ["kasur", "lemari", "meja belajar", "meja", "tempat tidur"],
+        "KM": ["kamar mandi"],
+        "AC & Pendingin": ["ac", "kulkas"],
+        "Umum": ["listrik", "air", "dapur", "wifi", "internet", "jemuran", "parkir"],
+      };
+
+      kos.fasilitas.forEach((fasil) => {
+        const lower = fasil.toLowerCase();
+        let categorized = false;
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+          if (keywords.some((kw) => lower.includes(kw))) {
+            groupedFasilitas[category].push(fasil);
+            categorized = true;
+            break;
+          }
+        }
+        if (!categorized) {
+          groupedFasilitas["Umum"].push(fasil);
+        }
+      });
+
+      const categoryStyles: Record<string, { bg: string; text: string; border: string }> = {
+        "Kamar": { bg: "#dcfce7", text: "#166534", border: "#86efac" },
+        "KM": { bg: "#dbeafe", text: "#1d4ed8", border: "#93c5fd" },
+        "AC & Pendingin": { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
+        "Umum": { bg: "#f3e8ff", text: "#6b21a8", border: "#d8b4fe" },
+      };
+
+      const allCategories = Object.entries(groupedFasilitas).filter(
+        ([_, items]) => items.length > 0
+      );
+
+      allCategories.forEach(([category, items]) => {
+        const categoryContainer = document.createElement("div");
+        categoryContainer.style.display = "flex";
+        categoryContainer.style.alignItems = "center";
+        categoryContainer.style.flexWrap = "wrap";
+        categoryContainer.style.gap = "4px";
+        categoryContainer.style.marginBottom = "5px";
+
+        const catStyle = categoryStyles[category];
+
+        const categoryBadge = document.createElement("span");
+        categoryBadge.textContent = category;
+        categoryBadge.style.padding = "2px 6px";
+        categoryBadge.style.borderRadius = "6px";
+        categoryBadge.style.fontSize = "9px";
+        categoryBadge.style.fontWeight = "700";
+        categoryBadge.style.backgroundColor = catStyle.bg;
+        categoryBadge.style.color = catStyle.text;
+        categoryBadge.style.border = `1px solid ${catStyle.border}`;
+        categoryBadge.style.whiteSpace = "nowrap";
+
+        categoryContainer.appendChild(categoryBadge);
+
+        items.forEach((item) => {
+          const pill = document.createElement("span");
+          pill.textContent = item;
+          pill.style.padding = "2px 8px";
+          pill.style.borderRadius = "6px";
+          pill.style.fontSize = "10px";
+          pill.style.backgroundColor = "#f0f4eb";
+          pill.style.color = "#374151";
+          pill.style.border = "1px solid #d1d5db";
+          categoryContainer.appendChild(pill);
+        });
+
+        fasilitasSection.appendChild(categoryContainer);
+      });
 
       const kontak = document.createElement("div");
       kontak.style.marginTop = "8px";
       kontak.style.fontSize = "13px";
-      const contactLabel = document.createElement("span");
-      contactLabel.textContent = "Kontak: ";
-      contactLabel.style.fontWeight = "600";
-      contactLabel.style.color = "#334155";
 
-      const parsedContact = parseContact(kos.kontak);
+      const parsedContact = parseContact(kos.narahubung);
       if (parsedContact.href) {
         const contactLink = document.createElement("a");
         contactLink.href = parsedContact.href;
         contactLink.target = "_blank";
         contactLink.rel = "noopener noreferrer";
-        contactLink.textContent = parsedContact.label;
+        contactLink.style.display = "flex";
+        contactLink.style.alignItems = "center";
+        contactLink.style.gap = "6px";
         contactLink.style.color = "#476184";
-        contactLink.style.textDecorationColor = `${popupColors.steel}88`;
-        kontak.append(contactLabel, contactLink);
+        contactLink.style.textDecoration = "none";
+        contactLink.style.transition = "color 150ms ease";
+
+        const waIcon = document.createElement("span");
+        waIcon.textContent = "💬";
+        waIcon.style.fontSize = "14px";
+
+        const contactText = document.createElement("span");
+        contactText.style.fontWeight = "500";
+        contactText.textContent = kos.narahubung_nama || parsedContact.label;
+
+        contactLink.appendChild(waIcon);
+        contactLink.appendChild(contactText);
+        kontak.appendChild(contactLink);
       } else {
         const fallbackText = document.createElement("span");
         fallbackText.textContent = parsedContact.label;
         fallbackText.style.color = "#475569";
-        kontak.append(contactLabel, fallbackText);
+        kontak.appendChild(fallbackText);
       }
 
       const routeSection = document.createElement("div");
@@ -700,7 +955,7 @@ export default function Map() {
         routeResult,
       );
 
-      popupNode.append(header, harga, fasilitas, kontak, routeSection);
+      popupNode.append(header, hargaSection, fasilitasSection, kontak, routeSection);
 
       const popup = new maplibregl.Popup({ offset: 25, className: "kos-popup" }).setDOMContent(popupNode);
       popup.on("close", clearRoute);

@@ -6,14 +6,16 @@ import styles from './kos.module.css';
 interface Kos {
   id: string;
   nama: string;
-  jenis: string;
+  jenis_kos: string;
   alamat: string;
+  plus_code: string;
   harga: string;
   fasilitas: string;
   peraturan: string;
-  kontak: string;
+  narahubung: string;
+  narahubung_nama: string;
   lat: number;
-  lon: number;
+  long: number;
 }
 
 export default function KosList() {
@@ -61,9 +63,9 @@ export default function KosList() {
   const filtered = items.filter((k) => {
     const q = search.toLowerCase();
     return k.nama.toLowerCase().includes(q)
-      || k.jenis.toLowerCase().includes(q)
+      || k.jenis_kos.toLowerCase().includes(q)
       || k.alamat.toLowerCase().includes(q)
-      || k.kontak.toLowerCase().includes(q);
+      || k.narahubung.toLowerCase().includes(q);
   });
 
   return (
@@ -115,9 +117,9 @@ export default function KosList() {
               {filtered.map((k) => (
                 <tr key={k.id}>
                   <td>{k.nama}</td>
-                  <td>{k.jenis}</td>
+                  <td>{k.jenis_kos}</td>
                   <td>{k.harga}</td>
-                  <td>{k.kontak}</td>
+                  <td>{k.narahubung}</td>
                   <td className={styles.actionCell}>
                     <a href={`/kos/${k.id}/edit`} className={styles.editBtn}>Edit</a>
                     <button type="button" className={styles.deleteBtn} onClick={() => setDeleteTarget(k)}>Delete</button>

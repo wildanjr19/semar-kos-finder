@@ -16,6 +16,11 @@ COLLECTION = "kos"
 
 def _doc_to_kos(doc: dict) -> dict:
     doc["id"] = str(doc.pop("_id"))
+    doc["jenis_kos"] = doc.pop("jenis", "Tidak diketahui")
+    doc["narahubung"] = doc.pop("kontak", "")
+    doc["long"] = doc.pop("lon", 0.0)
+    doc["plus_code"] = doc.get("plus_code", "")
+    doc["narahubung_nama"] = doc.get("narahubung_nama", "")
     doc.pop("source_id", None)
     doc.pop("location", None)
     doc.pop("updated_at", None)

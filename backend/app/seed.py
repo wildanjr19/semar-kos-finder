@@ -22,6 +22,7 @@ _KEY_MAP: dict[str, str] = {
     "Nama kos": "nama",
     "Jenis kos": "jenis",
     "Alamat": "alamat",
+    "Plus_Code": "plus_code",
     "Fasilitas": "fasilitas",
     "Peraturan": "peraturan",
     "Harga": "harga",
@@ -50,6 +51,16 @@ def make_source_id(nama: str, alamat: str, kontak: str) -> str:
     return hashlib.sha256(key.encode()).hexdigest()
 
 
+def _extract_narahubung_nama(raw: str) -> tuple[str, str]:
+    cleaned = str(raw).strip()
+    if not cleaned or cleaned == "-":
+        return "", ""
+    match = re.search(r"(.+?)\s*\(([^)]+)\)\s*$", cleaned)
+    if match:
+        return match.group(1).strip(), match.group(2).strip()
+    return cleaned, ""
+
+
 def _parse_row(row: dict) -> dict | None:
     mapped: dict = {}
     for json_key, field_name in _KEY_MAP.items():
@@ -70,6 +81,10 @@ def _parse_row(row: dict) -> dict | None:
     jenis = mapped.get("jenis", "")
     if jenis not in VALID_JENIS:
         mapped["jenis"] = "Tidak diketahui"
+
+    kontak, narahubung_nama = _extract_narahubung_nama(mapped.get("kontak", ""))
+    mapped["kontak"] = kontak
+    mapped["narahubung_nama"] = narahubung_nama
 
     mapped["source_id"] = make_source_id(
         mapped.get("nama", ""), mapped.get("alamat", ""), mapped.get("kontak", "")

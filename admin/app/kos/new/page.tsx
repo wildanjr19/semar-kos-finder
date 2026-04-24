@@ -19,14 +19,16 @@ export default function KosNew() {
     const form = new FormData(e.currentTarget);
     const body = {
       nama: form.get('nama') as string,
-      jenis: form.get('jenis') as string,
+      jenis: form.get('jenis_kos') as string,
       alamat: form.get('alamat') as string,
+      plus_code: form.get('plus_code') as string,
       harga: form.get('harga') as string,
       fasilitas: form.get('fasilitas') as string,
       peraturan: form.get('peraturan') as string,
-      kontak: form.get('kontak') as string,
+      kontak: form.get('narahubung') as string,
+      narahubung_nama: form.get('narahubung_nama') as string,
       lat: parseFloat(form.get('lat') as string),
-      lon: parseFloat(form.get('lon') as string),
+      lon: parseFloat(form.get('long') as string),
     };
 
     if (!body.nama || isNaN(body.lat) || isNaN(body.lon)) {
@@ -69,8 +71,8 @@ export default function KosNew() {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="jenis">Jenis</label>
-          <select id="jenis" name="jenis" defaultValue="Tidak diketahui">
+          <label htmlFor="jenis_kos">Jenis Kos</label>
+          <select id="jenis_kos" name="jenis_kos" defaultValue="Tidak diketahui">
             {JENIS_OPTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
@@ -78,6 +80,11 @@ export default function KosNew() {
         <div className={styles.field}>
           <label htmlFor="alamat">Alamat</label>
           <input type="text" id="alamat" name="alamat" />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="plus_code">Plus Code</label>
+          <input type="text" id="plus_code" name="plus_code" placeholder="e.g. CVX5+R2" />
         </div>
 
         <div className={styles.field}>
@@ -96,8 +103,13 @@ export default function KosNew() {
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="kontak">Kontak</label>
-          <input type="text" id="kontak" name="kontak" placeholder="e.g. https://wa.me/628..." />
+          <label htmlFor="narahubung">Narahubung</label>
+          <input type="text" id="narahubung" name="narahubung" placeholder="e.g. https://wa.me/628..." />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="narahubung_nama">Narahubung Nama</label>
+          <input type="text" id="narahubung_nama" name="narahubung_nama" placeholder="e.g. Pak Joko" />
         </div>
 
         <div className={styles.row}>
@@ -106,8 +118,8 @@ export default function KosNew() {
             <input type="number" step="any" id="lat" name="lat" required placeholder="-7.55" />
           </div>
           <div className={styles.field}>
-            <label htmlFor="lon">Longitude *</label>
-            <input type="number" step="any" id="lon" name="lon" required placeholder="110.85" />
+            <label htmlFor="long">Longitude *</label>
+            <input type="number" step="any" id="long" name="long" required placeholder="110.85" />
           </div>
         </div>
 

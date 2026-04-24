@@ -17,10 +17,12 @@ class KosCreate(BaseModel):
     nama: str
     jenis: Literal["Putra", "Putri", "Campuran", "Tidak diketahui"] = "Tidak diketahui"
     alamat: str = ""
+    plus_code: str = ""
     harga: str = ""
     fasilitas: str = ""
     peraturan: str = ""
     kontak: str = ""
+    narahubung_nama: str = ""
     lat: float
     lon: float
 
@@ -29,10 +31,12 @@ class KosUpdate(BaseModel):
     nama: str | None = None
     jenis: Literal["Putra", "Putri", "Campuran", "Tidak diketahui"] | None = None
     alamat: str | None = None
+    plus_code: str | None = None
     harga: str | None = None
     fasilitas: str | None = None
     peraturan: str | None = None
     kontak: str | None = None
+    narahubung_nama: str | None = None
     lat: float | None = None
     lon: float | None = None
 
@@ -40,14 +44,16 @@ class KosUpdate(BaseModel):
 class KosOut(BaseModel):
     id: str = Field(alias="_id")
     nama: str
-    jenis: Literal["Putra", "Putri", "Campuran", "Tidak diketahui"] = "Tidak diketahui"
+    jenis_kos: str = Field(alias="jenis")
     alamat: str = ""
-    harga: str = ""
+    plus_code: str = ""
     fasilitas: str = ""
     peraturan: str = ""
-    kontak: str = ""
+    harga: str = ""
+    narahubung: str = Field(alias="kontak")
+    narahubung_nama: str = ""
     lat: float
-    lon: float
+    long: float = Field(alias="lon")
 
     model_config = {"populate_by_name": True}
 
@@ -57,10 +63,12 @@ class Kos(BaseModel):
     nama: str
     jenis: Literal["Putra", "Putri", "Campuran", "Tidak diketahui"] = "Tidak diketahui"
     alamat: str = ""
+    plus_code: str = ""
     harga: str = ""
     fasilitas: str = ""
     peraturan: str = ""
     kontak: str = ""
+    narahubung_nama: str = ""
     lat: float
     lon: float
     source_id: str = ""

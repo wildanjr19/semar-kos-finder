@@ -12,14 +12,16 @@ EXPECTED_FORMAT = {
     "action": "upsert_kos",
     "payload": {
         "nama": "string",
-        "jenis": "Putra|Putri|Campuran|Tidak diketahui",
+        "jenis_kos": "Putra|Putri|Campuran|Tidak diketahui",
         "alamat": "string",
+        "plus_code": "string",
         "harga": "string",
         "fasilitas": "string",
         "peraturan": "string",
-        "kontak": "string",
+        "narahubung": "string",
+        "narahubung_nama": "string",
         "lat": -7.55,
-        "lon": 110.85,
+        "long": 110.85,
     },
 }
 

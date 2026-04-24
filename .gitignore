@@ -45,8 +45,7 @@ htmlcov/
 !.env.development.example
 
 # Mengabaikan semua JSON di folder data kost (sesuai request kamu)
-frontend/public/data/data_kost_geo.json
-frontend/public/data/master_uns.json
+frontend/public/data/
 
 # --- OS Junk ---
 .DS_Store
