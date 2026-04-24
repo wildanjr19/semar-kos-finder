@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: http://${{ secrets.SSH_HOST }}:${{ vars.WEB_PORT }}
     timeout-minutes: 10
 
     steps:
