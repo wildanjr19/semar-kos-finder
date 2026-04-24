@@ -42,20 +42,18 @@ class KosUpdate(BaseModel):
 
 
 class KosOut(BaseModel):
-    id: str = Field(alias="_id")
+    id: str
     nama: str
-    jenis_kos: str = Field(alias="jenis")
+    jenis_kos: str
     alamat: str = ""
     plus_code: str = ""
     fasilitas: str = ""
     peraturan: str = ""
     harga: str = ""
-    narahubung: str = Field(alias="kontak")
+    narahubung: str
     narahubung_nama: str = ""
     lat: float
-    long: float = Field(alias="lon")
-
-    model_config = {"populate_by_name": True}
+    long: float
 
 
 class Kos(BaseModel):

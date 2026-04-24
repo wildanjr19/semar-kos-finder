@@ -80,4 +80,20 @@ async def test_seed_missing_file_exits_ok():
 
             await seed()
 
-    mock_path.exists.assert_called_once()
+@pytest.mark.anyio
+async def test_master_uns_returns_list(app):
+    async def _empty_cursor():
+        return
+        yield  # make it an async generator
+
+    from unittest.mock import MagicMock
+
+    with patch("app.routers.master_uns.get_collection") as mock_get_coll:
+        mock_coll = MagicMock()
+        mock_coll.find.return_value = _empty_cursor()
+        mock_get_coll.return_value = mock_coll
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/master-uns")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)

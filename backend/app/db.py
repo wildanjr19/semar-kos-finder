@@ -56,3 +56,14 @@ async def init_db() -> None:
             backoff = min(backoff * 2, MAX_BACKOFF)
 
     logger.error("MongoDB unreachable after %ds — app will report db:down", MAX_RETRY_SECONDS)
+
+
+async def close_db() -> None:
+    global _client, _db, _ready
+
+    if _client is not None:
+        _client.close()
+        _client = None
+        _db = None
+        _ready = False
+        logger.info("MongoDB connection closed")

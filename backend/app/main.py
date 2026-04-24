@@ -3,14 +3,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.db import init_db, is_ready
-from app.routers import admin_actions, admin_kos, auth, kos
+from app.db import init_db, close_db, is_ready
+from app.routers import admin_actions, admin_kos, auth, kos, master_uns
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    yield
+    try:
+        yield
+    finally:
+        await close_db()
 
 
 def create_app() -> FastAPI:
@@ -30,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_kos.router)
     app.include_router(admin_actions.router)
     app.include_router(auth.router)
+    app.include_router(master_uns.router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

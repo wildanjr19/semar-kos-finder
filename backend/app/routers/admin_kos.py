@@ -8,6 +8,7 @@ from pymongo import ReturnDocument
 from app.auth import require_auth
 from app.db import get_collection
 from app.models import KosOut, KosCreate, KosUpdate
+from app.seed import make_source_id
 
 router = APIRouter(prefix="/api/admin/kos", tags=["admin-kos"])
 
@@ -33,7 +34,7 @@ async def create_kos(body: KosCreate, _username: str = Depends(require_auth)) ->
     coll = get_collection(COLLECTION)
     now = datetime.utcnow()
     doc = body.model_dump()
-    doc["source_id"] = f"manual:{hash((body.nama, body.alamat, body.kontak))}"
+    doc["source_id"] = f"manual:{make_source_id(body.nama, body.alamat, body.kontak)}"
     doc["location"] = {"type": "Point", "coordinates": [body.lon, body.lat]}
     doc["updated_at"] = now
 
