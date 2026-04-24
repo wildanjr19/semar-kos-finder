@@ -76,11 +76,3 @@ coverage/
 # --- Agent Artifacts ---
 .sisyphus/
 skills-lock.json
-
-# --- Project files not yet ready ---
-admin/Dockerfile
-admin/public/
-admin/types/
-backend/Dockerfile
-backend/app/routers/master_uns.py
-backend/app/seed_master_uns.py
