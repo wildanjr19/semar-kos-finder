@@ -38,6 +38,7 @@ In the `staging` environment, add these under **Variables** (not Secrets):
 | `WEB_PORT` | `3003` | Host port for staging web frontend |
 | `BACKEND_PORT` | `8001` | Host port for staging backend API |
 | `ADMIN_PORT` | `3004` | Host port for staging admin panel |
+| `STAGING_DOMAIN` | — | Domain for health check (e.g. `staging.example.com`) |
 
 These variables map container ports to host ports in `compose.yaml`.
 
@@ -50,10 +51,10 @@ These variables map container ports to host ports in `compose.yaml`.
 
 ### 5. How It Works
 
-1. **Build & Push**: Builds Docker images, pushes to GitHub Container Registry (`ghcr.io`)
+1. **Build & Push**: 3 jobs run in parallel (matrix strategy) — builds and pushes each staging image to GitHub Container Registry (`ghcr.io`) independently
 2. **Copy**: Runner sparse-checkouts `compose.yaml`, SCPs it to `${APP_DIR}` on VPS
-3. **Deploy**: SSH to VPS, generates `.env.staging`, logs in to GHCR, pulls images, starts containers
-4. **Health Check**: Waits 15s then curls `${SSH_HOST}:${WEB_PORT}`
+3. **Deploy**: SSH to VPS, passes port variables + secrets, generates `.env.staging`, logs in to GHCR, pulls images, starts containers
+4. **Health Check**: Waits 15s then curls `https://${STAGING_DOMAIN}`
 
 ---
 
@@ -90,3 +91,5 @@ This workflow does **not** use a GitHub Environment. Add secrets at **Settings �
 - **Port collision**: If host ports conflict, change the Variable values in the GitHub Environment settings — no code changes needed.
 - **Concurrency**: `staging.yml` uses `concurrency: group: staging-deploy` to prevent overlapping deploys.
 - **`APP_DIR` must be absolute**: Don't use `~` or `$HOME` — shell expansion doesn't work inside quoted workflow strings. Use `/home/ubuntu/semar-kos-staging` or `/opt/semar-kos-staging`.
+- **Parallel builds**: `build-push` uses matrix strategy to build `web_staging`, `backend_staging`, and `admin_staging` simultaneously across 3 runners.
+- **Domain health check**: Health check uses `STAGING_DOMAIN` variable instead of direct IP:port. Useful when VPS ports are firewalled and access is via reverse proxy/domain.
