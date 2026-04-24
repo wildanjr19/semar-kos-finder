@@ -74,6 +74,9 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
+          WEB_PORT: ${{ vars.WEB_PORT }}
+          BACKEND_PORT: ${{ vars.BACKEND_PORT }}
+          ADMIN_PORT: ${{ vars.ADMIN_PORT }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           ADMIN_PASSWORD_BCRYPT: ${{ secrets.ADMIN_PASSWORD_BCRYPT }}
@@ -82,7 +85,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: GOOGLE_MAPS_API_KEY,JWT_SECRET,ADMIN_PASSWORD_BCRYPT,GHCR_TOKEN
+          envs: WEB_PORT,BACKEND_PORT,ADMIN_PORT,GOOGLE_MAPS_API_KEY,JWT_SECRET,ADMIN_PASSWORD_BCRYPT,GHCR_TOKEN
           script_stop: true
           script: |
             set -euo pipefail
@@ -115,4 +118,4 @@ jobs:
 
       - name: Health check staging web
         run: |
-          curl -sf http://${{ secrets.SSH_HOST }}:${{ vars.WEB_PORT }} || exit 1
+          curl -sf http://${{ vars.SSH_HOST }}:${{ vars.WEB_PORT }} || exit 1
