@@ -41,48 +41,76 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: http://${{ secrets.STAGING_SSH_HOST }}:3003
+      url: http://${{ secrets.SSH_HOST }}:${{ vars.WEB_PORT }}
     timeout-minutes: 10
 
     steps:
+      - name: Checkout compose.yaml only
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            compose.yaml
+          sparse-checkout-cone-mode: false
+
+      - name: Ensure deploy directory exists
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: mkdir -p "${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+
+      - name: Copy compose.yaml to VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "compose.yaml"
+          target: "${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
-          STAGING_GOOGLE_MAPS_API_KEY: ${{ secrets.STAGING_GOOGLE_MAPS_API_KEY }}
-          STAGING_JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
-          STAGING_ADMIN_PASSWORD_BCRYPT: ${{ secrets.STAGING_ADMIN_PASSWORD_BCRYPT }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD_BCRYPT: ${{ secrets.ADMIN_PASSWORD_BCRYPT }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          host: ${{ secrets.STAGING_SSH_HOST }}
-          username: ${{ secrets.STAGING_SSH_USER }}
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          envs: STAGING_GOOGLE_MAPS_API_KEY,STAGING_JWT_SECRET,STAGING_ADMIN_PASSWORD_BCRYPT
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: GOOGLE_MAPS_API_KEY,JWT_SECRET,ADMIN_PASSWORD_BCRYPT,GHCR_TOKEN
           script_stop: true
           script: |
             set -euo pipefail
 
-            cd /home/ubuntu/semar-kos-finder
-            git pull origin staging
+            APP_DIR="${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+            cd "${APP_DIR}"
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             cat > .env.staging << 'EOF'
-            GOOGLE_MAPS_API_KEY=${STAGING_GOOGLE_MAPS_API_KEY}
+            GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
             NEXT_TELEMETRY_DISABLED=1
             NODE_ENV=production
             API_INTERNAL_URL=http://backend_staging:8000
             MONGO_URL=mongodb://mongodb_staging:27017/semar_kos_staging
-            JWT_SECRET=${STAGING_JWT_SECRET}
+            JWT_SECRET=${JWT_SECRET}
             JWT_EXPIRE_MINUTES=60
             ADMIN_USERNAME=admin
-            ADMIN_PASSWORD_BCRYPT=${STAGING_ADMIN_PASSWORD_BCRYPT}
+            ADMIN_PASSWORD_BCRYPT=${ADMIN_PASSWORD_BCRYPT}
             EOF
 
-            docker compose --profile staging pull
-            docker compose --profile staging up -d
+            docker compose -f compose.yaml --profile staging pull
+            docker compose -f compose.yaml --profile staging up -d
 
             docker image prune -af --filter "until=24h"
+            docker logout ghcr.io
 
       - name: Wait for services
         run: sleep 15
 
       - name: Health check staging web
         run: |
-          curl -sf http://${{ secrets.STAGING_SSH_HOST }}:3003 || exit 1
+          curl -sf http://${{ secrets.SSH_HOST }}:${{ vars.WEB_PORT }} || exit 1

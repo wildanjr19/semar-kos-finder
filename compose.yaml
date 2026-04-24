@@ -50,7 +50,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3003:3002"
+      - "${WEB_PORT:-3003}:3002"
     env_file:
       - ./.env.staging
     environment:
@@ -129,7 +129,7 @@ services:
       mongodb_staging:
         condition: service_healthy
     ports:
-      - "8001:8000"
+      - "${BACKEND_PORT:-8001}:8000"
     networks:
       - semar_staging
     restart: unless-stopped
@@ -169,7 +169,7 @@ services:
       backend_staging:
         condition: service_healthy
     ports:
-      - "3004:3001"
+      - "${ADMIN_PORT:-3004}:3001"
     networks:
       - semar_staging
     restart: unless-stopped
