@@ -79,8 +79,8 @@ export default function KosEdit() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Update failed' }));
-        throw new Error(data.error || 'Update failed');
+        const data = await res.json().catch(() => ({ detail: { error: 'Update failed' } }));
+        throw new Error(data.detail?.error || 'Update failed');
       }
       router.push('/kos');
     } catch (e) {

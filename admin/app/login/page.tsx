@@ -22,8 +22,8 @@ export default function Login() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Login failed' }));
-        throw new Error(data.error || 'Login failed');
+        const data = await res.json().catch(() => ({ detail: { error: 'Login failed' } }));
+        throw new Error(data.detail?.error || 'Login failed');
       }
       window.location.href = '/kos';
     } catch (e) {

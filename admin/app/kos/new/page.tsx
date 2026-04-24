@@ -44,8 +44,8 @@ export default function KosNew() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Create failed' }));
-        throw new Error(data.error || 'Create failed');
+        const data = await res.json().catch(() => ({ detail: { error: 'Create failed' } }));
+        throw new Error(data.detail?.error || 'Create failed');
       }
       router.push('/kos');
     } catch (e) {

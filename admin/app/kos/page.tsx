@@ -48,8 +48,8 @@ export default function KosList() {
     try {
       const res = await fetch(`/api/kos/${deleteTarget.id}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) {
-        const data = await res.json().catch(() => ({ error: 'Delete failed' }));
-        throw new Error(data.error || 'Delete failed');
+        const data = await res.json().catch(() => ({ detail: { error: 'Delete failed' } }));
+        throw new Error(data.detail?.error || 'Delete failed');
       }
       setDeleteTarget(null);
       await fetchKos();
