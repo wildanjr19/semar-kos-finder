@@ -17,6 +17,10 @@ concurrency:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        service: [web_staging, backend_staging, admin_staging]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,10 +38,10 @@ jobs:
       - name: Create placeholder env file
         run: touch .env.staging
 
-      - name: Build and push staging images
+      - name: Build and push staging image
         run: |
-          docker compose --profile staging build
-          docker compose --profile staging push
+          docker compose --profile staging build ${{ matrix.service }}
+          docker compose --profile staging push ${{ matrix.service }}
 
   deploy:
     needs: build-push
@@ -118,4 +122,4 @@ jobs:
 
       - name: Health check staging web
         run: |
-          curl -sf http://${{ vars.SSH_HOST }}:${{ vars.WEB_PORT }} || exit 1
+          curl -sf https://${{ vars.STAGING_DOMAIN }} || exit 1
