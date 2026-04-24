@@ -31,6 +31,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create placeholder env file
+        run: touch .env.staging
+
       - name: Build and push staging images
         run: |
           docker compose --profile staging build
