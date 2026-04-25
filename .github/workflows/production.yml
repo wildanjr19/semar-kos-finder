@@ -1,9 +1,9 @@
-name: Deploy Staging to VPS
+name: Deploy Production to VPS
 
 on:
   push:
     branches:
-      - staging
+      - main
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: staging-deploy
+  group: production-deploy
   cancel-in-progress: true
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        service: [web_staging, backend_staging, admin_staging]
+        service: [web_prod, backend_prod, admin_prod]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,18 +36,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create placeholder env file
-        run: touch .env.staging
+        run: touch .env.production
 
-      - name: Build and push staging image
+      - name: Build and push production image
         run: |
-          docker compose --profile staging build ${{ matrix.service }}
-          docker compose --profile staging push ${{ matrix.service }}
+          docker compose --profile production build ${{ matrix.service }}
+          docker compose --profile production push ${{ matrix.service }}
 
   deploy:
     needs: build-push
     runs-on: ubuntu-latest
     environment:
-      name: staging
+      name: production
     timeout-minutes: 10
 
     steps:
@@ -64,7 +64,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          script: mkdir -p "${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+          script: mkdir -p "${{ vars.APP_DIR || '/opt/semar-kos-prod' }}"
 
       - name: Copy compose.yaml to VPS
         uses: appleboy/scp-action@v1
@@ -73,13 +73,12 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "compose.yaml"
-          target: "${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+          target: "${{ vars.APP_DIR || '/opt/semar-kos-prod' }}"
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         env:
           WEB_PORT: ${{ vars.WEB_PORT }}
-          BACKEND_PORT: ${{ vars.BACKEND_PORT }}
           ADMIN_PORT: ${{ vars.ADMIN_PORT }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -89,30 +88,30 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: WEB_PORT,BACKEND_PORT,ADMIN_PORT,GOOGLE_MAPS_API_KEY,JWT_SECRET,ADMIN_PASSWORD_BCRYPT,GHCR_TOKEN
+          envs: WEB_PORT,ADMIN_PORT,GOOGLE_MAPS_API_KEY,JWT_SECRET,ADMIN_PASSWORD_BCRYPT,GHCR_TOKEN
           script_stop: true
           script: |
             set -euo pipefail
 
-            APP_DIR="${{ vars.APP_DIR || '/opt/semar-kos-staging' }}"
+            APP_DIR="${{ vars.APP_DIR || '/opt/semar-kos-prod' }}"
             cd "${APP_DIR}"
 
             echo "$GHCR_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            cat > .env.staging << 'EOF'
+            cat > .env.production << 'EOF'
             GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
             NEXT_TELEMETRY_DISABLED=1
             NODE_ENV=production
-            API_INTERNAL_URL=http://backend_staging:8000
-            MONGO_URL=mongodb://mongodb_staging:27017/semar_kos_staging
+            API_INTERNAL_URL=http://backend_prod:8000
+            MONGO_URL=mongodb://mongodb_prod:27017/semar_kos_prod
             JWT_SECRET=${JWT_SECRET}
             JWT_EXPIRE_MINUTES=60
             ADMIN_USERNAME=admin
             ADMIN_PASSWORD_BCRYPT=${ADMIN_PASSWORD_BCRYPT}
             EOF
 
-            docker compose -f compose.yaml --profile staging pull
-            docker compose -f compose.yaml --profile staging up -d
+            docker compose -f compose.yaml --profile production pull
+            docker compose -f compose.yaml --profile production up -d
 
             docker image prune -af --filter "until=24h"
             docker logout ghcr.io
@@ -120,6 +119,6 @@ jobs:
       - name: Wait for services
         run: sleep 15
 
-      - name: Health check staging web
+      - name: Health check production web
         run: |
-          curl -sf https://${{ secrets.STAGING_DOMAIN }} || exit 1
+          curl -sf https://${{ secrets.PRODUCTION_DOMAIN }} || exit 1
