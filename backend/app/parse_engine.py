@@ -222,7 +222,11 @@ async def _call_llm(
     if not config.llm_api_key:
         raise RuntimeError("LLM API key is not configured")
 
-    client = AsyncOpenAI(api_key=config.llm_api_key, base_url=config.llm_api_base)
+    client = AsyncOpenAI(
+        api_key=config.llm_api_key,
+        base_url=config.llm_api_base,
+        default_headers={"User-Agent": "UNSKosFinder-Parser/1.0"},
+    )
 
     system_prompt = _SYSTEM_PROMPT
     if custom_prompt:
@@ -286,10 +290,12 @@ async def parse_single_entry(
 async def test_llm_connection(override_config: dict) -> dict:
     """Send a minimal prompt to verify LLM connectivity."""
     config = _effective_config(override_config)
-    if not config.llm_api_key:
-        raise RuntimeError("LLM API key is not configured")
 
-    client = AsyncOpenAI(api_key=config.llm_api_key, base_url=config.llm_api_base)
+    client = AsyncOpenAI(
+        api_key=config.llm_api_key or "dummy",
+        base_url=config.llm_api_base,
+        default_headers={"User-Agent": "UNSKosFinder-Parser/1.0"},
+    )
 
     import time
 
@@ -297,8 +303,8 @@ async def test_llm_connection(override_config: dict) -> dict:
     try:
         response = await client.chat.completions.create(
             model=config.llm_model,
-            messages=[{"role": "user", "content": "Say 'ok' and nothing else."}],
-            max_tokens=10,
+            messages=[{"role": "user", "content": "Hi"}],
+            max_tokens=5,
             temperature=0,
         )
         latency_ms = round((time.monotonic() - start) * 1000)
@@ -314,8 +320,24 @@ async def test_llm_connection(override_config: dict) -> dict:
     except Exception as e:
         latency_ms = round((time.monotonic() - start) * 1000)
         error_msg = str(e)
+        # Try to extract richer error from OpenAI-style exceptions
         if hasattr(e, "body") and e.body:
-            error_msg = e.body.get("message", error_msg)
+            if isinstance(e.body, dict):
+                error_msg = e.body.get("message", error_msg)
+            elif isinstance(e.body, str):
+                error_msg = e.body
+        # Some providers embed error in response JSON
+        if hasattr(e, "response") and e.response:
+            try:
+                err_json = e.response.json()
+                if isinstance(err_json, dict):
+                    err_detail = err_json.get("error", {})
+                    if isinstance(err_detail, dict):
+                        error_msg = err_detail.get("message", error_msg)
+                    elif isinstance(err_detail, str):
+                        error_msg = err_detail
+            except Exception:
+                pass
         return {
             "status": "error",
             "error": error_msg,
