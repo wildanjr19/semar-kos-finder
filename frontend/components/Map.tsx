@@ -480,14 +480,17 @@ export default function Map() {
 
       // Popup content
       const popupNode = document.createElement("div");
-      popupNode.style.maxWidth = "300px";
+      popupNode.style.maxWidth = "340px";
+      popupNode.style.maxHeight = "70vh";
+      popupNode.style.overflowY = "auto";
       popupNode.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
-      popupNode.style.padding = "18px";
-      popupNode.style.borderRadius = "20px";
+      popupNode.style.padding = "14px";
+      popupNode.style.borderRadius = "16px";
       popupNode.style.border = "1px solid rgba(156, 175, 136, 0.25)";
       popupNode.style.background = "linear-gradient(160deg, #ffffff 0%, #f3f7ef 50%, #faf5f0 100%)";
       popupNode.style.color = "#2f3a2f";
       popupNode.style.boxShadow = "0 20px 40px rgba(47, 63, 57, 0.14)";
+      popupNode.style.scrollbarWidth = "thin";
 
       // Header: Title + Jenis badge
       const header = document.createElement("div");
@@ -495,7 +498,7 @@ export default function Map() {
       header.style.alignItems = "flex-start";
       header.style.justifyContent = "space-between";
       header.style.gap = "10px";
-      header.style.marginBottom = "10px";
+      header.style.marginBottom = "8px";
 
       const title = document.createElement("strong");
       title.textContent = kos.nama;
@@ -526,7 +529,7 @@ export default function Map() {
       metaRow.style.display = "flex";
       metaRow.style.flexWrap = "wrap";
       metaRow.style.gap = "6px";
-      metaRow.style.marginBottom = "10px";
+      metaRow.style.marginBottom = "8px";
 
       const acChip = createChip(kos.ac_status === "ac" ? "🧊 AC" : "Non-AC", {
         backgroundColor: kos.ac_status === "ac" ? "#e0f2fe" : "#f1f5f9",
@@ -546,7 +549,7 @@ export default function Map() {
 
       // Alamat
       const alamatSection = document.createElement("div");
-      alamatSection.style.marginBottom = "10px";
+      alamatSection.style.marginBottom = "8px";
       const alamatText = document.createElement("div");
       alamatText.textContent = `📍 ${kos.alamat || "Alamat tidak tersedia"}`;
       alamatText.style.fontSize = "12px";
@@ -566,7 +569,7 @@ export default function Map() {
 
       // Harga
       const hargaSection = document.createElement("div");
-      hargaSection.style.marginBottom = "10px";
+      hargaSection.style.marginBottom = "8px";
       const hargaLabel = createSectionLabel("Harga");
       hargaSection.appendChild(hargaLabel);
 
@@ -616,33 +619,25 @@ export default function Map() {
       }
       hargaSection.appendChild(hargaTags);
 
-      // Fasilitas
+      // Fasilitas (raw)
       const fasilitasSection = document.createElement("div");
-      fasilitasSection.style.marginBottom = "10px";
+      fasilitasSection.style.marginBottom = "8px";
       const fasilitasLabel = createSectionLabel("Fasilitas");
       fasilitasSection.appendChild(fasilitasLabel);
 
-      const fasilitasChips = document.createElement("div");
-      fasilitasChips.style.display = "flex";
-      fasilitasChips.style.flexWrap = "wrap";
-      fasilitasChips.style.gap = "5px";
-
-      if (kos.fasilitas) {
-        kos.fasilitas.split(",").map((s) => s.trim()).filter(Boolean).forEach((f) => {
-          fasilitasChips.appendChild(createChip(f));
-        });
-      } else {
-        const empty = document.createElement("span");
-        empty.textContent = "-";
-        empty.style.fontSize = "12px";
-        empty.style.color = "#7a8a70";
-        fasilitasChips.appendChild(empty);
-      }
-      fasilitasSection.appendChild(fasilitasChips);
+      const fasilitasText = document.createElement("div");
+      fasilitasText.textContent = kos.fasilitas || "-";
+      fasilitasText.style.fontSize = "12px";
+      fasilitasText.style.color = "#4a5a45";
+      fasilitasText.style.lineHeight = "1.45";
+      fasilitasText.style.backgroundColor = "#f0f4eb";
+      fasilitasText.style.padding = "6px 8px";
+      fasilitasText.style.borderRadius = "8px";
+      fasilitasSection.appendChild(fasilitasText);
 
       // Peraturan
       const peraturanSection = document.createElement("div");
-      peraturanSection.style.marginBottom = "10px";
+      peraturanSection.style.marginBottom = "8px";
       const peraturanLabel = createSectionLabel("Peraturan");
       peraturanSection.appendChild(peraturanLabel);
 
@@ -655,59 +650,31 @@ export default function Map() {
 
       // Kontak
       const kontakSection = document.createElement("div");
-      kontakSection.style.marginTop = "12px";
+      kontakSection.style.marginTop = "10px";
       const parsedContact = parseContact(kos.narahubung);
 
       if (parsedContact.href) {
-        const waBtn = document.createElement("a");
-        waBtn.href = parsedContact.href;
-        waBtn.target = "_blank";
-        waBtn.rel = "noopener noreferrer";
-        waBtn.style.display = "flex";
-        waBtn.style.alignItems = "center";
-        waBtn.style.justifyContent = "center";
-        waBtn.style.gap = "8px";
-        waBtn.style.width = "100%";
-        waBtn.style.padding = "10px 12px";
-        waBtn.style.border = "none";
-        waBtn.style.borderRadius = "12px";
-        waBtn.style.background = "linear-gradient(135deg, #9CAF88 0%, #829AB1 100%)";
-        waBtn.style.color = "#ffffff";
-        waBtn.style.fontWeight = "700";
-        waBtn.style.fontSize = "13px";
-        waBtn.style.textDecoration = "none";
-        waBtn.style.cursor = "pointer";
-        waBtn.style.transition = "transform 180ms ease, box-shadow 180ms ease, filter 180ms ease";
-        waBtn.textContent = `💬 Hubungi ${kos.narahubung_nama || "Pemilik"}`;
-
-        waBtn.onmouseenter = () => {
-          waBtn.style.transform = "translateY(-1px)";
-          waBtn.style.boxShadow = "0 10px 20px rgba(130, 154, 177, 0.32)";
-          waBtn.style.filter = "saturate(1.05)";
-        };
-        waBtn.onmouseleave = () => {
-          waBtn.style.transform = "translateY(0)";
-          waBtn.style.boxShadow = "none";
-          waBtn.style.filter = "none";
-        };
-
-        kontakSection.appendChild(waBtn);
+        const waLink = document.createElement("a");
+        waLink.href = parsedContact.href;
+        waLink.target = "_blank";
+        waLink.rel = "noopener noreferrer";
+        waLink.textContent = parsedContact.label || kos.narahubung;
+        waLink.style.color = "#2563eb";
+        waLink.style.fontSize = "12px";
+        waLink.style.textDecoration = "underline";
+        kontakSection.appendChild(waLink);
       } else {
-        const fallback = document.createElement("div");
+        const fallback = document.createElement("span");
         fallback.textContent = parsedContact.label;
-        fallback.style.fontSize = "13px";
+        fallback.style.fontSize = "12px";
         fallback.style.color = "#64748b";
-        fallback.style.textAlign = "center";
-        fallback.style.padding = "8px";
-        fallback.style.backgroundColor = "#f8fafc";
-        fallback.style.borderRadius = "10px";
         kontakSection.appendChild(fallback);
       }
 
       // Route section
       const routeSection = document.createElement("div");
-      routeSection.style.marginTop = "12px";
-      routeSection.style.paddingTop = "12px";
+      routeSection.style.marginTop = "10px";
+      routeSection.style.paddingTop = "10px";
       routeSection.style.borderTop = "1px dashed #c4d1bc";
 
       const routeLabel = document.createElement("div");
@@ -755,65 +722,27 @@ export default function Map() {
       const routeButton = document.createElement("button");
       routeButton.type = "button";
       routeButton.textContent = "Tampilkan Rute";
-      routeButton.style.width = "100%";
-      routeButton.style.padding = "10px 12px";
-      routeButton.style.border = "none";
-      routeButton.style.borderRadius = "11px";
-      routeButton.style.background = "linear-gradient(140deg, #829AB1 0%, #9CAF88 100%)";
-      routeButton.style.color = "#ffffff";
+      routeButton.style.padding = "6px 12px";
+      routeButton.style.border = "1px solid #bfc9d6";
+      routeButton.style.borderRadius = "6px";
+      routeButton.style.backgroundColor = "#ffffff";
+      routeButton.style.color = "#334155";
       routeButton.style.cursor = "pointer";
-      routeButton.style.fontWeight = "600";
-      routeButton.style.fontSize = "13px";
-      routeButton.style.transition = "transform 180ms ease, box-shadow 180ms ease, filter 180ms ease";
-
-      routeButton.onmouseenter = () => {
-        if (routeButton.disabled) return;
-        routeButton.style.transform = "translateY(-1px)";
-        routeButton.style.boxShadow = "0 10px 20px rgba(130, 154, 177, 0.32)";
-        routeButton.style.filter = "saturate(1.05)";
-      };
-      routeButton.onmouseleave = () => {
-        routeButton.style.transform = "translateY(0)";
-        routeButton.style.boxShadow = "none";
-        routeButton.style.filter = "none";
-      };
-      routeButton.onfocus = () => {
-        routeButton.style.boxShadow = "0 0 0 3px rgba(130, 154, 177, 0.3)";
-      };
-      routeButton.onblur = () => {
-        routeButton.style.boxShadow = "none";
-      };
+      routeButton.style.fontWeight = "500";
+      routeButton.style.fontSize = "12px";
 
       const clearRouteButton = document.createElement("button");
       clearRouteButton.type = "button";
       clearRouteButton.textContent = "Hapus Rute";
-      clearRouteButton.style.width = "100%";
-      clearRouteButton.style.padding = "10px 12px";
-      clearRouteButton.style.marginTop = "6px";
-      clearRouteButton.style.border = "1px solid #d9b8a8";
-      clearRouteButton.style.borderRadius = "11px";
-      clearRouteButton.style.backgroundColor = "#f6e9e1";
-      clearRouteButton.style.color = "#67473a";
+      clearRouteButton.style.padding = "6px 12px";
+      clearRouteButton.style.marginLeft = "6px";
+      clearRouteButton.style.border = "1px solid #e2e8f0";
+      clearRouteButton.style.borderRadius = "6px";
+      clearRouteButton.style.backgroundColor = "#f8fafc";
+      clearRouteButton.style.color = "#64748b";
       clearRouteButton.style.cursor = "pointer";
-      clearRouteButton.style.fontSize = "13px";
-      clearRouteButton.style.fontWeight = "600";
-      clearRouteButton.style.transition = "transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease";
-
-      clearRouteButton.onmouseenter = () => {
-        if (clearRouteButton.disabled) return;
-        clearRouteButton.style.transform = "translateY(-1px)";
-        clearRouteButton.style.backgroundColor = "#f2dfd4";
-      };
-      clearRouteButton.onmouseleave = () => {
-        clearRouteButton.style.transform = "translateY(0)";
-        clearRouteButton.style.backgroundColor = "#f6e9e1";
-      };
-      clearRouteButton.onfocus = () => {
-        clearRouteButton.style.boxShadow = "0 0 0 3px rgba(217, 174, 148, 0.3)";
-      };
-      clearRouteButton.onblur = () => {
-        clearRouteButton.style.boxShadow = "none";
-      };
+      clearRouteButton.style.fontSize = "12px";
+      clearRouteButton.style.fontWeight = "500";
 
       const routeResult = document.createElement("div");
       routeResult.style.marginTop = "8px";
