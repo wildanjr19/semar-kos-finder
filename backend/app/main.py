@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -7,12 +8,26 @@ from app.db import init_db, close_db, is_ready
 from app.routers import admin_actions, admin_kos, admin_master_uns, auth, kos, master_uns
 
 
+async def _cleanup_loop() -> None:
+    """Periodic cleanup of old parse jobs every 10 minutes."""
+    while True:
+        await asyncio.sleep(600)
+        from app.job_queue import cleanup_old_jobs
+        cleanup_old_jobs()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    cleanup_task = asyncio.create_task(_cleanup_loop())
     try:
         yield
     finally:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            pass
         await close_db()
 
 

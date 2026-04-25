@@ -399,6 +399,54 @@
   color: var(--text-secondary);
 }
 
+.badgeRaw {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.badgeParsed {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.badgeReviewed {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.badgeRejected {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.statusFilter {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusFilterItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+
+.statusFilterItem:hover {
+  border-color: var(--accent);
+}
+
+.statusFilterItem input {
+  margin: 0;
+}
+
 .editBtn {
   color: var(--accent);
   text-decoration: none;

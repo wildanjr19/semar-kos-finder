@@ -23,6 +23,42 @@ type RouteApiResponse = {
   encodedPolyline: string;
 };
 
+type HargaItem = {
+  min: number;
+  max: number;
+  periode: string;
+  tipe_kamar: string | null;
+  catatan: string | null;
+};
+
+type FasilitasCleaned = {
+  dalam_kamar: string[];
+  bersama: string[];
+  utilitas: string[];
+  catatan: string;
+};
+
+type PeraturanCleaned = {
+  jam_malam: string | null;
+  tamu_lawan_jenis: string | null;
+  tamu_menginap: boolean | null;
+  boleh_hewan: boolean | null;
+  lainnya: string[];
+};
+
+type KontakItem = {
+  nama: string;
+  nomor_wa: string;
+  url_wa: string;
+};
+
+type KosClean = {
+  harga: HargaItem[];
+  fasilitas: FasilitasCleaned;
+  peraturan: PeraturanCleaned;
+  kontak: KontakItem[];
+};
+
 type Kos = {
   id: string;
   nama: string;
@@ -38,6 +74,7 @@ type Kos = {
   narahubung_nama: string;
   ac_status: string;
   tipe_pembayaran: string[];
+  parsed_data?: KosClean | null;
 };
 
 type RawKos = {
@@ -54,7 +91,12 @@ type RawKos = {
   long?: string | number;
   ac_status?: string;
   tipe_pembayaran?: string[] | null;
+  parsed_data?: KosClean | null;
 };
+
+function isCleanData(kos: Kos): boolean {
+  return kos.parsed_data != null;
+}
 
 function toNumber(value: string | number | undefined): number {
   if (typeof value === "number") return value;
@@ -410,6 +452,7 @@ export default function Map() {
               narahubung_nama: narahubung_nama || (contactParsed.href ? contactParsed.label : ""),
               ac_status: String(item.ac_status ?? "non_ac"),
               tipe_pembayaran: Array.isArray(item.tipe_pembayaran) ? item.tipe_pembayaran : [],
+              parsed_data: item.parsed_data ?? null,
             };
           })
           .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lon));
@@ -579,7 +622,35 @@ export default function Map() {
       hargaTags.style.flexWrap = "wrap";
       hargaTags.style.gap = "6px";
 
-      if (kos.harga && kos.harga !== "-") {
+      if (isCleanData(kos) && kos.parsed_data) {
+        const clean = kos.parsed_data;
+        if (clean.harga.length > 0) {
+          clean.harga.forEach((h) => {
+            const tag = document.createElement("span");
+            const tipe = h.tipe_kamar ? `${h.tipe_kamar} · ` : "";
+            tag.textContent = `${tipe}Rp ${h.min.toLocaleString()}${h.min !== h.max ? ` - ${h.max.toLocaleString()}` : ""} / ${h.periode}`;
+            tag.style.display = "inline-block";
+            tag.style.padding = "6px 10px";
+            tag.style.borderRadius = "8px";
+            tag.style.fontSize = "12px";
+            tag.style.fontWeight = "600";
+            tag.style.backgroundColor = "#ecf2e8";
+            tag.style.color = "#3a4a35";
+            hargaTags.appendChild(tag);
+          });
+        } else {
+          const tag = document.createElement("span");
+          tag.textContent = "Harga belum tersedia";
+          tag.style.display = "inline-block";
+          tag.style.padding = "6px 10px";
+          tag.style.borderRadius = "8px";
+          tag.style.fontSize = "12px";
+          tag.style.fontWeight = "600";
+          tag.style.backgroundColor = "#f1f5f9";
+          tag.style.color = "#64748b";
+          hargaTags.appendChild(tag);
+        }
+      } else if (kos.harga && kos.harga !== "-") {
         const parts = kos.harga.split(";").map((s) => s.trim()).filter(Boolean);
         if (parts.length > 0) {
           parts.forEach((part) => {
@@ -620,21 +691,41 @@ export default function Map() {
       }
       hargaSection.appendChild(hargaTags);
 
-      // Fasilitas (raw)
+      // Fasilitas
       const fasilitasSection = document.createElement("div");
       fasilitasSection.style.marginBottom = "8px";
       const fasilitasLabel = createSectionLabel("Fasilitas");
       fasilitasSection.appendChild(fasilitasLabel);
 
-      const fasilitasText = document.createElement("div");
-      fasilitasText.textContent = kos.fasilitas || "-";
-      fasilitasText.style.fontSize = "12px";
-      fasilitasText.style.color = "#4a5a45";
-      fasilitasText.style.lineHeight = "1.45";
-      fasilitasText.style.backgroundColor = "#f0f4eb";
-      fasilitasText.style.padding = "6px 8px";
-      fasilitasText.style.borderRadius = "8px";
-      fasilitasSection.appendChild(fasilitasText);
+      if (isCleanData(kos) && kos.parsed_data) {
+        const f = kos.parsed_data.fasilitas;
+        const fasilitasWrap = document.createElement("div");
+        fasilitasWrap.style.display = "flex";
+        fasilitasWrap.style.flexWrap = "wrap";
+        fasilitasWrap.style.gap = "4px";
+        f.dalam_kamar.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
+        f.bersama.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
+        f.utilitas.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
+        if (f.catatan) {
+          const note = document.createElement("div");
+          note.textContent = f.catatan;
+          note.style.fontSize = "11px";
+          note.style.color = "#7a8a70";
+          note.style.marginTop = "4px";
+          fasilitasWrap.appendChild(note);
+        }
+        fasilitasSection.appendChild(fasilitasWrap);
+      } else {
+        const fasilitasText = document.createElement("div");
+        fasilitasText.textContent = kos.fasilitas || "-";
+        fasilitasText.style.fontSize = "12px";
+        fasilitasText.style.color = "#4a5a45";
+        fasilitasText.style.lineHeight = "1.45";
+        fasilitasText.style.backgroundColor = "#f0f4eb";
+        fasilitasText.style.padding = "6px 8px";
+        fasilitasText.style.borderRadius = "8px";
+        fasilitasSection.appendChild(fasilitasText);
+      }
 
       // Peraturan
       const peraturanSection = document.createElement("div");
@@ -642,34 +733,79 @@ export default function Map() {
       const peraturanLabel = createSectionLabel("Peraturan");
       peraturanSection.appendChild(peraturanLabel);
 
-      const peraturanText = document.createElement("div");
-      peraturanText.textContent = kos.peraturan || "-";
-      peraturanText.style.fontSize = "12px";
-      peraturanText.style.color = "#4a5a45";
-      peraturanText.style.lineHeight = "1.45";
-      peraturanSection.appendChild(peraturanText);
+      if (isCleanData(kos) && kos.parsed_data) {
+        const p = kos.parsed_data.peraturan;
+        const peraturanWrap = document.createElement("div");
+        peraturanWrap.style.display = "flex";
+        peraturanWrap.style.flexWrap = "wrap";
+        peraturanWrap.style.gap = "4px";
+        if (p.jam_malam) peraturanWrap.appendChild(createChip(`⏰ ${p.jam_malam}`));
+        if (p.tamu_lawan_jenis) peraturanWrap.appendChild(createChip(`👫 ${p.tamu_lawan_jenis}`));
+        if (p.tamu_menginap === true) peraturanWrap.appendChild(createChip("🛏 Tamu menginap"));
+        if (p.boleh_hewan === true) peraturanWrap.appendChild(createChip("🐕 Hewan diizinkan"));
+        p.lainnya.forEach((r) => peraturanWrap.appendChild(createChip(r)));
+        if (peraturanWrap.childNodes.length === 0) {
+          peraturanWrap.textContent = "-";
+          peraturanWrap.style.fontSize = "12px";
+          peraturanWrap.style.color = "#4a5a45";
+        }
+        peraturanSection.appendChild(peraturanWrap);
+      } else {
+        const peraturanText = document.createElement("div");
+        peraturanText.textContent = kos.peraturan || "-";
+        peraturanText.style.fontSize = "12px";
+        peraturanText.style.color = "#4a5a45";
+        peraturanText.style.lineHeight = "1.45";
+        peraturanSection.appendChild(peraturanText);
+      }
 
       // Kontak
       const kontakSection = document.createElement("div");
       kontakSection.style.marginTop = "10px";
-      const parsedContact = parseContact(kos.narahubung);
 
-      if (parsedContact.href) {
-        const waLink = document.createElement("a");
-        waLink.href = parsedContact.href;
-        waLink.target = "_blank";
-        waLink.rel = "noopener noreferrer";
-        waLink.textContent = parsedContact.label || kos.narahubung;
-        waLink.style.color = "#2563eb";
-        waLink.style.fontSize = "12px";
-        waLink.style.textDecoration = "underline";
-        kontakSection.appendChild(waLink);
+      if (isCleanData(kos) && kos.parsed_data) {
+        const kontakWrap = document.createElement("div");
+        kontakWrap.style.display = "flex";
+        kontakWrap.style.flexDirection = "column";
+        kontakWrap.style.gap = "4px";
+        kos.parsed_data.kontak.forEach((k) => {
+          const waLink = document.createElement("a");
+          waLink.href = k.url_wa;
+          waLink.target = "_blank";
+          waLink.rel = "noopener noreferrer";
+          waLink.textContent = `${k.nama || "Kontak"} — ${k.nomor_wa}`;
+          waLink.style.color = "#2563eb";
+          waLink.style.fontSize = "12px";
+          waLink.style.textDecoration = "underline";
+          kontakWrap.appendChild(waLink);
+        });
+        if (kos.parsed_data.kontak.length === 0) {
+          const fallback = document.createElement("span");
+          fallback.textContent = "-";
+          fallback.style.fontSize = "12px";
+          fallback.style.color = "#64748b";
+          kontakWrap.appendChild(fallback);
+        }
+        kontakSection.appendChild(kontakWrap);
       } else {
-        const fallback = document.createElement("span");
-        fallback.textContent = parsedContact.label;
-        fallback.style.fontSize = "12px";
-        fallback.style.color = "#64748b";
-        kontakSection.appendChild(fallback);
+        const parsedContact = parseContact(kos.narahubung);
+        if (parsedContact.href) {
+          const waLink = document.createElement("a");
+          waLink.href = parsedContact.href;
+          waLink.target = "_blank";
+          waLink.rel = "noopener noreferrer";
+          waLink.textContent = parsedContact.label || kos.narahubung;
+          waLink.style.color = "#2563eb";
+          waLink.style.fontSize = "12px";
+          waLink.style.textDecoration = "underline";
+          kontakSection.appendChild(waLink);
+        } else {
+          const fallback = document.createElement("span");
+          fallback.textContent = parsedContact.label;
+          fallback.style.fontSize = "12px";
+          fallback.style.color = "#64748b";
+          kontakSection.appendChild(fallback);
+        }
       }
 
       // Route section
