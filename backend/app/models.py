@@ -115,3 +115,63 @@ class Kos(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     model_config = {"populate_by_name": True}
+
+
+class MasterUnsCreate(BaseModel):
+    id: str
+    nama: str
+    lat: float
+    lon: float
+
+    @field_validator("lat", mode="before")
+    @classmethod
+    def _parse_lat(cls, v):
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError("lat must be a valid number")
+        return v
+
+    @field_validator("lon", mode="before")
+    @classmethod
+    def _parse_lon(cls, v):
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError("lon must be a valid number")
+        return v
+
+
+class MasterUnsUpdate(BaseModel):
+    nama: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+
+    @field_validator("lat", mode="before")
+    @classmethod
+    def _parse_lat(cls, v):
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError("lat must be a valid number")
+        return v
+
+    @field_validator("lon", mode="before")
+    @classmethod
+    def _parse_lon(cls, v):
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                raise ValueError("lon must be a valid number")
+        return v
+
+
+class MasterUnsOut(BaseModel):
+    id: str
+    nama: str
+    lat: float
+    lon: float
