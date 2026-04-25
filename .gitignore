@@ -32,6 +32,7 @@ htmlcov/
 **/node_modules/
 **/.next/
 **/out/
+**/*.tsbuildinfo
 
 # --- Sensitive Data ---
 .env
