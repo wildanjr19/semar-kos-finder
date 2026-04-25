@@ -112,7 +112,7 @@ jobs:
             docker compose -f compose.yaml --profile production pull
             docker compose -f compose.yaml --profile production up -d
 
-            docker image prune -af --filter "until=24h"
+            docker image prune -a --force --filter "until=24h"
             docker logout ghcr.io
 
       - name: Health check production web
