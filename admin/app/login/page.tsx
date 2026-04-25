@@ -22,8 +22,8 @@ export default function Login() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Login failed' }));
-        throw new Error(data.error || 'Login failed');
+        const data = await res.json().catch(() => ({ detail: { error: 'Login failed' } }));
+        throw new Error(data.detail?.error || 'Login failed');
       }
       window.location.href = '/kos';
     } catch (e) {
@@ -37,6 +37,7 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>Admin Login</h1>
+        <p className={styles.subtitle}>Kos Finder Dashboard</p>
         {error && <div className={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>

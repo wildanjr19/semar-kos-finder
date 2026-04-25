@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class GeoJSONPoint(BaseModel):
@@ -11,6 +11,39 @@ class GeoJSONPoint(BaseModel):
     coordinates: list[float] = Field(
         min_length=2, max_length=2, description="[lon, lat]"
     )
+
+
+class KosBulkItem(BaseModel):
+    No: str | None = None
+    Nama_kos: str = Field(alias="Nama kos")
+    Jenis_kos: str = Field(alias="Jenis kos", default="Tidak diketahui")
+    Alamat: str = ""
+    Plus_Code: str = ""
+    Harga: str = ""
+    Fasilitas: str = ""
+    Peraturan: str = ""
+    Narahubung: str = ""
+    lat: float | None = None
+    long: float | None = None
+    ac_status: str = ""
+    tipe_pembayaran: list[str] | None = None
+
+    model_config = {"populate_by_name": True}
+
+    @field_validator("lat", "long", mode="before")
+    @classmethod
+    def _parse_float(cls, v):
+        if isinstance(v, str):
+            try:
+                return float(v)
+            except ValueError:
+                return None
+        return v
+
+
+class KosBulkCreate(BaseModel):
+    items: list[KosBulkItem]
+    id_strategy: Literal["parse_json", "auto_increment"] = "auto_increment"
 
 
 class KosCreate(BaseModel):
@@ -25,6 +58,8 @@ class KosCreate(BaseModel):
     narahubung_nama: str = ""
     lat: float
     lon: float
+    ac_status: str = ""
+    tipe_pembayaran: list[str] | None = None
 
 
 class KosUpdate(BaseModel):
@@ -39,6 +74,8 @@ class KosUpdate(BaseModel):
     narahubung_nama: str | None = None
     lat: float | None = None
     lon: float | None = None
+    ac_status: str | None = None
+    tipe_pembayaran: list[str] | None = None
 
 
 class KosOut(BaseModel):
@@ -54,6 +91,8 @@ class KosOut(BaseModel):
     narahubung_nama: str = ""
     lat: float
     long: float
+    ac_status: str = ""
+    tipe_pembayaran: list[str] | None = None
 
 
 class Kos(BaseModel):
@@ -69,6 +108,8 @@ class Kos(BaseModel):
     narahubung_nama: str = ""
     lat: float
     lon: float
+    ac_status: str = ""
+    tipe_pembayaran: list[str] | None = None
     source_id: str = ""
     location: GeoJSONPoint | None = None
     updated_at: datetime = Field(default_factory=datetime.utcnow)

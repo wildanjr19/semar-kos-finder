@@ -92,6 +92,15 @@ def _parse_row(row: dict) -> dict | None:
     mapped["location"] = {"type": "Point", "coordinates": [mapped["lon"], mapped["lat"]]}
     mapped["updated_at"] = datetime.now(timezone.utc)
 
+    # Parse ac_status and tipe_pembayaran from raw JSON row
+    ac_status = row.get("ac_status", "")
+    mapped["ac_status"] = str(ac_status).strip() if isinstance(ac_status, str) else ""
+    tipe_pembayaran = row.get("tipe_pembayaran")
+    if isinstance(tipe_pembayaran, list):
+        mapped["tipe_pembayaran"] = [str(v).strip() for v in tipe_pembayaran if v]
+    else:
+        mapped["tipe_pembayaran"] = None
+
     mapped.pop("_id", None)
     return mapped
 
