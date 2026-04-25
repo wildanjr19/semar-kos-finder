@@ -37,6 +37,7 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>Admin Login</h1>
+        <p className={styles.subtitle}>Kos Finder Dashboard</p>
         {error && <div className={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>

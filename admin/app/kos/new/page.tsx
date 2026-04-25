@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation';
 import styles from './new.module.css';
 
 const JENIS_OPTIONS = ['Putra', 'Putri', 'Campuran', 'Tidak diketahui'] as const;
+const AC_OPTIONS = ['ac', 'non_ac', 'keduanya'] as const;
+const PEMBAYARAN_OPTIONS = ['bulanan', 'semesteran', 'tahunan', 'per3bulan', 'mingguan'] as const;
 
 export default function KosNew() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [tipePembayaran, setTipePembayaran] = useState<string[]>([]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,6 +32,8 @@ export default function KosNew() {
       narahubung_nama: form.get('narahubung_nama') as string,
       lat: parseFloat(form.get('lat') as string),
       lon: parseFloat(form.get('long') as string),
+      ac_status: form.get('ac_status') as string,
+      tipe_pembayaran: tipePembayaran.length > 0 ? tipePembayaran : null,
     };
 
     if (!body.nama || isNaN(body.lat) || isNaN(body.lon)) {
@@ -59,7 +64,7 @@ export default function KosNew() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>Add Kos</h1>
-        <a href="/kos" className={styles.outlineButton}>Back to List</a>
+        <a href="/kos" className={styles.ghostButton}>Back to List</a>
       </header>
 
       {error && <div className={styles.error}>{error}</div>}
@@ -90,6 +95,35 @@ export default function KosNew() {
         <div className={styles.field}>
           <label htmlFor="harga">Harga</label>
           <input type="text" id="harga" name="harga" placeholder="e.g. 1.500.000/bulan" />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="ac_status">AC Status</label>
+          <select id="ac_status" name="ac_status" defaultValue="">
+            <option value="">—</option>
+            {AC_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </div>
+
+        <div className={styles.field}>
+          <label>Tipe Pembayaran</label>
+          <div className={styles.checkboxGroup}>
+            {PEMBAYARAN_OPTIONS.map((o) => (
+              <label key={o} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  value={o}
+                  checked={tipePembayaran.includes(o)}
+                  onChange={(e) => {
+                    setTipePembayaran((prev) =>
+                      e.target.checked ? [...prev, o] : prev.filter((x) => x !== o)
+                    );
+                  }}
+                />
+                {o}
+              </label>
+            ))}
+          </div>
         </div>
 
         <div className={styles.field}>

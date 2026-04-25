@@ -25,8 +25,8 @@ type Kos = {
   alamat: string;
   plus_code: string;
   harga: Harga;
-  fasilitas: string[];
-  peraturan: string[];
+  fasilitas: string;
+  peraturan: string;
   narahubung: string;
   narahubung_nama: string;
 };
@@ -39,18 +39,19 @@ type Destination = {
 };
 
 type RawKos = {
-  id?: string;
-  nama?: string;
-  jenis_kos?: string;
-  alamat?: string;
-  plus_code?: string;
-  harga?: string;
-  fasilitas?: string;
-  peraturan?: string;
-  narahubung?: string;
-  narahubung_nama?: string;
+  No?: string;
+  "Nama kos"?: string;
+  "Jenis kos"?: string;
+  Alamat?: string;
+  Plus_Code?: string;
+  Harga?: string;
+  Fasilitas?: string;
+  Peraturan?: string;
+  Narahubung?: string;
   lat?: string | number;
   long?: string | number;
+  ac_status?: string;
+  tipe_pembayaran?: string[] | null;
 };
 
 type RawDestination = {
@@ -360,7 +361,7 @@ export default function Map() {
         const arr = Array.isArray(res) ? res : [];
         const mapped: Kos[] = arr
           .map((item: any) => {
-            const hargaRaw = item.harga;
+            const hargaRaw = item.Harga;
             let harga: Harga;
             if (typeof hargaRaw === "string") {
               harga = { raw: hargaRaw, variants: [] };
@@ -370,29 +371,19 @@ export default function Map() {
               harga = { raw: "-", variants: [] };
             }
 
-            const fasilitasStr = String(item.fasilitas ?? "");
-            const fasilitasArr = fasilitasStr
-              ? fasilitasStr.split(",").map((s: string) => s.trim()).filter(Boolean)
-              : [];
-
-            const peraturanStr = String(item.peraturan ?? "");
-            const peraturanArr = peraturanStr
-              ? peraturanStr.split(",").map((s: string) => s.trim()).filter(Boolean)
-              : [];
-
             return {
-              id: String(item.id ?? ""),
-              nama: String(item.nama ?? "Tanpa Nama"),
-              jenis: String(item.jenis_kos ?? "Tidak diketahui"),
-              alamat: String(item.alamat ?? ""),
-              plus_code: String(item.plus_code ?? ""),
+              id: String(item.No ?? ""),
+              nama: String(item["Nama kos"] ?? "Tanpa Nama"),
+              jenis: String(item["Jenis kos"] ?? "Tidak diketahui"),
+              alamat: String(item.Alamat ?? ""),
+              plus_code: String(item.Plus_Code ?? ""),
               lat: toNumber(item.lat),
               lon: toNumber(item.long),
               harga,
-              fasilitas: fasilitasArr,
-              peraturan: peraturanArr,
-              narahubung: String(item.narahubung ?? "-"),
-              narahubung_nama: String(item.narahubung_nama ?? ""),
+              fasilitas: String(item.Fasilitas ?? ""),
+              peraturan: String(item.Peraturan ?? ""),
+              narahubung: String(item.Narahubung ?? "-"),
+              narahubung_nama: "",
             };
           })
           .filter(
@@ -530,201 +521,141 @@ export default function Map() {
         return '';
       };
 
-      if (hasMultipleVariants) {
-        // Price range header
-        const prices = variants.map(v => getYearlyPrice(v)).filter(p => p > 0);
-        const minPrice = Math.min(...prices);
-        const maxPrice = Math.max(...prices);
+      if (variants.length === 0) {
+        const rawHarga = document.createElement("div");
+        rawHarga.style.fontSize = "13px";
+        rawHarga.style.color = "#324030";
+        rawHarga.style.fontWeight = "500";
+        rawHarga.style.padding = "6px 10px";
+        rawHarga.style.backgroundColor = "#ecf2e8";
+        rawHarga.style.borderRadius = "10px";
+        rawHarga.textContent = kos.harga.raw !== "-" ? `💰 ${kos.harga.raw}` : "Harga tidak tersedia";
+        hargaSection.appendChild(rawHarga);
+      } else {
+        if (hasMultipleVariants) {
+          // Price range header
+          const prices = variants.map(v => getYearlyPrice(v)).filter(p => p > 0);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
 
-        const priceRangeHeader = document.createElement("div");
-        priceRangeHeader.style.display = "flex";
-        priceRangeHeader.style.alignItems = "center";
-        priceRangeHeader.style.justifyContent = "space-between";
-        priceRangeHeader.style.padding = "6px 10px";
-        priceRangeHeader.style.marginBottom = "6px";
-        priceRangeHeader.style.borderRadius = "10px";
-        priceRangeHeader.style.backgroundColor = "#ecf2e8";
-        priceRangeHeader.style.color = "#324030";
-        priceRangeHeader.style.fontSize = "13px";
-        priceRangeHeader.style.gap = "8px";
+          const priceRangeHeader = document.createElement("div");
+          priceRangeHeader.style.display = "flex";
+          priceRangeHeader.style.alignItems = "center";
+          priceRangeHeader.style.justifyContent = "space-between";
+          priceRangeHeader.style.padding = "6px 10px";
+          priceRangeHeader.style.marginBottom = "6px";
+          priceRangeHeader.style.borderRadius = "10px";
+          priceRangeHeader.style.backgroundColor = "#ecf2e8";
+          priceRangeHeader.style.color = "#324030";
+          priceRangeHeader.style.fontSize = "13px";
+          priceRangeHeader.style.gap = "8px";
 
-        const priceLabel = document.createElement("span");
-        priceLabel.style.fontWeight = "600";
-        priceLabel.textContent = `💰 ${formatPrice(minPrice)} - ${formatPrice(maxPrice)}/tahun`;
-        priceLabel.style.whiteSpace = "nowrap";
+          const priceLabel = document.createElement("span");
+          priceLabel.style.fontWeight = "600";
+          priceLabel.textContent = `💰 ${formatPrice(minPrice)} - ${formatPrice(maxPrice)}/tahun`;
+          priceLabel.style.whiteSpace = "nowrap";
 
-        const variantCount = document.createElement("span");
-        variantCount.textContent = `${variants.length} opsi`;
-        variantCount.style.fontSize = "11px";
-        variantCount.style.opacity = "0.7";
+          const variantCount = document.createElement("span");
+          variantCount.textContent = `${variants.length} opsi`;
+          variantCount.style.fontSize = "11px";
+          variantCount.style.opacity = "0.7";
 
-        priceRangeHeader.append(priceLabel, variantCount);
-        hargaSection.appendChild(priceRangeHeader);
+          priceRangeHeader.append(priceLabel, variantCount);
+          hargaSection.appendChild(priceRangeHeader);
+        }
+
+        // Variant cards
+        variants.forEach((variant, idx) => {
+          const yearlyPrice = getYearlyPrice(variant);
+          if (yearlyPrice <= 0) return;
+
+          const isFirst = idx === 0;
+          const isBestValue = isFirst && variant.deskripsi && (
+            variant.deskripsi.toLowerCase().includes('ac') || 
+            variant.deskripsi.toLowerCase().includes('dalam')
+          );
+
+          const variantCard = document.createElement("div");
+          variantCard.style.padding = "6px 10px";
+          variantCard.style.marginBottom = "4px";
+          variantCard.style.borderRadius = "8px";
+          variantCard.style.fontSize = "12px";
+          variantCard.style.backgroundColor = isBestValue ? "#fef3c7" : "#f0f4eb";
+          variantCard.style.border = isBestValue 
+            ? "1px solid #f59e0b55" 
+            : "1px solid #d1d5db55";
+          variantCard.style.color = "#374151";
+          variantCard.style.position = "relative";
+
+          if (isBestValue) {
+            const badge = document.createElement("span");
+            badge.textContent = "⭐ Best Value";
+            badge.style.position = "absolute";
+            badge.style.top = "4px";
+            badge.style.right = "6px";
+            badge.style.fontSize = "9px";
+            badge.style.fontWeight = "700";
+            badge.style.color = "#92400e";
+            variantCard.appendChild(badge);
+          }
+
+          const variantLine1 = document.createElement("div");
+          variantLine1.style.display = "flex";
+          variantLine1.style.justifyContent = "space-between";
+          variantLine1.style.alignItems = "center";
+          variantLine1.style.fontWeight = isBestValue ? "700" : "500";
+
+          const variantName = document.createElement("span");
+          variantName.textContent = isBestValue ? `⭐ ${variant.deskripsi || 'Standard'}` : (variant.deskripsi || 'Standard');
+          variantName.style.flexShrink = "1";
+          variantName.style.marginRight = "8px";
+          variantName.style.color = isBestValue ? "#78350f" : "#1f2937";
+
+          const variantPrice = document.createElement("span");
+          variantPrice.textContent = `Rp ${formatPrice(yearlyPrice)}${getPeriodLabel(variant)}`;
+          variantPrice.style.fontWeight = "700";
+          variantPrice.style.color = isBestValue ? "#b45309" : "#047857";
+          variantPrice.style.whiteSpace = "nowrap";
+
+          variantLine1.append(variantName, variantPrice);
+
+          const variantLine2 = document.createElement("div");
+          variantLine2.style.fontSize = "10px";
+          variantLine2.style.color = "#6b7280";
+          variantLine2.style.marginTop = "2px";
+
+          if (variant.exclude && variant.exclude.length > 0) {
+            variantLine2.textContent = `* Tidak termasuk: ${variant.exclude.join(', ')}`;
+          } else if (isBestValue) {
+            variantLine2.textContent = "Termasuk semua fasilitas";
+          }
+
+          variantCard.appendChild(variantLine1);
+          if (variantLine2.textContent) {
+            variantCard.appendChild(variantLine2);
+          }
+
+          hargaSection.appendChild(variantCard);
+        });
       }
 
-      // Variant cards
-      variants.forEach((variant, idx) => {
-        const yearlyPrice = getYearlyPrice(variant);
-        if (yearlyPrice <= 0) return;
-
-        const isFirst = idx === 0;
-        const isBestValue = isFirst && variant.deskripsi && (
-          variant.deskripsi.toLowerCase().includes('ac') || 
-          variant.deskripsi.toLowerCase().includes('dalam')
-        );
-
-        const variantCard = document.createElement("div");
-        variantCard.style.padding = "6px 10px";
-        variantCard.style.marginBottom = "4px";
-        variantCard.style.borderRadius = "8px";
-        variantCard.style.fontSize = "12px";
-        variantCard.style.backgroundColor = isBestValue ? "#fef3c7" : "#f0f4eb";
-        variantCard.style.border = isBestValue 
-          ? "1px solid #f59e0b55" 
-          : "1px solid #d1d5db55";
-        variantCard.style.color = "#374151";
-        variantCard.style.position = "relative";
-
-        if (isBestValue) {
-          const badge = document.createElement("span");
-          badge.textContent = "⭐ Best Value";
-          badge.style.position = "absolute";
-          badge.style.top = "4px";
-          badge.style.right = "6px";
-          badge.style.fontSize = "9px";
-          badge.style.fontWeight = "700";
-          badge.style.color = "#92400e";
-          variantCard.appendChild(badge);
-        }
-
-        const variantLine1 = document.createElement("div");
-        variantLine1.style.display = "flex";
-        variantLine1.style.justifyContent = "space-between";
-        variantLine1.style.alignItems = "center";
-        variantLine1.style.fontWeight = isBestValue ? "700" : "500";
-
-        const variantName = document.createElement("span");
-        variantName.textContent = isBestValue ? `⭐ ${variant.deskripsi || 'Standard'}` : (variant.deskripsi || 'Standard');
-        variantName.style.flexShrink = "1";
-        variantName.style.marginRight = "8px";
-        variantName.style.color = isBestValue ? "#78350f" : "#1f2937";
-
-        const variantPrice = document.createElement("span");
-        variantPrice.textContent = `Rp ${formatPrice(yearlyPrice)}${getPeriodLabel(variant)}`;
-        variantPrice.style.fontWeight = "700";
-        variantPrice.style.color = isBestValue ? "#b45309" : "#047857";
-        variantPrice.style.whiteSpace = "nowrap";
-
-        variantLine1.append(variantName, variantPrice);
-
-        const variantLine2 = document.createElement("div");
-        variantLine2.style.fontSize = "10px";
-        variantLine2.style.color = "#6b7280";
-        variantLine2.style.marginTop = "2px";
-
-        if (variant.exclude && variant.exclude.length > 0) {
-          variantLine2.textContent = `* Tidak termasuk: ${variant.exclude.join(', ')}`;
-        } else if (isBestValue) {
-          variantLine2.textContent = "Termasuk semua fasilitas";
-        }
-
-        variantCard.appendChild(variantLine1);
-        if (variantLine2.textContent) {
-          variantCard.appendChild(variantLine2);
-        }
-
-        hargaSection.appendChild(variantCard);
-      });
-
-      // --- FASILITAS SECTION (Grouped Pills) ---
       const fasilitasSection = document.createElement("div");
       fasilitasSection.style.marginBottom = "8px";
 
       const fasilitasLabel = document.createElement("div");
       fasilitasLabel.textContent = "Fasilitas";
       fasilitasLabel.style.fontWeight = "600";
-      fasilitasLabel.style.marginBottom = "6px";
+      fasilitasLabel.style.marginBottom = "4px";
       fasilitasLabel.style.fontSize = "12px";
       fasilitasLabel.style.color = "#475569";
       fasilitasSection.appendChild(fasilitasLabel);
 
-      const groupedFasilitas: Record<string, string[]> = {
-        "Kamar": [],
-        "KM": [],
-        "AC & Pendingin": [],
-        "Umum": [],
-      };
-
-      const categoryKeywords: Record<string, string[]> = {
-        "Kamar": ["kasur", "lemari", "meja belajar", "meja", "tempat tidur"],
-        "KM": ["kamar mandi"],
-        "AC & Pendingin": ["ac", "kulkas"],
-        "Umum": ["listrik", "air", "dapur", "wifi", "internet", "jemuran", "parkir"],
-      };
-
-      kos.fasilitas.forEach((fasil) => {
-        const lower = fasil.toLowerCase();
-        let categorized = false;
-        for (const [category, keywords] of Object.entries(categoryKeywords)) {
-          if (keywords.some((kw) => lower.includes(kw))) {
-            groupedFasilitas[category].push(fasil);
-            categorized = true;
-            break;
-          }
-        }
-        if (!categorized) {
-          groupedFasilitas["Umum"].push(fasil);
-        }
-      });
-
-      const categoryStyles: Record<string, { bg: string; text: string; border: string }> = {
-        "Kamar": { bg: "#dcfce7", text: "#166534", border: "#86efac" },
-        "KM": { bg: "#dbeafe", text: "#1d4ed8", border: "#93c5fd" },
-        "AC & Pendingin": { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" },
-        "Umum": { bg: "#f3e8ff", text: "#6b21a8", border: "#d8b4fe" },
-      };
-
-      const allCategories = Object.entries(groupedFasilitas).filter(
-        ([_, items]) => items.length > 0
-      );
-
-      allCategories.forEach(([category, items]) => {
-        const categoryContainer = document.createElement("div");
-        categoryContainer.style.display = "flex";
-        categoryContainer.style.alignItems = "center";
-        categoryContainer.style.flexWrap = "wrap";
-        categoryContainer.style.gap = "4px";
-        categoryContainer.style.marginBottom = "5px";
-
-        const catStyle = categoryStyles[category];
-
-        const categoryBadge = document.createElement("span");
-        categoryBadge.textContent = category;
-        categoryBadge.style.padding = "2px 6px";
-        categoryBadge.style.borderRadius = "6px";
-        categoryBadge.style.fontSize = "9px";
-        categoryBadge.style.fontWeight = "700";
-        categoryBadge.style.backgroundColor = catStyle.bg;
-        categoryBadge.style.color = catStyle.text;
-        categoryBadge.style.border = `1px solid ${catStyle.border}`;
-        categoryBadge.style.whiteSpace = "nowrap";
-
-        categoryContainer.appendChild(categoryBadge);
-
-        items.forEach((item) => {
-          const pill = document.createElement("span");
-          pill.textContent = item;
-          pill.style.padding = "2px 8px";
-          pill.style.borderRadius = "6px";
-          pill.style.fontSize = "10px";
-          pill.style.backgroundColor = "#f0f4eb";
-          pill.style.color = "#374151";
-          pill.style.border = "1px solid #d1d5db";
-          categoryContainer.appendChild(pill);
-        });
-
-        fasilitasSection.appendChild(categoryContainer);
-      });
+      const fasilitasText = document.createElement("div");
+      fasilitasText.textContent = kos.fasilitas || "-";
+      fasilitasText.style.fontSize = "12px";
+      fasilitasText.style.color = "#374151";
+      fasilitasText.style.lineHeight = "1.45";
+      fasilitasSection.appendChild(fasilitasText);
 
       const kontak = document.createElement("div");
       kontak.style.marginTop = "8px";

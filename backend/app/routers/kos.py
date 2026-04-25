@@ -20,6 +20,8 @@ def _doc_to_kos(doc: dict) -> dict:
     doc["long"] = doc.pop("lon", 0.0)
     doc["plus_code"] = doc.get("plus_code", "")
     doc["narahubung_nama"] = doc.get("narahubung_nama", "")
+    doc["ac_status"] = doc.get("ac_status", "")
+    doc["tipe_pembayaran"] = doc.get("tipe_pembayaran", None)
     doc.pop("source_id", None)
     doc.pop("location", None)
     doc.pop("updated_at", None)
@@ -42,11 +44,10 @@ async def get_kos(kos_id: str) -> dict:
     """Return single kos by ID or 404."""
     from bson import ObjectId
 
-    if not ObjectId.is_valid(kos_id):
-        raise HTTPException(status_code=404, detail={"error": "Kos not found"})
+    _id = ObjectId(kos_id) if ObjectId.is_valid(kos_id) else kos_id
 
     coll = get_collection(COLLECTION)
-    doc = await coll.find_one({"_id": ObjectId(kos_id)})
+    doc = await coll.find_one({"_id": _id})
     if doc is None:
         raise HTTPException(status_code=404, detail={"error": "Kos not found"})
     return _doc_to_kos(doc)
