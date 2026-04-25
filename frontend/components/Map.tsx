@@ -420,10 +420,11 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    fetch("/data/master_uns.json")
+    fetch("/api/master-uns")
       .then((res) => res.json())
       .then((res: RawDestination[]) => {
-        const mapped = res
+        const arr = Array.isArray(res) ? res : [];
+        const mapped = arr
           .map((item) => ({
             id: item.id ?? "",
             nama: item.nama ?? "Tanpa Nama",

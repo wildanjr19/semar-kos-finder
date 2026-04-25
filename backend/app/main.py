@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.db import init_db, close_db, is_ready
-from app.routers import admin_actions, admin_kos, auth, kos, master_uns
+from app.routers import admin_actions, admin_kos, admin_master_uns, auth, kos, master_uns
 
 
 @asynccontextmanager
@@ -34,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_actions.router)
     app.include_router(auth.router)
     app.include_router(master_uns.router)
+    app.include_router(admin_master_uns.router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

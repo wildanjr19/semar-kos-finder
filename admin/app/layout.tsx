@@ -6,6 +6,56 @@ export const metadata = {
   description: 'Admin panel for Kos Finder',
 };
 
+function Nav() {
+  return (
+    <nav style={{
+      background: 'var(--surface)',
+      borderBottom: '1px solid var(--border)',
+      padding: '0.75rem 2rem',
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+    }}>
+      <div style={{
+        maxWidth: '1280px',
+        margin: '0 auto',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem',
+      }}>
+        <a href="/" style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: '1.25rem',
+          color: 'var(--text-primary)',
+          textDecoration: 'none',
+          fontWeight: 400,
+        }}>
+          UNSKosFinder
+        </a>
+        <div style={{ width: '1px', height: '20px', background: 'var(--border)' }} />
+        <a href="/kos" style={{
+          fontSize: '0.875rem',
+          color: 'var(--text-secondary)',
+          textDecoration: 'none',
+          fontWeight: 500,
+          padding: '0.375rem 0',
+          borderBottom: '2px solid transparent',
+          transition: 'all 0.2s ease',
+        }}>Kos</a>
+        <a href="/master-uns" style={{
+          fontSize: '0.875rem',
+          color: 'var(--text-secondary)',
+          textDecoration: 'none',
+          fontWeight: 500,
+          padding: '0.375rem 0',
+          borderBottom: '2px solid transparent',
+          transition: 'all 0.2s ease',
+        }}>Master UNS</a>
+      </div>
+    </nav>
+  );
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="id">
@@ -17,7 +67,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Nav />
+        {children}
+      </body>
     </html>
   );
 }
