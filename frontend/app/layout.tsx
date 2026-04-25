@@ -32,30 +32,44 @@ export default function RootLayout({ children }: RootLayoutProps) {
         }}
       >
         <style>{`
+          @keyframes kos-marker-pop {
+            0% { transform: scale(0) translateY(10px); opacity: 0; }
+            60% { transform: scale(1.15) translateY(-4px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+          }
+
+          @keyframes kos-popup-enter {
+            0% { transform: translateY(8px) scale(0.96); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+          }
+
           .maplibregl-popup.kos-popup .maplibregl-popup-content {
-            background: #f8fbf6;
+            background: transparent;
             padding: 0;
-            border-radius: 18px;
-            box-shadow: 0 10px 24px rgba(47, 63, 57, 0.16);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(47, 63, 57, 0.18);
+            animation: kos-popup-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
           }
 
           .maplibregl-popup.kos-popup .maplibregl-popup-close-button {
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
             border-radius: 999px;
             border: 1px solid rgba(130, 154, 177, 0.45);
             background: #ffffff;
             color: #334155;
             font-size: 16px;
             line-height: 20px;
-            transition: background-color 180ms ease, border-color 180ms ease;
+            transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+            z-index: 10;
           }
 
           .maplibregl-popup.kos-popup .maplibregl-popup-close-button:hover {
             background: #ffffff;
-            border-color: rgba(130, 154, 177, 0.8);
+            border-color: rgba(130, 154, 177, 0.9);
+            transform: scale(1.08);
           }
 
           .maplibregl-popup.kos-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip {

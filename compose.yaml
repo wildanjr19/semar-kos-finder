@@ -1,0 +1,468 @@
+name: semar-kos-finder
+
+services:
+  web_prod:
+    profiles: ["production"]
+    image: ghcr.io/wildanjr19/semar-kos-web:prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-3002}:3002"
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      API_INTERNAL_URL: "http://backend_prod:8000"
+    depends_on:
+      backend_prod:
+        condition: service_healthy
+    networks:
+      - semar_production
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache:uid=1000,gid=1000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3002,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  mongodb_prod:
+    profiles: ["production"]
+    image: mongo:7
+    volumes:
+      - mongo_production_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - semar_production
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  backend_prod:
+    profiles: ["production"]
+    image: ghcr.io/wildanjr19/semar-kos-backend:prod
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      mongodb_prod:
+        condition: service_healthy
+    networks:
+      - semar_production
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  admin_prod:
+    profiles: ["production"]
+    image: ghcr.io/wildanjr19/semar-kos-admin:prod
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.production
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3001,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      backend_prod:
+        condition: service_healthy
+    ports:
+      - "${ADMIN_PORT:-3005}:3001"
+    networks:
+      - semar_production
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  web_staging:
+    profiles: ["staging"]
+    image: ghcr.io/wildanjr19/semar-kos-web:staging
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-3003}:3002"
+    env_file:
+      - ./.env.staging
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      API_INTERNAL_URL: "http://backend_staging:8000"
+    networks:
+      - semar_staging
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3002,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      backend_staging:
+        condition: service_healthy
+
+  mongodb_staging:
+    profiles: ["staging"]
+    image: mongo:7
+    volumes:
+      - mongo_staging_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - semar_staging
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  backend_staging:
+    profiles: ["staging"]
+    image: ghcr.io/wildanjr19/semar-kos-backend:staging
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.staging
+    environment:
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      mongodb_staging:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    networks:
+      - semar_staging
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  admin_staging:
+    profiles: ["staging"]
+    image: ghcr.io/wildanjr19/semar-kos-admin:staging
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env.staging
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3001,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      backend_staging:
+        condition: service_healthy
+    ports:
+      - "${ADMIN_PORT:-3004}:3001"
+    networks:
+      - semar_staging
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  mongodb:
+    profiles: ["development"]
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - semar_dev
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  backend_dev:
+    profiles: ["development"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env.development
+    volumes:
+      - ./backend:/app
+      - ./frontend/public/data:/seed-data:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - semar_dev
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  admin_dev:
+    profiles: ["development"]
+    image: node:20-slim
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./.env.development
+    environment:
+      CHOKIDAR_USEPOLLING: "1"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./admin:/app
+      - admin_node_modules:/app/node_modules
+      - admin_next_cache:/app/.next
+    command: sh -lc "test -x node_modules/.bin/next || npm ci; npm run dev -- -p 3001 -H 0.0.0.0"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const net=require('net');const s=net.connect(3001,'127.0.0.1');s.on('connect',()=>process.exit(0));s.on('error',()=>process.exit(1));"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      backend_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  web_dev:
+    profiles: ["development"]
+    image: node:20-slim
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env.development
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      CHOKIDAR_USEPOLLING: "1"
+      WATCHPACK_POLLING: "true"
+      API_INTERNAL_URL: "http://backend_dev:8000"
+    volumes:
+      - ./frontend:/app
+      - dev_node_modules:/app/node_modules
+      - dev_next_cache:/app/.next
+    command: >
+      sh -lc "test -x node_modules/.bin/next || npm ci; npm run dev -- -p 3000 -H 0.0.0.0"
+    depends_on:
+      backend_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  admin_e2e:
+    profiles: ["development"]
+    image: mcr.microsoft.com/playwright
+    working_dir: /work
+    volumes:
+      - ./admin:/work
+    command: sh -lc "npm ci && npx playwright test"
+    environment:
+      E2E_ADMIN_USERNAME: admin
+      E2E_ADMIN_PASSWORD: admin123
+      E2E_BACKEND_URL: "http://backend_dev:8000"
+    depends_on:
+      admin_dev:
+        condition: service_healthy
+    networks:
+      - semar_dev
+    restart: unless-stopped
+    init: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  semar_production:
+    name: semar-kos-production
+    driver: bridge
+  semar_dev:
+    name: semar-kos-dev
+    driver: bridge
+  semar_staging:
+    name: semar-kos-staging
+    driver: bridge
+
+volumes:
+  dev_node_modules:
+  dev_next_cache:
+  mongo_data:
+  mongo_staging_data:
+  mongo_production_data:
+  admin_node_modules:
+  admin_next_cache:

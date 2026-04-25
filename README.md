@@ -145,9 +145,147 @@ Karena mengutamakan akurasi dan validitas data, maka untuk penambahan data baru 
 - [ ] Parsing harga yang lebih baik.
 
 ### Other
-- [ ] Create staging area.
-- [ ] Migration to dedicated db.
+- [x] Create staging area.
+- [x] Migration to dedicated db.
 
+
+## Port Matrix
+
+| Environment | Service    | URL                     | Profile       | Network               | Exposed |
+|-------------|------------|-------------------------|---------------|-----------------------|---------|
+| Development | Frontend   | http://localhost:3000   | development   | semar-kos-dev         | Yes     |
+| Development | Admin      | http://localhost:3001   | development   | semar-kos-dev         | Yes     |
+| Development | Backend    | http://localhost:8000   | development   | semar-kos-dev         | Yes     |
+| Development | MongoDB    | —                       | development   | semar-kos-dev         | No      |
+| Production  | Web        | http://localhost:3002   | production    | semar-kos-production  | Yes     |
+| Production  | Admin      | http://localhost:3005   | production    | semar-kos-production  | Yes     |
+| Production  | Backend    | —                       | production    | semar-kos-production  | No      |
+| Production  | MongoDB    | —                       | production    | semar-kos-production  | No      |
+| Staging     | Web        | http://localhost:3003   | staging       | semar-kos-staging     | Yes     |
+| Staging     | Admin      | http://localhost:3004   | staging       | semar-kos-staging     | Yes     |
+| Staging     | Backend    | http://localhost:8001   | staging       | semar-kos-staging     | Yes     |
+| Staging     | MongoDB    | —                       | staging       | semar-kos-staging     | No      |
+
+**Catatan**: Production dan Staging backend/MongoDB tidak di-expose ke host (intra-Docker only).
+
+## Docker (Production/Staging)
+
+Production dan staging masing-masing menjalankan full stack (web, admin, backend, MongoDB) dengan network isolation. Backend dan MongoDB tidak di-expose ke host.
+
+```bash
+# Setup environment files
+cp .env.production.example .env.production
+cp .env.staging.example .env.staging
+
+# Start both environments
+docker compose --profile production --profile staging up -d --build
+```
+
+- Production web: http://localhost:3002
+- Production admin: http://localhost:3005
+- Staging web: http://localhost:3003
+- Staging admin: http://localhost:3004
+
+Stop: `docker compose --profile production --profile staging down`
+
+## Docker (Development)
+
+Dev compose menjalankan 4 services: frontend, admin, backend (FastAPI), dan MongoDB.
+
+### Setup Environment
+
+```bash
+# Copy environment file
+cp .env.development.example .env.development
+
+# Edit .env.development dengan variabel berikut:
+# GOOGLE_MAPS_API_KEY=<google_maps_api_key>
+# API_INTERNAL_URL=http://backend_dev:8000
+# MONGO_URL=mongodb://mongodb:27017/semar_kos
+# JWT_SECRET=<random_secret_key>
+# JWT_EXPIRE_MINUTES=60
+# ADMIN_USERNAME=admin
+# ADMIN_PASSWORD_BCRYPT=<bcrypt_hash>
+#
+# Generate bcrypt hash:
+# docker compose --profile development run --rm backend_dev uv run python -c "from passlib.hash import bcrypt; print(bcrypt.hash('admin123'))"
+```
+
+### Start Development
+
+```bash
+# Start all 4 services dengan hot reload
+docker compose --profile development up -d --build
+```
+
+- Frontend: http://localhost:3000
+- Admin: http://localhost:3001
+- Backend API: http://localhost:8000
+
+### Seed Data
+
+```bash
+# Import data dari JSON ke MongoDB
+docker compose --profile development run --rm backend_dev uv run python -m app.seed
+```
+
+**Catatan**: Dataset bersifat close-source. Jika file data tidak tersedia, seed akan skip dengan pesan "seed skipped: dataset not present".
+
+### Stop
+
+```bash
+docker compose --profile development down
+```
+
+## CI/CD Workflows
+
+Deployment ke VPS menggunakan GitHub Actions. Terdapat dua workflow terpisah yang deploy ke server berbeda. Masing-masing menggunakan **GitHub Environment** sehingga secret/isolasi deployment terpisah antar environment.
+
+### Staging Deploy
+- **Trigger**: Push ke branch `staging` atau manual (`workflow_dispatch`)
+- **File**: `.github/workflows/staging.yml`
+- **Environment**: `staging`
+- **Services**: `web_staging`, `backend_staging`, `admin_staging`
+- **Server**: Staging VPS
+- **Dir default**: `/opt/semar-kos-staging`
+- **Health check**: `https://${STAGING_DOMAIN}`
+
+### Production Deploy
+- **Trigger**: Push ke branch `main` atau manual (`workflow_dispatch`)
+- **File**: `.github/workflows/production.yml`
+- **Environment**: `production`
+- **Services**: `web_prod`, `backend_prod`, `admin_prod`
+- **Server**: Production VPS (beda server dari staging)
+- **Dir default**: `/opt/semar-kos-prod`
+- **Health check**: `https://${PRODUCTION_DOMAIN}`
+
+### Setup Environment Secrets
+
+Workflow membaca secret/variable dari **GitHub Environment** terlebih dahulu. Buat environment di repo: **Settings → Environments → New environment**.
+
+**Environment `production`:**
+- Semua secret production (SSH_HOST, SSH_USER, SSH_KEY, dll) wajib di-set di sini.
+- Ini memastikan production secrets tidak tercampur dengan staging.
+
+**Environment `staging`:**
+- Semua secret staging di-set di environment ini.
+
+### Required Secrets & Variables
+
+| Name | Environment | Keterangan |
+|------|-------------|------------|
+| `SSH_HOST` | production / staging | IP/hostname VPS |
+| `SSH_USER` | production / staging | Username SSH |
+| `SSH_KEY` | production / staging | Private key SSH |
+| `GITHUB_TOKEN` | Auto | Token bawaan GH Actions |
+| `GOOGLE_MAPS_API_KEY` | production / staging | API key Google Maps |
+| `JWT_SECRET` | production / staging | Secret key JWT |
+| `ADMIN_PASSWORD_BCRYPT` | production / staging | Hash bcrypt password admin |
+| `PRODUCTION_DOMAIN` | production | Domain production (health check) |
+| `STAGING_DOMAIN` | staging | Domain staging (health check) |
+| `APP_DIR` | production / staging | Direktori deploy di VPS (optional) |
+| `WEB_PORT` | production / staging | Host port web (optional) |
+| `ADMIN_PORT` | production / staging | Host port admin (optional) |
 
 ## Kontribusi
 

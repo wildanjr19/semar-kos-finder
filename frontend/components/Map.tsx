@@ -3,31 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 
-type Kos = {
-  nama: string;
-  jenis: string;
-  lat: number;
-  lon: number;
-  harga: string;
-  fasilitas: string;
-  kontak: string;
-};
-
 type Destination = {
   id: string;
   nama: string;
   lat: number;
   lon: number;
-};
-
-type RawKos = {
-  "Nama kos"?: string;
-  "Jenis kos"?: string;
-  "Harga"?: string;
-  Fasilitas?: string;
-  Narahubung?: string;
-  lat?: string | number;
-  long?: string | number;
 };
 
 type RawDestination = {
@@ -41,6 +21,39 @@ type RouteApiResponse = {
   distanceMeters: number;
   duration: string;
   encodedPolyline: string;
+};
+
+type Kos = {
+  id: string;
+  nama: string;
+  jenis: string;
+  lat: number;
+  lon: number;
+  alamat: string;
+  plus_code: string;
+  harga: string;
+  fasilitas: string;
+  peraturan: string;
+  narahubung: string;
+  narahubung_nama: string;
+  ac_status: string;
+  tipe_pembayaran: string[];
+};
+
+type RawKos = {
+  id?: string;
+  nama?: string;
+  jenis_kos?: string;
+  alamat?: string;
+  plus_code?: string;
+  harga?: string;
+  fasilitas?: string;
+  peraturan?: string;
+  narahubung?: string;
+  lat?: string | number;
+  long?: string | number;
+  ac_status?: string;
+  tipe_pembayaran?: string[] | null;
 };
 
 function toNumber(value: string | number | undefined): number {
@@ -93,7 +106,6 @@ function formatDistanceMeters(distanceMeters: number): string {
   if (distanceMeters >= 1000) {
     return `${(distanceMeters / 1000).toFixed(1)} km`;
   }
-
   return `${Math.round(distanceMeters)} m`;
 }
 
@@ -102,18 +114,14 @@ function formatDuration(durationValue: string): string {
   if (!Number.isFinite(seconds) || seconds <= 0) {
     return durationValue;
   }
-
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-
   if (hours > 0) {
     return `${hours} jam ${minutes} menit`;
   }
-
   if (minutes > 0) {
     return `${minutes} menit`;
   }
-
   return `${seconds} detik`;
 }
 
@@ -122,7 +130,6 @@ type ParsedContact = {
   label: string;
 };
 
-// clickable
 function normalizeWaHref(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
   if (!trimmed) return null;
@@ -131,12 +138,10 @@ function normalizeWaHref(rawUrl: string): string | null {
     if (/wa\.me\//i.test(trimmed)) {
       return trimmed;
     }
-
     const phoneMatch = trimmed.match(/https?:\/\/(\d{8,15})\/?/i);
     if (phoneMatch?.[1]) {
       return `https://wa.me/${phoneMatch[1]}`;
     }
-
     return trimmed;
   }
 
@@ -181,16 +186,61 @@ function getJenisBadgeColor(jenis: string): { bg: string; text: string; border: 
   if (jenis === "Putri") {
     return { bg: "#FCE7F3", text: "#9D174D", border: "#F9A8D4" };
   }
-
   if (jenis === "Putra") {
     return { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" };
   }
-
   if (jenis === "Campuran") {
     return { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" };
   }
-
   return { bg: "#E2E8F0", text: "#334155", border: "#CBD5E1" };
+}
+
+function getMarkerGradient(jenis: string): string {
+  if (jenis === "Putri") return "linear-gradient(135deg, #f9a8d4 0%, #fce7f3 100%)";
+  if (jenis === "Putra") return "linear-gradient(135deg, #93c5fd 0%, #dbeafe 100%)";
+  return "linear-gradient(135deg, #86efac 0%, #dcfce7 100%)";
+}
+
+function getMarkerTextColor(jenis: string): string {
+  if (jenis === "Putri") return "#9d174d";
+  if (jenis === "Putra") return "#1d4ed8";
+  return "#166534";
+}
+
+function getMarkerLetter(jenis: string): string {
+  if (jenis === "Putri") return "P";
+  if (jenis === "Putra") return "L";
+  return "C";
+}
+
+function createSectionLabel(text: string): HTMLDivElement {
+  const el = document.createElement("div");
+  el.textContent = text;
+  el.style.fontSize = "11px";
+  el.style.fontWeight = "700";
+  el.style.letterSpacing = "0.08em";
+  el.style.textTransform = "uppercase";
+  el.style.color = "#8a9a80";
+  el.style.marginBottom = "6px";
+  return el;
+}
+
+function createChip(text: string, styles?: Partial<CSSStyleDeclaration>): HTMLSpanElement {
+  const chip = document.createElement("span");
+  chip.textContent = text.trim();
+  chip.style.display = "inline-block";
+  chip.style.padding = "3px 10px";
+  chip.style.borderRadius = "999px";
+  chip.style.fontSize = "11px";
+  chip.style.fontWeight = "600";
+  chip.style.lineHeight = "1.4";
+  chip.style.backgroundColor = "#f0f4eb";
+  chip.style.color = "#4a5a45";
+  chip.style.border = "1px solid #d8e0d0";
+  if (styles) {
+    Object.assign(chip.style, styles);
+  }
+  return chip;
 }
 
 export default function Map() {
@@ -198,6 +248,7 @@ export default function Map() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -217,30 +268,22 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    if (!showWelcome) {
-      return;
-    }
-
+    if (!showWelcome) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeWelcome();
       }
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [showWelcome]);
 
   const clearRoute = () => {
     const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-
+    if (!map) return;
     if (map.getLayer(routeLayerId)) {
       map.removeLayer(routeLayerId);
     }
-
     if (map.getSource(routeSourceId)) {
       map.removeSource(routeSourceId);
     }
@@ -248,15 +291,13 @@ export default function Map() {
 
   const drawRoute = (coordinates: Array<[number, number]>) => {
     const map = mapRef.current;
-    if (!map || coordinates.length < 2) {
-      return;
-    }
+    if (!map || coordinates.length < 2) return;
 
     const routeFeature = {
-      type: "Feature",
+      type: "Feature" as const,
       properties: {},
       geometry: {
-        type: "LineString",
+        type: "LineString" as const,
         coordinates,
       },
     };
@@ -269,7 +310,6 @@ export default function Map() {
         type: "geojson",
         data: routeFeature as never,
       });
-
       map.addLayer({
         id: routeLayerId,
         type: "line",
@@ -292,9 +332,7 @@ export default function Map() {
   };
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) {
-      return;
-    }
+    if (!mapContainerRef.current || mapRef.current) return;
 
     mapRef.current = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -322,41 +360,71 @@ export default function Map() {
 
     mapRef.current.addControl(new maplibregl.NavigationControl(), "top-right");
 
+    const onMapLoad = () => {
+      // eslint-disable-next-line no-console
+      console.log("[UNSKosFinder] Map ready");
+      setMapReady(true);
+    };
+    mapRef.current.on("load", onMapLoad);
+    if (mapRef.current.loaded()) {
+      // eslint-disable-next-line no-console
+      console.log("[UNSKosFinder] Map already ready");
+      setMapReady(true);
+    }
+
     return () => {
+      mapRef.current?.off("load", onMapLoad);
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
       mapRef.current?.remove();
       mapRef.current = null;
+      setMapReady(false);
     };
   }, []);
 
   useEffect(() => {
-    fetch("/data/data_kost_geo.json")
+    fetch("/api/kos")
       .then((res) => res.json())
-      .then((res: RawKos[]) => {
-        const mapped = res
-          .map((item) => ({
-            nama: item["Nama kos"] ?? "Tanpa Nama",
-            jenis: item["Jenis kos"] ?? "Tidak diketahui",
-            lat: toNumber(item.lat),
-            lon: toNumber(item.long),
-            harga: item["Harga"] ?? "-",
-            fasilitas: item["Fasilitas"] ?? "-",
-            kontak: item["Narahubung"] ?? "-",
-          }))
-          .filter(
-            (item) => Number.isFinite(item.lat) && Number.isFinite(item.lon),
-          );
+      .then((res: unknown) => {
+        const arr = Array.isArray(res) ? res : [];
+        const mapped: Kos[] = arr
+          .map((item: RawKos) => {
+            const rawNarahubung = String(item.narahubung ?? "-");
+            const contactParsed = parseContact(rawNarahubung);
+            const contactMatch = rawNarahubung.match(/^(.*?)\s*\(([^)]+)\)$/);
+            const narahubung = contactMatch ? contactMatch[1].trim() : rawNarahubung;
+            const narahubung_nama = contactMatch ? contactMatch[2].trim() : "";
 
+            return {
+              id: String(item.id ?? ""),
+              nama: String(item.nama ?? "Tanpa Nama"),
+              jenis: String(item.jenis_kos ?? "Tidak diketahui"),
+              alamat: String(item.alamat ?? ""),
+              plus_code: String(item.plus_code ?? ""),
+              lat: toNumber(item.lat),
+              lon: toNumber(item.long),
+              harga: String(item.harga ?? "-"),
+              fasilitas: String(item.fasilitas ?? ""),
+              peraturan: String(item.peraturan ?? ""),
+              narahubung,
+              narahubung_nama: narahubung_nama || (contactParsed.href ? contactParsed.label : ""),
+              ac_status: String(item.ac_status ?? "non_ac"),
+              tipe_pembayaran: Array.isArray(item.tipe_pembayaran) ? item.tipe_pembayaran : [],
+            };
+          })
+          .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lon));
+        // eslint-disable-next-line no-console
+        console.log(`[UNSKosFinder] Loaded ${mapped.length} kos items`);
         setData(mapped);
       });
   }, []);
 
   useEffect(() => {
-    fetch("/data/master_uns.json")
+    fetch("/api/master-uns")
       .then((res) => res.json())
       .then((res: RawDestination[]) => {
-        const mapped = res
+        const arr = Array.isArray(res) ? res : [];
+        const mapped = arr
           .map((item) => ({
             id: item.id ?? "",
             nama: item.nama ?? "Tanpa Nama",
@@ -369,70 +437,77 @@ export default function Map() {
               Number.isFinite(item.lat) &&
               Number.isFinite(item.lon),
           );
-
         setDestinations(mapped);
       });
   }, []);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) {
-      return;
-    }
+    if (!map || !mapReady) return;
 
     markersRef.current.forEach((marker) => marker.remove());
 
+    // eslint-disable-next-line no-console
+    console.log(`[UNSKosFinder] Rendering ${data.length} markers`);
+    if (data.length > 0) {
+      const first = data[0];
+      const projected = map.project([first.lon, first.lat]);
+      // eslint-disable-next-line no-console
+      console.log(`[UNSKosFinder] First marker: lng=${first.lon}, lat=${first.lat}, pixel=${Math.round(projected.x)},${Math.round(projected.y)}`);
+    }
+
     markersRef.current = data.map((kos) => {
-      const popupColors = {
-        sage: "#9CAF88",
-        steel: "#829AB1",
-        peach: "#D9AE94",
-      };
-
-      // Tentukan icon marker berdasarkan jenis kos
       const jenis = normalizeJenisKos(kos.jenis);
-      let iconUrl = "/marker_campuran.png";
-      if (jenis === "Putra") iconUrl = "/marker_putra.png";
-      else if (jenis === "Putri") iconUrl = "/marker_putri.png";
+      const jenisColor = getJenisBadgeColor(jenis);
 
-      // Buat elemen img untuk marker
-      const el = document.createElement("img");
-      el.src = iconUrl;
-      el.alt = jenis + " marker";
-      el.style.width = "38px";
-      el.style.height = "38px";
-      el.style.objectFit = "contain";
-      el.style.display = "block";
-      el.style.transform = "translateY(-10%)";
+      // Marker element
+      const el = document.createElement("div");
+      el.style.width = "36px";
+      el.style.height = "36px";
+      el.style.borderRadius = "50%";
+      el.style.background = getMarkerGradient(jenis);
+      el.style.border = "3px solid #ffffff";
+      el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.8)";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.cursor = "pointer";
+      el.style.fontWeight = "800";
+      el.style.fontSize = "14px";
+      el.style.color = getMarkerTextColor(jenis);
+      el.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
+      el.style.userSelect = "none";
+      el.textContent = getMarkerLetter(jenis);
 
-      // ...existing code for popupNode, header, badge, etc...
+      // Popup content
       const popupNode = document.createElement("div");
-      popupNode.style.maxWidth = "280px";
+      popupNode.style.maxWidth = "340px";
+      popupNode.style.maxHeight = "70vh";
+      popupNode.style.overflowY = "auto";
       popupNode.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
       popupNode.style.padding = "14px";
       popupNode.style.borderRadius = "16px";
-      popupNode.style.border = `1px solid ${popupColors.sage}55`;
-      popupNode.style.background =
-        "linear-gradient(145deg, #ffffff 0%, #eef4ea 55%, #f7eee8 100%)";
-      popupNode.style.boxShadow = "0 10px 24px rgba(47, 63, 57, 0.14)";
+      popupNode.style.border = "1px solid rgba(156, 175, 136, 0.25)";
+      popupNode.style.background = "linear-gradient(160deg, #ffffff 0%, #f3f7ef 50%, #faf5f0 100%)";
       popupNode.style.color = "#2f3a2f";
+      popupNode.style.boxShadow = "0 20px 40px rgba(47, 63, 57, 0.14)";
+      popupNode.style.scrollbarWidth = "thin";
 
+      // Header: Title + Jenis badge
       const header = document.createElement("div");
       header.style.display = "flex";
-      header.style.alignItems = "center";
+      header.style.alignItems = "flex-start";
       header.style.justifyContent = "space-between";
       header.style.gap = "10px";
-      header.style.marginBottom = "10px";
+      header.style.marginBottom = "8px";
 
       const title = document.createElement("strong");
       title.textContent = kos.nama;
-      title.style.display = "inline-block";
-      title.style.fontSize = "16px";
+      title.style.display = "block";
+      title.style.fontSize = "17px";
       title.style.lineHeight = "1.35";
-      title.style.marginBottom = "0";
-      title.style.color = "#2e3c2a";
-
-      const jenisColor = getJenisBadgeColor(jenis);
+      title.style.color = "#2a3b28";
+      title.style.flex = "1";
 
       const jenisBadge = document.createElement("span");
       jenisBadge.textContent = jenis;
@@ -446,80 +521,188 @@ export default function Map() {
       jenisBadge.style.backgroundColor = jenisColor.bg;
       jenisBadge.style.color = jenisColor.text;
       jenisBadge.style.border = `1px solid ${jenisColor.border}`;
+      jenisBadge.style.flexShrink = "0";
 
       header.append(title, jenisBadge);
 
-      const harga = document.createElement("div");
-      harga.textContent = `Harga: ${kos.harga}`;
-      harga.style.fontSize = "13px";
-      harga.style.padding = "7px 10px";
-      harga.style.marginBottom = "6px";
-      harga.style.borderRadius = "10px";
-      harga.style.backgroundColor = "#ecf2e8";
-      harga.style.color = "#324030";
+      // Meta row: AC + Payment
+      const metaRow = document.createElement("div");
+      metaRow.style.display = "flex";
+      metaRow.style.flexWrap = "wrap";
+      metaRow.style.gap = "6px";
+      metaRow.style.marginBottom = "8px";
 
-      const fasilitas = document.createElement("div");
-      fasilitas.textContent = `Fasilitas: ${kos.fasilitas}`;
-      fasilitas.style.fontSize = "13px";
-      fasilitas.style.padding = "7px 10px";
-      fasilitas.style.borderRadius = "10px";
-      fasilitas.style.backgroundColor = "#e8eef3";
-      fasilitas.style.color = "#2f3c4a";
+      const acChip = createChip(kos.ac_status === "ac" ? "🧊 AC" : "Non-AC", {
+        backgroundColor: kos.ac_status === "ac" ? "#e0f2fe" : "#f1f5f9",
+        color: kos.ac_status === "ac" ? "#0369a1" : "#64748b",
+        border: kos.ac_status === "ac" ? "1px solid #bae6fd" : "1px solid #e2e8f0",
+      });
+      metaRow.appendChild(acChip);
 
-      const kontak = document.createElement("div");
-      kontak.style.marginTop = "8px";
-      kontak.style.fontSize = "13px";
-      const contactLabel = document.createElement("span");
-      contactLabel.textContent = "Kontak: ";
-      contactLabel.style.fontWeight = "600";
-      contactLabel.style.color = "#334155";
+      kos.tipe_pembayaran.forEach((tp) => {
+        const paymentChip = createChip(tp, {
+          backgroundColor: "#f3e8ff",
+          color: "#7e22ce",
+          border: "1px solid #e9d5ff",
+        });
+        metaRow.appendChild(paymentChip);
+      });
 
-      const parsedContact = parseContact(kos.kontak);
-      if (parsedContact.href) {
-        const contactLink = document.createElement("a");
-        contactLink.href = parsedContact.href;
-        contactLink.target = "_blank";
-        contactLink.rel = "noopener noreferrer";
-        contactLink.textContent = parsedContact.label;
-        contactLink.style.color = "#476184";
-        contactLink.style.textDecorationColor = `${popupColors.steel}88`;
-        kontak.append(contactLabel, contactLink);
-      } else {
-        const fallbackText = document.createElement("span");
-        fallbackText.textContent = parsedContact.label;
-        fallbackText.style.color = "#475569";
-        kontak.append(contactLabel, fallbackText);
+      // Alamat
+      const alamatSection = document.createElement("div");
+      alamatSection.style.marginBottom = "8px";
+      const alamatText = document.createElement("div");
+      alamatText.textContent = `📍 ${kos.alamat || "Alamat tidak tersedia"}`;
+      alamatText.style.fontSize = "12px";
+      alamatText.style.color = "#5a6b55";
+      alamatText.style.lineHeight = "1.45";
+      alamatSection.appendChild(alamatText);
+
+      if (kos.plus_code) {
+        const plusCode = document.createElement("div");
+        plusCode.textContent = `Plus Code: ${kos.plus_code}`;
+        plusCode.style.fontSize = "11px";
+        plusCode.style.color = "#7a8a70";
+        plusCode.style.fontFamily = "monospace";
+        plusCode.style.marginTop = "3px";
+        alamatSection.appendChild(plusCode);
       }
 
+      // Harga
+      const hargaSection = document.createElement("div");
+      hargaSection.style.marginBottom = "8px";
+      const hargaLabel = createSectionLabel("Harga");
+      hargaSection.appendChild(hargaLabel);
+
+      const hargaTags = document.createElement("div");
+      hargaTags.style.display = "flex";
+      hargaTags.style.flexWrap = "wrap";
+      hargaTags.style.gap = "6px";
+
+      if (kos.harga && kos.harga !== "-") {
+        const parts = kos.harga.split(";").map((s) => s.trim()).filter(Boolean);
+        if (parts.length > 0) {
+          parts.forEach((part) => {
+            const tag = document.createElement("span");
+            tag.textContent = part;
+            tag.style.display = "inline-block";
+            tag.style.padding = "6px 10px";
+            tag.style.borderRadius = "8px";
+            tag.style.fontSize = "12px";
+            tag.style.fontWeight = "600";
+            tag.style.backgroundColor = "#ecf2e8";
+            tag.style.color = "#3a4a35";
+            hargaTags.appendChild(tag);
+          });
+        } else {
+          const tag = document.createElement("span");
+          tag.textContent = kos.harga;
+          tag.style.display = "inline-block";
+          tag.style.padding = "6px 10px";
+          tag.style.borderRadius = "8px";
+          tag.style.fontSize = "12px";
+          tag.style.fontWeight = "600";
+          tag.style.backgroundColor = "#ecf2e8";
+          tag.style.color = "#3a4a35";
+          hargaTags.appendChild(tag);
+        }
+      } else {
+        const tag = document.createElement("span");
+        tag.textContent = "Harga belum tersedia";
+        tag.style.display = "inline-block";
+        tag.style.padding = "6px 10px";
+        tag.style.borderRadius = "8px";
+        tag.style.fontSize = "12px";
+        tag.style.fontWeight = "600";
+        tag.style.backgroundColor = "#f1f5f9";
+        tag.style.color = "#64748b";
+        hargaTags.appendChild(tag);
+      }
+      hargaSection.appendChild(hargaTags);
+
+      // Fasilitas (raw)
+      const fasilitasSection = document.createElement("div");
+      fasilitasSection.style.marginBottom = "8px";
+      const fasilitasLabel = createSectionLabel("Fasilitas");
+      fasilitasSection.appendChild(fasilitasLabel);
+
+      const fasilitasText = document.createElement("div");
+      fasilitasText.textContent = kos.fasilitas || "-";
+      fasilitasText.style.fontSize = "12px";
+      fasilitasText.style.color = "#4a5a45";
+      fasilitasText.style.lineHeight = "1.45";
+      fasilitasText.style.backgroundColor = "#f0f4eb";
+      fasilitasText.style.padding = "6px 8px";
+      fasilitasText.style.borderRadius = "8px";
+      fasilitasSection.appendChild(fasilitasText);
+
+      // Peraturan
+      const peraturanSection = document.createElement("div");
+      peraturanSection.style.marginBottom = "8px";
+      const peraturanLabel = createSectionLabel("Peraturan");
+      peraturanSection.appendChild(peraturanLabel);
+
+      const peraturanText = document.createElement("div");
+      peraturanText.textContent = kos.peraturan || "-";
+      peraturanText.style.fontSize = "12px";
+      peraturanText.style.color = "#4a5a45";
+      peraturanText.style.lineHeight = "1.45";
+      peraturanSection.appendChild(peraturanText);
+
+      // Kontak
+      const kontakSection = document.createElement("div");
+      kontakSection.style.marginTop = "10px";
+      const parsedContact = parseContact(kos.narahubung);
+
+      if (parsedContact.href) {
+        const waLink = document.createElement("a");
+        waLink.href = parsedContact.href;
+        waLink.target = "_blank";
+        waLink.rel = "noopener noreferrer";
+        waLink.textContent = parsedContact.label || kos.narahubung;
+        waLink.style.color = "#2563eb";
+        waLink.style.fontSize = "12px";
+        waLink.style.textDecoration = "underline";
+        kontakSection.appendChild(waLink);
+      } else {
+        const fallback = document.createElement("span");
+        fallback.textContent = parsedContact.label;
+        fallback.style.fontSize = "12px";
+        fallback.style.color = "#64748b";
+        kontakSection.appendChild(fallback);
+      }
+
+      // Route section
       const routeSection = document.createElement("div");
       routeSection.style.marginTop = "10px";
-      routeSection.style.paddingTop = "8px";
-      routeSection.style.borderTop = `1px solid ${popupColors.sage}55`;
+      routeSection.style.paddingTop = "10px";
+      routeSection.style.borderTop = "1px dashed #c4d1bc";
 
       const routeLabel = document.createElement("div");
-      routeLabel.textContent = "Rute ke:";
-      routeLabel.style.fontWeight = "600";
-      routeLabel.style.marginBottom = "6px";
+      routeLabel.textContent = "Rute ke kampus";
+      routeLabel.style.fontWeight = "700";
+      routeLabel.style.marginBottom = "8px";
       routeLabel.style.color = "#334155";
+      routeLabel.style.fontSize = "13px";
 
       const destinationSelect = document.createElement("select");
       destinationSelect.style.width = "100%";
-      destinationSelect.style.marginBottom = "6px";
-      destinationSelect.style.padding = "8px 10px";
+      destinationSelect.style.marginBottom = "8px";
+      destinationSelect.style.padding = "9px 11px";
       destinationSelect.style.borderRadius = "10px";
-      destinationSelect.style.border = `1px solid ${popupColors.steel}66`;
+      destinationSelect.style.border = "1px solid #bfc9d6";
       destinationSelect.style.backgroundColor = "#ffffff";
       destinationSelect.style.color = "#334155";
       destinationSelect.style.outline = "none";
+      destinationSelect.style.fontSize = "13px";
       destinationSelect.style.transition = "border-color 180ms ease, box-shadow 180ms ease";
 
       destinationSelect.onfocus = () => {
-        destinationSelect.style.borderColor = popupColors.steel;
-        destinationSelect.style.boxShadow = `0 0 0 3px ${popupColors.steel}33`;
+        destinationSelect.style.borderColor = "#829AB1";
+        destinationSelect.style.boxShadow = "0 0 0 3px rgba(130, 154, 177, 0.2)";
       };
-
       destinationSelect.onblur = () => {
-        destinationSelect.style.borderColor = `${popupColors.steel}66`;
+        destinationSelect.style.borderColor = "#bfc9d6";
         destinationSelect.style.boxShadow = "none";
       };
 
@@ -540,69 +723,27 @@ export default function Map() {
       const routeButton = document.createElement("button");
       routeButton.type = "button";
       routeButton.textContent = "Tampilkan Rute";
-      routeButton.style.width = "100%";
-      routeButton.style.padding = "9px 10px";
-      routeButton.style.border = "none";
-      routeButton.style.borderRadius = "11px";
-      routeButton.style.background =
-        `linear-gradient(140deg, ${popupColors.steel} 0%, ${popupColors.sage} 100%)`;
-      routeButton.style.color = "#ffffff";
+      routeButton.style.padding = "6px 12px";
+      routeButton.style.border = "1px solid #bfc9d6";
+      routeButton.style.borderRadius = "6px";
+      routeButton.style.backgroundColor = "#ffffff";
+      routeButton.style.color = "#334155";
       routeButton.style.cursor = "pointer";
-      routeButton.style.fontWeight = "600";
-      routeButton.style.transition = "transform 180ms ease, box-shadow 180ms ease, filter 180ms ease";
-
-      routeButton.onmouseenter = () => {
-        if (routeButton.disabled) return;
-        routeButton.style.transform = "translateY(-1px)";
-        routeButton.style.boxShadow = "0 10px 20px rgba(130, 154, 177, 0.32)";
-        routeButton.style.filter = "saturate(1.05)";
-      };
-
-      routeButton.onmouseleave = () => {
-        routeButton.style.transform = "translateY(0)";
-        routeButton.style.boxShadow = "none";
-        routeButton.style.filter = "none";
-      };
-
-      routeButton.onfocus = () => {
-        routeButton.style.boxShadow = `0 0 0 3px ${popupColors.sage}66`;
-      };
-
-      routeButton.onblur = () => {
-        routeButton.style.boxShadow = "none";
-      };
+      routeButton.style.fontWeight = "500";
+      routeButton.style.fontSize = "12px";
 
       const clearRouteButton = document.createElement("button");
       clearRouteButton.type = "button";
       clearRouteButton.textContent = "Hapus Rute";
-      clearRouteButton.style.width = "100%";
-      clearRouteButton.style.padding = "9px 10px";
-      clearRouteButton.style.marginTop = "6px";
-      clearRouteButton.style.border = `1px solid ${popupColors.peach}99`;
-      clearRouteButton.style.borderRadius = "11px";
-      clearRouteButton.style.backgroundColor = "#f6e9e1";
-      clearRouteButton.style.color = "#67473a";
+      clearRouteButton.style.padding = "6px 12px";
+      clearRouteButton.style.marginLeft = "6px";
+      clearRouteButton.style.border = "1px solid #e2e8f0";
+      clearRouteButton.style.borderRadius = "6px";
+      clearRouteButton.style.backgroundColor = "#f8fafc";
+      clearRouteButton.style.color = "#64748b";
       clearRouteButton.style.cursor = "pointer";
-      clearRouteButton.style.transition = "transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease";
-
-      clearRouteButton.onmouseenter = () => {
-        if (clearRouteButton.disabled) return;
-        clearRouteButton.style.transform = "translateY(-1px)";
-        clearRouteButton.style.backgroundColor = "#f2dfd4";
-      };
-
-      clearRouteButton.onmouseleave = () => {
-        clearRouteButton.style.transform = "translateY(0)";
-        clearRouteButton.style.backgroundColor = "#f6e9e1";
-      };
-
-      clearRouteButton.onfocus = () => {
-        clearRouteButton.style.boxShadow = `0 0 0 3px ${popupColors.peach}4d`;
-      };
-
-      clearRouteButton.onblur = () => {
-        clearRouteButton.style.boxShadow = "none";
-      };
+      clearRouteButton.style.fontSize = "12px";
+      clearRouteButton.style.fontWeight = "500";
 
       const routeResult = document.createElement("div");
       routeResult.style.marginTop = "8px";
@@ -633,13 +774,11 @@ export default function Map() {
         try {
           const response = await fetch("/api/directions", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               origin: { lat: kos.lat, lon: kos.lon },
               destination: { lat: selectedDestination.lat, lon: selectedDestination.lon },
-              travelMode: "WALK"
+              travelMode: "WALK",
             }),
           });
 
@@ -657,7 +796,7 @@ export default function Map() {
             map.once("load", () => drawRoute(coordinates));
           }
 
-          routeResult.textContent = `Jarak: ${formatDistanceMeters(routeData.distanceMeters)} | Estimasi (Walking): ${formatDuration(routeData.duration)}`;
+          routeResult.textContent = `Jarak: ${formatDistanceMeters(routeData.distanceMeters)} | Estimasi jalan kaki: ${formatDuration(routeData.duration)}`;
           routeResult.style.color = "#2f5133";
         } catch (error) {
           routeResult.textContent =
@@ -685,18 +824,26 @@ export default function Map() {
         routeResult,
       );
 
-      popupNode.append(header, harga, fasilitas, kontak, routeSection);
+      popupNode.append(
+        header,
+        metaRow,
+        alamatSection,
+        hargaSection,
+        fasilitasSection,
+        peraturanSection,
+        kontakSection,
+        routeSection,
+      );
 
       const popup = new maplibregl.Popup({ offset: 25, className: "kos-popup" }).setDOMContent(popupNode);
       popup.on("close", clearRoute);
 
-      // Gunakan custom marker element (el)
-      return new maplibregl.Marker({ element: el })
+      return new maplibregl.Marker({ element: el, offset: [0, -18] })
         .setLngLat([kos.lon, kos.lat])
         .setPopup(popup)
         .addTo(map);
     });
-  }, [data, destinations]);
+  }, [data.length, destinations.length, mapReady]);
 
   return (
     <div style={{ position: "relative", height: "100vh", width: "100%" }}>
@@ -750,7 +897,7 @@ export default function Map() {
                 cursor: "pointer",
               }}
             >
-              X
+              ✕
             </button>
 
             <h2 style={{ margin: "0 36px 8px 0", fontSize: "22px", color: "#2e3c2a" }}>
