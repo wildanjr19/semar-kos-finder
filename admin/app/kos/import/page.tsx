@@ -15,6 +15,8 @@ interface KosItem {
   Narahubung: string;
   lat?: number;
   long?: number;
+  ac_status?: string;
+  tipe_pembayaran?: string[] | string | null;
   [key: string]: unknown;
 }
 
@@ -36,6 +38,40 @@ interface DuplicateReportItem {
 }
 
 type IdStrategy = 'auto_increment' | 'parse_json';
+
+function normalizeAcStatus(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+
+  const normalized = raw
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+    .replace(/\s+/g, '_');
+
+  if (normalized === 'ac') return 'ac';
+  if (normalized === 'non_ac' || normalized === 'nonac') return 'non_ac';
+  if (normalized === 'keduanya' || normalized === 'both') return 'keduanya';
+  return '';
+}
+
+function normalizePaymentTypes(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return Array.from(new Set(raw.map((value) => String(value).trim()).filter(Boolean)));
+  }
+
+  if (typeof raw === 'string') {
+    return Array.from(
+      new Set(
+        raw
+          .split(/[;,|]/)
+          .map((value) => value.trim())
+          .filter(Boolean),
+      ),
+    );
+  }
+
+  return [];
+}
 
 export default function KosImport() {
   const [jsonText, setJsonText] = useState('');
@@ -162,19 +198,26 @@ export default function KosImport() {
 
     const items = parsedItems
       .filter((_, i) => selectedIds.has(i))
-      .map(item => ({
-        No: item.No,
-        'Nama kos': item['Nama kos'],
-        'Jenis kos': item['Jenis kos'],
-        Alamat: item.Alamat,
-        Plus_Code: item.Plus_Code ?? '',
-        Harga: item.Harga,
-        Fasilitas: item.Fasilitas ?? '',
-        Peraturan: item.Peraturan ?? '',
-        Narahubung: item.Narahubung,
-        lat: item.lat ?? 0,
-        long: item.long ?? 0,
-      }));
+      .map(item => {
+        const acStatus = normalizeAcStatus(item.ac_status);
+        const paymentTypes = normalizePaymentTypes(item.tipe_pembayaran);
+
+        return {
+          No: item.No,
+          'Nama kos': item['Nama kos'],
+          'Jenis kos': item['Jenis kos'],
+          Alamat: item.Alamat,
+          Plus_Code: item.Plus_Code ?? '',
+          Harga: item.Harga,
+          Fasilitas: item.Fasilitas ?? '',
+          Peraturan: item.Peraturan ?? '',
+          Narahubung: item.Narahubung,
+          lat: item.lat ?? 0,
+          long: item.long ?? 0,
+          ac_status: acStatus,
+          tipe_pembayaran: paymentTypes.length > 0 ? paymentTypes : null,
+        };
+      });
 
     setSubmitting(true);
     try {
@@ -244,7 +287,7 @@ export default function KosImport() {
           className={styles.textarea}
           value={jsonText}
           onChange={handleTextareaChange}
-          placeholder='[{"No": 1, "Nama kos": "...", "Jenis kos": "...", "Alamat": "...", "Harga": "...", "Narahubung": "..."}]'
+          placeholder='[{"No": 1, "Nama kos": "...", "Jenis kos": "...", "Alamat": "...", "Harga": "...", "Narahubung": "...", "ac_status": "ac", "tipe_pembayaran": ["bulanan"]}]'
         />
 
         <div className={styles.fileInput}>
@@ -367,6 +410,8 @@ export default function KosImport() {
                   <th>Jenis kos</th>
                   <th>Alamat</th>
                   <th>Harga</th>
+                  <th>AC Status</th>
+                  <th>Tipe Pembayaran</th>
                   <th>Narahubung</th>
                 </tr>
               </thead>
@@ -385,6 +430,8 @@ export default function KosImport() {
                     <td>{item['Jenis kos']}</td>
                     <td>{item.Alamat}</td>
                     <td>{item.Harga}</td>
+                    <td>{normalizeAcStatus(item.ac_status) || '-'}</td>
+                    <td>{normalizePaymentTypes(item.tipe_pembayaran).join(', ') || '-'}</td>
                     <td>{item.Narahubung}</td>
                   </tr>
                 ))}
