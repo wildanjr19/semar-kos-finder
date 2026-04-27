@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styles from './kos.module.css';
 
@@ -63,7 +63,7 @@ const STATUS_ICONS: Record<string, string> = {
   rejected: '❌',
 };
 
-export default function KosList() {
+function KosListContent() {
   const searchParams = useSearchParams();
   const importedCount = searchParams.get('imported');
 
@@ -436,7 +436,7 @@ export default function KosList() {
                 )}
               </div>
 
-              {detailTarget.parsed_data && (
+              {detailTarget.parsed_data != null && (
                 <div className={styles.detailSection}>
                   <h3 className={styles.detailSectionTitle}>Parsed Data (Clean)</h3>
                   <pre style={{ background: 'var(--surface-raised)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', overflow: 'auto', maxHeight: '300px' }}>
@@ -521,5 +521,13 @@ export default function KosList() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function KosList() {
+  return (
+    <Suspense fallback={null}>
+      <KosListContent />
+    </Suspense>
   );
 }

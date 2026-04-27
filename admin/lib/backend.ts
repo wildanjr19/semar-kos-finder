@@ -77,12 +77,12 @@ export async function proxyWithRetry(
   const method = options.method || request.method;
   const body =
     options.body !== undefined
-      ? options.body
+      ? options.body ?? undefined
       : method !== 'GET'
         ? await request.text()
         : undefined;
 
-  let token = request.cookies.get('admin_token')?.value;
+  const token = request.cookies.get('admin_token')?.value;
 
   let backendRes = await fetchBackend(url.toString(), method, token, body);
 

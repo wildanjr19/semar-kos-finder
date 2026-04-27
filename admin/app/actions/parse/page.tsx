@@ -28,7 +28,7 @@ interface RawEntry {
 interface HargaItem {
   min: number;
   max: number;
-  periode: string;
+  periode: 'bulanan' | 'semesteran' | 'tahunan' | 'per3bulan' | 'mingguan';
   tipe_kamar: string | null;
   catatan: string | null;
 }
@@ -139,6 +139,10 @@ function loadLlmConfig(): LlmConfig {
 function saveLlmConfig(config: LlmConfig) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(LLM_STORAGE_KEY, JSON.stringify(config));
+}
+
+function normalizeCoordinate(value: unknown): string | number {
+  return typeof value === 'string' || typeof value === 'number' ? value : 0;
 }
 
 function formatHargaSnippet(harga: HargaItem[]): string {
@@ -317,8 +321,8 @@ export default function ParseAction() {
         Peraturan: String(d.peraturan ?? ''),
         Harga: String(d.harga ?? ''),
         Narahubung: String(d.narahubung ?? ''),
-        lat: d.lat ?? 0,
-        long: d.long ?? 0,
+        lat: normalizeCoordinate(d.lat),
+        long: normalizeCoordinate(d.long),
         ac_status: String(d.ac_status ?? ''),
         tipe_pembayaran: Array.isArray(d.tipe_pembayaran) ? d.tipe_pembayaran : [],
         data_status: String(d.data_status || 'raw'),
@@ -566,7 +570,7 @@ export default function ParseAction() {
       <header className={styles.header}>
         <div>
           <h1>Clean Data Workspace</h1>
-          <div className={styles.textMuted}>Flow: cleaning -> review -> feedback -> final publish -> map update</div>
+          <div className={styles.textMuted}>Flow: cleaning {'->'} review {'->'} feedback {'->'} final publish {'->'} map update</div>
         </div>
         <div className={styles.gap1}>
           <a href="/kos" className={styles.outlineButton}>Back to Kos List</a>
