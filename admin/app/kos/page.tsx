@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './kos.module.css';
 
 interface Kos {
@@ -18,6 +19,8 @@ interface Kos {
   long: number;
   ac_status: string;
   tipe_pembayaran: string[] | null;
+  data_status: string;
+  parsed_data: unknown;
 }
 
 const JENIS_STYLES: Record<string, string> = {
@@ -39,7 +42,31 @@ const AC_LABELS: Record<string, string> = {
   keduanya: 'Keduanya',
 };
 
+const STATUS_STYLES: Record<string, string> = {
+  raw: styles.badgeRaw,
+  parsed: styles.badgeParsed,
+  reviewed: styles.badgeReviewed,
+  rejected: styles.badgeRejected,
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  raw: 'Raw',
+  parsed: 'Parsed',
+  reviewed: 'Reviewed',
+  rejected: 'Rejected',
+};
+
+const STATUS_ICONS: Record<string, string> = {
+  raw: '📄',
+  parsed: '🔧',
+  reviewed: '✅',
+  rejected: '❌',
+};
+
 export default function KosList() {
+  const searchParams = useSearchParams();
+  const importedCount = searchParams.get('imported');
+
   const [items, setItems] = useState<Kos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,6 +77,7 @@ export default function KosList() {
   const [deleting, setDeleting] = useState(false);
   const [detailTarget, setDetailTarget] = useState<Kos | null>(null);
   const [detailAnimating, setDetailAnimating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const fetchKos = async () => {
     try {
@@ -66,6 +94,15 @@ export default function KosList() {
   };
 
   useEffect(() => { fetchKos(); }, []);
+
+  // 5e: auto-refresh after coming back from parse wizard
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('just_imported')) {
+      sessionStorage.removeItem('just_imported');
+      fetchKos();
+    }
+  }, []);
 
   const openDetail = useCallback((kos: Kos) => {
     setDetailTarget(kos);
@@ -91,11 +128,13 @@ export default function KosList() {
 
   const filtered = items.filter((k) => {
     const q = search.toLowerCase();
-    return k.nama.toLowerCase().includes(q)
+    const matchesSearch = k.nama.toLowerCase().includes(q)
       || k.jenis_kos.toLowerCase().includes(q)
       || k.alamat.toLowerCase().includes(q)
       || k.narahubung.toLowerCase().includes(q)
       || k.fasilitas.toLowerCase().includes(q);
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(k.data_status || 'raw');
+    return matchesSearch && matchesStatus;
   });
 
   const filteredIds = filtered.map((k) => k.id);
@@ -158,6 +197,13 @@ export default function KosList() {
     }
   };
 
+  const statusCounts = {
+    raw: items.filter((k) => (k.data_status || 'raw') === 'raw').length,
+    parsed: items.filter((k) => (k.data_status || 'raw') === 'parsed').length,
+    reviewed: items.filter((k) => (k.data_status || 'raw') === 'reviewed').length,
+    rejected: items.filter((k) => (k.data_status || 'raw') === 'rejected').length,
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -166,7 +212,7 @@ export default function KosList() {
           <p className={styles.headerMeta}>{items.length} kos tercatat</p>
         </div>
         <div className={styles.actions}>
-          <a href="/actions/parse" className={styles.ghostButton}>Parse Action</a>
+          <a href="/actions/parse" className={styles.ghostButton}>🧹 Clean Data</a>
           <a href="/kos/import" className={styles.ghostButton}>Bulk Import</a>
           <a href="/kos/new" className={styles.primaryButton}>Tambah Kos</a>
           <button
@@ -180,6 +226,25 @@ export default function KosList() {
       </header>
 
       {error && <div className={styles.error}>{error}</div>}
+
+      {/* 1f: Imported success banner */}
+      {importedCount && (
+        <div className={styles.successBanner}>
+          ✅ {importedCount} entry berhasil diimport ke database.
+        </div>
+      )}
+
+      {/* 5d: Stat cards */}
+      <div className={styles.statCards}>
+        {(['raw', 'parsed', 'reviewed', 'rejected'] as const).map((s) => (
+          <div key={s} className={styles.statCard}>
+            <div>
+              <div className={styles.statCardValue}>{statusCounts[s]}</div>
+              <div className={styles.statCardLabel}>{STATUS_ICONS[s]} {STATUS_LABELS[s]}</div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className={styles.searchBar}>
         <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -200,6 +265,24 @@ export default function KosList() {
             </svg>
           </button>
         )}
+      </div>
+
+      <div className={styles.statusFilter}>
+        {(['raw', 'parsed', 'reviewed', 'rejected'] as const).map((s) => (
+          <label key={s} className={styles.statusFilterItem}>
+            <input
+              type="checkbox"
+              checked={statusFilter.includes(s)}
+              onChange={(e) => {
+                setStatusFilter((prev) =>
+                  e.target.checked ? [...prev, s] : prev.filter((x) => x !== s)
+                );
+              }}
+            />
+            <span className={`${styles.badge} ${STATUS_STYLES[s]}`}>{STATUS_LABELS[s]}</span>
+            <span className={styles.textMuted}>({items.filter((k) => (k.data_status || 'raw') === s).length})</span>
+          </label>
+        ))}
       </div>
 
       {selectedIds.length > 0 && (
@@ -243,6 +326,7 @@ export default function KosList() {
                 </th>
                 <th>Nama</th>
                 <th>Jenis</th>
+                <th>Status</th>
                 <th>Harga</th>
                 <th>AC</th>
                 <th>Pembayaran</th>
@@ -278,6 +362,11 @@ export default function KosList() {
                   <td>
                     <span className={`${styles.badge} ${JENIS_STYLES[k.jenis_kos] || styles.badgeMuted}`}>
                       {k.jenis_kos}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`${styles.badge} ${STATUS_STYLES[k.data_status || 'raw'] || styles.badgeMuted}`}>
+                      {STATUS_LABELS[k.data_status || 'raw'] || k.data_status}
                     </span>
                   </td>
                   <td className={styles.cellPrice}>{k.harga || '-'}</td>
@@ -347,6 +436,14 @@ export default function KosList() {
                 )}
               </div>
 
+              {detailTarget.parsed_data && (
+                <div className={styles.detailSection}>
+                  <h3 className={styles.detailSectionTitle}>Parsed Data (Clean)</h3>
+                  <pre style={{ background: 'var(--surface-raised)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', overflow: 'auto', maxHeight: '300px' }}>
+                    {JSON.stringify(detailTarget.parsed_data, null, 2)}
+                  </pre>
+                </div>
+              )}
               <div className={styles.detailGrid}>
                 <div className={styles.detailSection}>
                   <h3 className={styles.detailSectionTitle}>Fasilitas</h3>
