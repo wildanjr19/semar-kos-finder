@@ -61,6 +61,15 @@ function Nav() {
           borderBottom: '2px solid transparent',
           transition: 'all 0.2s ease',
         }}>🧹 Clean Data</a>
+        <a href="/actions/parse/jobs" style={{
+          fontSize: '0.875rem',
+          color: 'var(--text-secondary)',
+          textDecoration: 'none',
+          fontWeight: 500,
+          padding: '0.375rem 0',
+          borderBottom: '2px solid transparent',
+          transition: 'all 0.2s ease',
+        }}>Parse Jobs</a>
       </div>
     </nav>
   );

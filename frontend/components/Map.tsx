@@ -74,6 +74,7 @@ type Kos = {
   narahubung_nama: string;
   ac_status: string;
   tipe_pembayaran: string[];
+  data_status: string;
   parsed_data?: KosClean | null;
 };
 
@@ -91,11 +92,12 @@ type RawKos = {
   long?: string | number;
   ac_status?: string;
   tipe_pembayaran?: string[] | null;
+  data_status?: string;
   parsed_data?: KosClean | null;
 };
 
 function isCleanData(kos: Kos): boolean {
-  return kos.parsed_data != null;
+  return kos.data_status === "reviewed" && kos.parsed_data != null;
 }
 
 function toNumber(value: string | number | undefined): number {
@@ -452,6 +454,7 @@ export default function Map() {
               narahubung_nama: narahubung_nama || (contactParsed.href ? contactParsed.label : ""),
               ac_status: String(item.ac_status ?? "non_ac"),
               tipe_pembayaran: Array.isArray(item.tipe_pembayaran) ? item.tipe_pembayaran : [],
+              data_status: String(item.data_status ?? "raw"),
               parsed_data: item.parsed_data ?? null,
             };
           })

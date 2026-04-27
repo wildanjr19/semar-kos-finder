@@ -204,6 +204,7 @@ def _effective_config(override: dict | None = None) -> Config:
         admin_username=base.admin_username,
         admin_password_bcrypt=base.admin_password_bcrypt,
         jwt_expire_minutes=base.jwt_expire_minutes,
+        jwt_refresh_expire_days=base.jwt_refresh_expire_days,
         llm_api_key=override.get("api_key", base.llm_api_key),
         llm_api_base=override.get("api_base", base.llm_api_base),
         llm_model=override.get("model", base.llm_model),

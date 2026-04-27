@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import styles from './kos.module.css';
 
 interface Kos {
@@ -55,7 +56,17 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejected',
 };
 
+const STATUS_ICONS: Record<string, string> = {
+  raw: '📄',
+  parsed: '🔧',
+  reviewed: '✅',
+  rejected: '❌',
+};
+
 export default function KosList() {
+  const searchParams = useSearchParams();
+  const importedCount = searchParams.get('imported');
+
   const [items, setItems] = useState<Kos[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -83,6 +94,15 @@ export default function KosList() {
   };
 
   useEffect(() => { fetchKos(); }, []);
+
+  // 5e: auto-refresh after coming back from parse wizard
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('just_imported')) {
+      sessionStorage.removeItem('just_imported');
+      fetchKos();
+    }
+  }, []);
 
   const openDetail = useCallback((kos: Kos) => {
     setDetailTarget(kos);
@@ -177,6 +197,13 @@ export default function KosList() {
     }
   };
 
+  const statusCounts = {
+    raw: items.filter((k) => (k.data_status || 'raw') === 'raw').length,
+    parsed: items.filter((k) => (k.data_status || 'raw') === 'parsed').length,
+    reviewed: items.filter((k) => (k.data_status || 'raw') === 'reviewed').length,
+    rejected: items.filter((k) => (k.data_status || 'raw') === 'rejected').length,
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -199,6 +226,25 @@ export default function KosList() {
       </header>
 
       {error && <div className={styles.error}>{error}</div>}
+
+      {/* 1f: Imported success banner */}
+      {importedCount && (
+        <div className={styles.successBanner}>
+          ✅ {importedCount} entry berhasil diimport ke database.
+        </div>
+      )}
+
+      {/* 5d: Stat cards */}
+      <div className={styles.statCards}>
+        {(['raw', 'parsed', 'reviewed', 'rejected'] as const).map((s) => (
+          <div key={s} className={styles.statCard}>
+            <div>
+              <div className={styles.statCardValue}>{statusCounts[s]}</div>
+              <div className={styles.statCardLabel}>{STATUS_ICONS[s]} {STATUS_LABELS[s]}</div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className={styles.searchBar}>
         <svg className={styles.searchIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

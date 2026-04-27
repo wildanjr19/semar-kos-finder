@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 export interface JobState {
   job_id: string;
-  status: 'pending' | 'running' | 'done' | 'cancelled';
+  status: 'pending' | 'running' | 'done' | 'cancelled' | 'error';
   total: number;
   completed: number;
   failed: number;
@@ -13,38 +13,72 @@ export interface JobState {
   created_at: string;
 }
 
-export function useJobPoller(jobId: string | null) {
-  const [job, setJob] = useState<JobState | null>(null);
+interface UseJobPollerOptions {
+  interval?: number;
+  onComplete?: (job: JobState) => void;
+  onError?: (job: JobState) => void;
+  onProgress?: (job: JobState) => void;
+}
+
+export function useJobPoller(
+  jobIds: string[],
+  options: UseJobPollerOptions = {}
+) {
+  const { interval = 2000, onComplete, onError, onProgress } = options;
+  const [jobs, setJobs] = useState<Record<string, JobState>>({});
+  const prevStatuses = useRef<Record<string, string>>({});
+
+  const fetchJob = useCallback(async (jobId: string): Promise<JobState | null> => {
+    try {
+      const res = await fetch(`/api/actions/parse/jobs/${jobId}`);
+      const data = await res.json();
+      if (data.error) return null;
+      return data as JobState;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
-    if (!jobId) return;
+    if (jobIds.length === 0) return;
     let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
     const poll = async () => {
-      try {
-        const res = await fetch(`/api/actions/parse/jobs/${jobId}`);
-        const data = await res.json();
-        if (cancelled) return;
-        if (data.error) {
-          // handle error
-          console.error('Job poll error:', data.error);
-        } else {
-          setJob(data);
-          if (data.status === 'running' || data.status === 'pending') {
-            setTimeout(poll, 2000);
-          }
+      if (cancelled) return;
+      const activeIds: string[] = [];
+
+      for (const jobId of jobIds) {
+        const job = await fetchJob(jobId);
+        if (!job) continue;
+
+        setJobs((prev) => ({ ...prev, [jobId]: job }));
+
+        const prevStatus = prevStatuses.current[jobId];
+        if (prevStatus && prevStatus !== job.status) {
+          if (job.status === 'done' && onComplete) onComplete(job);
+          if (job.status === 'error' && onError) onError(job);
         }
-      } catch (e) {
-        if (!cancelled) {
-          console.error('Job poll network error:', e);
-          setTimeout(poll, 5000);
+        if (onProgress) onProgress(job);
+        prevStatuses.current[jobId] = job.status;
+
+        if (job.status === 'running' || job.status === 'pending') {
+          activeIds.push(jobId);
         }
+      }
+
+      if (activeIds.length > 0 && !cancelled) {
+        const t = setTimeout(poll, interval);
+        timers.push(t);
       }
     };
 
     poll();
-    return () => { cancelled = true; };
-  }, [jobId]);
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [jobIds, interval, fetchJob, onComplete, onError, onProgress]);
 
-  return job;
+  return jobs;
 }

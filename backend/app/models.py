@@ -233,3 +233,29 @@ class MasterUnsOut(BaseModel):
     nama: str
     lat: float
     lon: float
+
+
+# --- Admin settings & job persistence ---
+
+
+class UserLlmConfig(BaseModel):
+    username: str
+    api_base: str = "https://api.openai.com/v1"
+    api_key: str = ""
+    model: str = "gpt-4o"
+    max_tokens: int = 4096
+    temperature: float = 0.1
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PersistedJob(BaseModel):
+    job_id: str
+    username: str
+    status: Literal["pending", "running", "done", "cancelled", "error"]
+    total: int
+    completed: int = 0
+    failed: int = 0
+    results: list[dict] = []
+    errors: list[dict] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
