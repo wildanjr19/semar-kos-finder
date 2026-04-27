@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
+
+const UNKNOWN_PAYMENT_VALUE = "unknown_payment";
+
+const PAYMENT_FILTER_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "mingguan", label: "Mingguan" },
+  { value: "bulanan", label: "Bulanan" },
+  { value: "per3bulan", label: "Per 3 Bulan" },
+  { value: "semesteran", label: "Semesteran" },
+  { value: "tahunan", label: "Tahunan" },
+  { value: UNKNOWN_PAYMENT_VALUE, label: "Tidak diketahui" },
+];
 
 type Destination = {
   id: string;
@@ -287,18 +298,221 @@ function createChip(text: string, styles?: Partial<CSSStyleDeclaration>): HTMLSp
   return chip;
 }
 
-export default function Map() {
-  const [data, setData] = useState<Kos[]>([]);
+function normalizeAcStatus(raw: string): string {
+  const normalized = raw.trim().toLowerCase().replace(/-/g, "_").replace(/\s+/g, "_");
+  if (normalized === "ac") return "ac";
+  if (normalized === "non_ac" || normalized === "nonac") return "non_ac";
+  if (normalized === "keduanya" || normalized === "both") return "keduanya";
+  return "";
+}
+
+function normalizePaymentType(raw: string): string {
+  const normalized = raw.trim().toLowerCase().replace(/-/g, "_").replace(/\s+/g, "_");
+  if (!normalized) return "";
+
+  const compact = normalized.replace(/_/g, "");
+  if (compact === "mingguan") return "mingguan";
+  if (compact === "bulanan") return "bulanan";
+  if (compact === "per3bulan" || compact === "3bulan") return "per3bulan";
+  if (compact === "semesteran") return "semesteran";
+  if (compact === "tahunan") return "tahunan";
+  return "";
+}
+
+function normalizePaymentTypes(values: string[]): string[] {
+  return Array.from(new Set(values.map((value) => normalizePaymentType(value)).filter(Boolean)));
+}
+
+function getAcChipPresentation(rawStatus: string): {
+  label: string;
+  backgroundColor: string;
+  color: string;
+  border: string;
+} {
+  const status = normalizeAcStatus(rawStatus);
+  if (status === "ac") {
+    return {
+      label: "AC",
+      backgroundColor: "#e0f2fe",
+      color: "#0369a1",
+      border: "1px solid #bae6fd",
+    };
+  }
+  if (status === "non_ac") {
+    return {
+      label: "Non-AC",
+      backgroundColor: "#f1f5f9",
+      color: "#64748b",
+      border: "1px solid #e2e8f0",
+    };
+  }
+  if (status === "keduanya") {
+    return {
+      label: "AC & Non-AC",
+      backgroundColor: "#ecfeff",
+      color: "#0f766e",
+      border: "1px solid #99f6e4",
+    };
+  }
+  return {
+    label: "Status AC tidak diketahui",
+    backgroundColor: "#f8fafc",
+    color: "#64748b",
+    border: "1px solid #e2e8f0",
+  };
+}
+
+export default function KosMap() {
+  const [allKos, setAllKos] = useState<Kos[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [showWelcome, setShowWelcome] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterAcChecked, setFilterAcChecked] = useState(false);
+  const [filterNonAcChecked, setFilterNonAcChecked] = useState(false);
+  const [filterPaymentTypes, setFilterPaymentTypes] = useState<string[]>([]);
+  const [filtersHydrated, setFiltersHydrated] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const routeSourceId = "route-source";
   const routeLayerId = "route-layer";
   const welcomeStorageKey = "unskosfinder_welcome_seen";
+
+  const paymentLabelMap = useMemo(
+    () =>
+      new Map(PAYMENT_FILTER_OPTIONS.map((option) => [option.value, option.label])),
+    [],
+  );
+
+  const activeFilterCount =
+    Number(filterAcChecked) + Number(filterNonAcChecked) + filterPaymentTypes.length;
+
+  const matchesAcFilter = (rawAcStatus: string): boolean => {
+    if (!filterAcChecked && !filterNonAcChecked) return true;
+    if (filterAcChecked && filterNonAcChecked) return true;
+
+    const normalizedAcStatus = normalizeAcStatus(rawAcStatus);
+    if (filterAcChecked) {
+      return normalizedAcStatus === "ac" || normalizedAcStatus === "keduanya";
+    }
+    return normalizedAcStatus === "non_ac" || normalizedAcStatus === "keduanya";
+  };
+
+  const matchesPaymentFilter = (rawPaymentTypes: string[]): boolean => {
+    if (filterPaymentTypes.length === 0) return true;
+
+    const normalizedPayments = normalizePaymentTypes(rawPaymentTypes);
+    const hasUnknownPayment = normalizedPayments.length === 0;
+
+    return filterPaymentTypes.some((selectedType) => {
+      if (selectedType === UNKNOWN_PAYMENT_VALUE) {
+        return hasUnknownPayment;
+      }
+      return normalizedPayments.includes(selectedType);
+    });
+  };
+
+  const filteredByAc = useMemo(
+    () => allKos.filter((item) => matchesAcFilter(item.ac_status)),
+    [allKos, filterAcChecked, filterNonAcChecked],
+  );
+
+  const filteredKos = useMemo(
+    () => filteredByAc.filter((item) => matchesPaymentFilter(item.tipe_pembayaran)),
+    [filteredByAc, filterPaymentTypes],
+  );
+
+  const baseForAcCounts = useMemo(
+    () => allKos.filter((item) => matchesPaymentFilter(item.tipe_pembayaran)),
+    [allKos, filterPaymentTypes],
+  );
+
+  const acFacetCount = useMemo(
+    () =>
+      baseForAcCounts.filter((item) => {
+        const status = normalizeAcStatus(item.ac_status);
+        return status === "ac" || status === "keduanya";
+      }).length,
+    [baseForAcCounts],
+  );
+
+  const nonAcFacetCount = useMemo(
+    () =>
+      baseForAcCounts.filter((item) => {
+        const status = normalizeAcStatus(item.ac_status);
+        return status === "non_ac" || status === "keduanya";
+      }).length,
+    [baseForAcCounts],
+  );
+
+  const paymentFacetCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    PAYMENT_FILTER_OPTIONS.forEach((option) => {
+      counts[option.value] = 0;
+    });
+
+    filteredByAc.forEach((item) => {
+      const normalizedPayments = normalizePaymentTypes(item.tipe_pembayaran);
+      if (normalizedPayments.length === 0) {
+        counts[UNKNOWN_PAYMENT_VALUE] += 1;
+        return;
+      }
+      normalizedPayments.forEach((paymentType) => {
+        if (paymentType in counts) {
+          counts[paymentType] += 1;
+        }
+      });
+    });
+
+    return counts;
+  }, [filteredByAc]);
+
+  const activeFilterChips = useMemo(() => {
+    const chips: Array<{ key: string; label: string }> = [];
+    if (filterAcChecked) {
+      chips.push({ key: "ac", label: "AC" });
+    }
+    if (filterNonAcChecked) {
+      chips.push({ key: "non_ac", label: "Non-AC" });
+    }
+    filterPaymentTypes.forEach((paymentType) => {
+      chips.push({
+        key: `pay:${paymentType}`,
+        label: paymentLabelMap.get(paymentType) ?? paymentType,
+      });
+    });
+    return chips;
+  }, [filterAcChecked, filterNonAcChecked, filterPaymentTypes, paymentLabelMap]);
+
+  const acRuleHint =
+    filterAcChecked && !filterNonAcChecked
+      ? "AC aktif: menampilkan kos AC + keduanya"
+      : !filterAcChecked && filterNonAcChecked
+        ? "Non-AC aktif: menampilkan kos Non-AC + keduanya"
+        : "Tidak pilih AC/Non-AC: semua kos ditampilkan";
+
+  const resetFilters = () => {
+    setFilterAcChecked(false);
+    setFilterNonAcChecked(false);
+    setFilterPaymentTypes([]);
+  };
+
+  const clearFilterChip = (chipKey: string) => {
+    if (chipKey === "ac") {
+      setFilterAcChecked(false);
+      return;
+    }
+    if (chipKey === "non_ac") {
+      setFilterNonAcChecked(false);
+      return;
+    }
+    if (chipKey.startsWith("pay:")) {
+      const paymentType = chipKey.replace("pay:", "");
+      setFilterPaymentTypes((prev) => prev.filter((item) => item !== paymentType));
+    }
+  };
 
   const closeWelcome = () => {
     setShowWelcome(false);
@@ -321,6 +535,58 @@ export default function Map() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [showWelcome]);
+
+  useEffect(() => {
+    if (!isHydrated || filtersHydrated) return;
+
+    const params = new URLSearchParams(window.location.search);
+    setFilterAcChecked(params.get("ac") === "1");
+    setFilterNonAcChecked(params.get("non_ac") === "1");
+
+    const paymentQuery = params.get("pay");
+    if (paymentQuery) {
+      const parsedPayments = Array.from(
+        new Set(
+          paymentQuery
+            .split(",")
+            .map((value) => value.trim())
+            .filter(Boolean)
+            .map((value) => (value === UNKNOWN_PAYMENT_VALUE ? value : normalizePaymentType(value)))
+            .filter(Boolean),
+        ),
+      );
+      setFilterPaymentTypes(parsedPayments);
+    }
+
+    setFiltersHydrated(true);
+  }, [isHydrated, filtersHydrated]);
+
+  useEffect(() => {
+    if (!filtersHydrated) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (filterAcChecked) {
+      params.set("ac", "1");
+    } else {
+      params.delete("ac");
+    }
+
+    if (filterNonAcChecked) {
+      params.set("non_ac", "1");
+    } else {
+      params.delete("non_ac");
+    }
+
+    if (filterPaymentTypes.length > 0) {
+      params.set("pay", filterPaymentTypes.join(","));
+    } else {
+      params.delete("pay");
+    }
+
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}`;
+    window.history.replaceState(null, "", nextUrl);
+  }, [filterAcChecked, filterNonAcChecked, filterPaymentTypes, filtersHydrated]);
 
   const clearRoute = () => {
     const map = mapRef.current;
@@ -461,7 +727,7 @@ export default function Map() {
           .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lon));
         // eslint-disable-next-line no-console
         console.log(`[UNSKosFinder] Loaded ${mapped.length} kos items`);
-        setData(mapped);
+        setAllKos(mapped);
       });
   }, []);
 
@@ -494,15 +760,15 @@ export default function Map() {
     markersRef.current.forEach((marker) => marker.remove());
 
     // eslint-disable-next-line no-console
-    console.log(`[UNSKosFinder] Rendering ${data.length} markers`);
-    if (data.length > 0) {
-      const first = data[0];
+    console.log(`[UNSKosFinder] Rendering ${filteredKos.length} markers`);
+    if (filteredKos.length > 0) {
+      const first = filteredKos[0];
       const projected = map.project([first.lon, first.lat]);
       // eslint-disable-next-line no-console
       console.log(`[UNSKosFinder] First marker: lng=${first.lon}, lat=${first.lat}, pixel=${Math.round(projected.x)},${Math.round(projected.y)}`);
     }
 
-    markersRef.current = data.map((kos) => {
+    markersRef.current = filteredKos.map((kos) => {
       const jenis = normalizeJenisKos(kos.jenis);
       const jenisColor = getJenisBadgeColor(jenis);
 
@@ -578,10 +844,11 @@ export default function Map() {
       metaRow.style.gap = "6px";
       metaRow.style.marginBottom = "8px";
 
-      const acChip = createChip(kos.ac_status === "ac" ? "🧊 AC" : "Non-AC", {
-        backgroundColor: kos.ac_status === "ac" ? "#e0f2fe" : "#f1f5f9",
-        color: kos.ac_status === "ac" ? "#0369a1" : "#64748b",
-        border: kos.ac_status === "ac" ? "1px solid #bae6fd" : "1px solid #e2e8f0",
+      const acChipStyle = getAcChipPresentation(kos.ac_status);
+      const acChip = createChip(acChipStyle.label, {
+        backgroundColor: acChipStyle.backgroundColor,
+        color: acChipStyle.color,
+        border: acChipStyle.border,
       });
       metaRow.appendChild(acChip);
 
@@ -982,11 +1249,135 @@ export default function Map() {
         .setPopup(popup)
         .addTo(map);
     });
-  }, [data.length, destinations.length, mapReady]);
+  }, [filteredKos, destinations, mapReady]);
 
   return (
     <div style={{ position: "relative", height: "100vh", width: "100%" }}>
       <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
+
+      <div className="mapFilterDock">
+        <button
+          type="button"
+          className="mapFilterToggle"
+          onClick={() => setIsFilterOpen((prev) => !prev)}
+          aria-expanded={isFilterOpen}
+          aria-controls="map-filter-panel"
+        >
+          Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+        </button>
+
+        {activeFilterChips.length > 0 && (
+          <div className="mapFilterActiveChips" aria-label="Filter aktif">
+            {activeFilterChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                className="mapFilterChip"
+                onClick={() => clearFilterChip(chip.key)}
+              >
+                <span>{chip.label}</span>
+                <span className="mapFilterChipClose">x</span>
+              </button>
+            ))}
+            <button type="button" className="mapFilterChip mapFilterChipReset" onClick={resetFilters}>
+              Reset
+            </button>
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        className={`mapFilterBackdrop ${isFilterOpen ? "open" : ""}`}
+        aria-label="Tutup panel filter"
+        onClick={() => setIsFilterOpen(false)}
+      />
+
+      <aside id="map-filter-panel" className={`mapFilterPanel ${isFilterOpen ? "open" : ""}`}>
+        <header className="mapFilterHeader">
+          <div>
+            <h3>Filter Kos</h3>
+            <p>{filteredKos.length} kos cocok dari {allKos.length}</p>
+          </div>
+          <button type="button" className="mapFilterClose" onClick={() => setIsFilterOpen(false)}>
+            Tutup
+          </button>
+        </header>
+
+        <div className="mapFilterBody">
+          <section className="mapFilterSection">
+            <h4>AC</h4>
+            <p className="mapFilterHint">{acRuleHint}</p>
+
+            <label className="mapFilterOption">
+              <span className="mapFilterOptionMain">
+                <input
+                  type="checkbox"
+                  checked={filterAcChecked}
+                  onChange={(event) => setFilterAcChecked(event.target.checked)}
+                />
+                <span>AC</span>
+              </span>
+              <span className="mapFilterCount">{acFacetCount}</span>
+            </label>
+
+            <label className="mapFilterOption">
+              <span className="mapFilterOptionMain">
+                <input
+                  type="checkbox"
+                  checked={filterNonAcChecked}
+                  onChange={(event) => setFilterNonAcChecked(event.target.checked)}
+                />
+                <span>Non-AC</span>
+              </span>
+              <span className="mapFilterCount">{nonAcFacetCount}</span>
+            </label>
+          </section>
+
+          <section className="mapFilterSection">
+            <h4>Periode Pembayaran</h4>
+            <p className="mapFilterHint">Pilih satu atau lebih. Hasil memakai logika OR.</p>
+
+            {PAYMENT_FILTER_OPTIONS.map((option) => (
+              <label key={option.value} className="mapFilterOption">
+                <span className="mapFilterOptionMain">
+                  <input
+                    type="checkbox"
+                    checked={filterPaymentTypes.includes(option.value)}
+                    onChange={(event) => {
+                      setFilterPaymentTypes((prev) => {
+                        if (event.target.checked) {
+                          return Array.from(new Set([...prev, option.value]));
+                        }
+                        return prev.filter((item) => item !== option.value);
+                      });
+                    }}
+                  />
+                  <span>{option.label}</span>
+                </span>
+                <span className="mapFilterCount">{paymentFacetCounts[option.value] ?? 0}</span>
+              </label>
+            ))}
+          </section>
+        </div>
+
+        <footer className="mapFilterFooter">
+          <button type="button" className="mapFilterGhostButton" onClick={resetFilters}>
+            Reset Semua
+          </button>
+          <button type="button" className="mapFilterPrimaryButton" onClick={() => setIsFilterOpen(false)}>
+            Tutup Panel
+          </button>
+        </footer>
+      </aside>
+
+      {allKos.length > 0 && filteredKos.length === 0 && (
+        <div className="mapFilterEmptyState" role="status" aria-live="polite">
+          <strong>Tidak ada kos yang cocok</strong>
+          <p>Coba ubah kombinasi filter Anda atau reset semua filter.</p>
+          <button type="button" onClick={resetFilters}>Reset Filter</button>
+        </div>
+      )}
 
       {isHydrated && showWelcome && (
         <div
@@ -1105,6 +1496,301 @@ export default function Map() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .mapFilterDock {
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          z-index: 1001;
+          max-width: min(72vw, 380px);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          pointer-events: none;
+        }
+
+        .mapFilterToggle {
+          pointer-events: auto;
+          width: fit-content;
+          border: 1px solid rgba(148, 163, 184, 0.55);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.95);
+          color: #1e293b;
+          padding: 10px 14px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          backdrop-filter: blur(6px);
+          box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+        }
+
+        .mapFilterActiveChips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          pointer-events: auto;
+        }
+
+        .mapFilterChip {
+          border: 1px solid #cbd5e1;
+          border-radius: 999px;
+          padding: 6px 10px;
+          background: rgba(255, 255, 255, 0.95);
+          color: #334155;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 5px 16px rgba(15, 23, 42, 0.09);
+        }
+
+        .mapFilterChipClose {
+          font-weight: 700;
+          color: #64748b;
+          line-height: 1;
+        }
+
+        .mapFilterChipReset {
+          background: #eef2ff;
+          border-color: #c7d2fe;
+          color: #3730a3;
+        }
+
+        .mapFilterBackdrop {
+          position: absolute;
+          inset: 0;
+          z-index: 1002;
+          border: none;
+          background: rgba(15, 23, 42, 0.14);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 220ms ease;
+        }
+
+        .mapFilterBackdrop.open {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .mapFilterPanel {
+          position: absolute;
+          top: 14px;
+          left: 14px;
+          bottom: 14px;
+          z-index: 1003;
+          width: min(360px, calc(100% - 28px));
+          border-radius: 18px;
+          border: 1px solid rgba(148, 163, 184, 0.35);
+          background: linear-gradient(165deg, #ffffff 0%, #f1f6ef 58%, #fbf5ee 100%);
+          box-shadow: 0 20px 42px rgba(15, 23, 42, 0.22);
+          display: grid;
+          grid-template-rows: auto 1fr auto;
+          overflow: hidden;
+          transform: translateX(-112%);
+          transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+          pointer-events: none;
+        }
+
+        .mapFilterPanel.open {
+          transform: translateX(0);
+          pointer-events: auto;
+        }
+
+        .mapFilterHeader {
+          padding: 16px;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .mapFilterHeader h3 {
+          margin: 0;
+          font-size: 18px;
+          color: #1f2937;
+        }
+
+        .mapFilterHeader p {
+          margin: 4px 0 0 0;
+          color: #64748b;
+          font-size: 13px;
+        }
+
+        .mapFilterClose {
+          border: 1px solid #cbd5e1;
+          border-radius: 10px;
+          background: #ffffff;
+          color: #334155;
+          padding: 7px 10px;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+
+        .mapFilterBody {
+          padding: 16px;
+          overflow: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .mapFilterSection {
+          border: 1px solid rgba(148, 163, 184, 0.26);
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.78);
+          padding: 12px;
+        }
+
+        .mapFilterSection h4 {
+          margin: 0;
+          font-size: 14px;
+          color: #1f2937;
+        }
+
+        .mapFilterHint {
+          margin: 7px 0 10px;
+          color: #64748b;
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .mapFilterOption {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 7px 8px;
+          border-radius: 10px;
+          cursor: pointer;
+        }
+
+        .mapFilterOption:hover {
+          background: rgba(241, 245, 249, 0.8);
+        }
+
+        .mapFilterOptionMain {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #334155;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .mapFilterOptionMain input {
+          width: 15px;
+          height: 15px;
+          accent-color: #4f46e5;
+        }
+
+        .mapFilterCount {
+          font-size: 11px;
+          line-height: 1;
+          font-weight: 700;
+          border-radius: 999px;
+          padding: 5px 8px;
+          color: #334155;
+          background: #e2e8f0;
+          border: 1px solid #cbd5e1;
+        }
+
+        .mapFilterFooter {
+          padding: 14px 16px;
+          border-top: 1px solid rgba(148, 163, 184, 0.24);
+          background: rgba(255, 255, 255, 0.92);
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .mapFilterGhostButton,
+        .mapFilterPrimaryButton {
+          border-radius: 11px;
+          padding: 10px 12px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .mapFilterGhostButton {
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #334155;
+        }
+
+        .mapFilterPrimaryButton {
+          border: 1px solid #1d4ed8;
+          background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+          color: #ffffff;
+        }
+
+        .mapFilterEmptyState {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 1000;
+          border-radius: 16px;
+          border: 1px solid rgba(148, 163, 184, 0.45);
+          background: rgba(255, 255, 255, 0.96);
+          box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+          padding: 14px 16px;
+          width: min(360px, calc(100% - 32px));
+          text-align: center;
+          color: #1f2937;
+        }
+
+        .mapFilterEmptyState strong {
+          display: block;
+          margin-bottom: 6px;
+        }
+
+        .mapFilterEmptyState p {
+          margin: 0;
+          color: #64748b;
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        .mapFilterEmptyState button {
+          margin-top: 10px;
+          border-radius: 10px;
+          border: 1px solid #1d4ed8;
+          background: #eff6ff;
+          color: #1d4ed8;
+          padding: 9px 12px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+          .mapFilterDock {
+            max-width: calc(100vw - 28px);
+          }
+
+          .mapFilterPanel {
+            left: 0;
+            right: 0;
+            top: auto;
+            bottom: 0;
+            width: 100%;
+            height: min(78vh, 560px);
+            border-radius: 18px 18px 0 0;
+            transform: translateY(104%);
+          }
+
+          .mapFilterPanel.open {
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

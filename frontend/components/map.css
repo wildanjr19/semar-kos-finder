@@ -1,0 +1,292 @@
+.mapFilterDock {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1001;
+  max-width: min(72vw, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.mapFilterToggle {
+  pointer-events: auto;
+  width: fit-content;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+}
+
+.mapFilterActiveChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.mapFilterChip {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.09);
+}
+
+.mapFilterChipClose {
+  font-weight: 700;
+  color: #64748b;
+  line-height: 1;
+}
+
+.mapFilterChipReset {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+
+.mapFilterBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1002;
+  border: none;
+  background: rgba(15, 23, 42, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.mapFilterBackdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mapFilterPanel {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1003;
+  width: min(360px, calc(100% - 28px));
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(165deg, #ffffff 0%, #f1f6ef 58%, #fbf5ee 100%);
+  box-shadow: 0 20px 42px rgba(15, 23, 42, 0.22);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  transform: translateX(-112%);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.mapFilterPanel.open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.mapFilterHeader {
+  padding: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mapFilterHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.mapFilterHeader p {
+  margin: 4px 0 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.mapFilterClose {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mapFilterBody {
+  padding: 16px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mapFilterSection {
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 12px;
+}
+
+.mapFilterSection h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.mapFilterHint {
+  margin: 7px 0 10px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mapFilterOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.mapFilterOption:hover {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.mapFilterOptionMain {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mapFilterOptionMain input {
+  width: 15px;
+  height: 15px;
+  accent-color: #4f46e5;
+}
+
+.mapFilterCount {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: #334155;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+}
+
+.mapFilterFooter {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.92);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mapFilterGhostButton,
+.mapFilterPrimaryButton {
+  border-radius: 11px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mapFilterGhostButton {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.mapFilterPrimaryButton {
+  border: 1px solid #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  color: #ffffff;
+}
+
+.mapFilterEmptyState {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  padding: 14px 16px;
+  width: min(360px, calc(100% - 32px));
+  text-align: center;
+  color: #1f2937;
+}
+
+.mapFilterEmptyState strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mapFilterEmptyState p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mapFilterEmptyState button {
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #1d4ed8;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .mapFilterDock {
+    max-width: calc(100vw - 28px);
+  }
+
+  .mapFilterPanel {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    height: min(78vh, 560px);
+    border-radius: 18px 18px 0 0;
+    transform: translateY(104%);
+  }
+
+  .mapFilterPanel.open {
+    transform: translateY(0);
+  }
+}
