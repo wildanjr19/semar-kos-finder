@@ -32,6 +32,15 @@
 
 ## Session Continuity
 
-- **Last Action**: Roadmap creation
+- **Last Action**: Phase 1 UI-SPEC approved via `/gsd-ui-phase 1`
 - **Next Expected Action**: `/gsd-plan-phase 1`
 - **Open Questions**: None.
+
+## Accumulated Context (updated)
+
+- **Decisions**:
+  - Client-side data only; backend filtering deferred to v2.
+  - UI mock without wired logic for v1; logic deferred to v2.
+  - Prototype-first in isolated folder before production integration.
+  - Phase 1 context captured in `.planning/phases/01-prototype-foundation/01-CONTEXT.md`.
+  - Phase 1 UI design contract approved: `.planning/phases/01-prototype-foundation/01-UI-SPEC.md`.
