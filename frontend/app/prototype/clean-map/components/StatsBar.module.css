@@ -1,0 +1,64 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.card {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background-color: rgba(255, 255, 255, 0.72);
+  padding: 9px;
+}
+
+.cardPutri {
+  border-color: #fbcfe8;
+  background-color: #fdf2f8;
+}
+
+.cardPutra {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+}
+
+.cardCampur {
+  border-color: #bbf7d0;
+  background-color: #f0fdf4;
+}
+
+.cardNeutral {
+  border-color: #e2e8f0;
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+.value {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.valuePutri {
+  color: #9d174d;
+}
+
+.valuePutra {
+  color: #1d4ed8;
+}
+
+.valueCampur {
+  color: #166534;
+}
+
+.valueNeutral {
+  color: #0f172a;
+}
+
+.label {
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+}
