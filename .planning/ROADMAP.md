@@ -25,7 +25,13 @@
   1. User can navigate to /prototype/clean-map and see a working map.
   2. User sees kos markers on the map representing real listings from /api/kos.
   3. User can pan and zoom the map; markers remain visible and correctly positioned.
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] `01-01-PLAN.md` — Extract shared types and helpers
+- [ ] `01-02-PLAN.md` — Decompose prototype presentational components + Sidebar
+- [ ] `01-03-PLAN.md` — Extract MapView container + wire page composition with lifted state
+- [ ] `01-04-PLAN.md` — Refactor production Map.tsx to use shared types/helpers and CSS modules
 **UI hint**: yes
 
 ### Phase 2: Filter Panel UI
@@ -55,6 +61,6 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prototype Foundation | 0/2 | Not started | - |
+| 1. Prototype Foundation | 0/4 | Planned | - |
 | 2. Filter Panel UI | 0/3 | Not started | - |
 | 3. Responsive UX Scaffolding | 0/2 | Not started | - |
