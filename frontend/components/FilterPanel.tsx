@@ -155,29 +155,36 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
               </div>
             </div>
             <div className="priceInputs">
-              <label>
-                <span>Min (Rp)</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={formatRupiah(priceMin)}
-                  onChange={(event) => updateMinPrice(parseRupiahInput(event.target.value))}
-                />
-              </label>
-              <label>
-                <span>Max (Rp)</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={formatRupiah(priceMax)}
-                  onChange={(event) => updateMaxPrice(parseRupiahInput(event.target.value))}
-                />
-              </label>
+              <div>
+                <span className="priceLabel">Min</span>
+                <div className="priceInputBox">
+                  <span className="pricePrefix">Rp</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatRupiah(priceMin)}
+                    onChange={(event) => updateMinPrice(parseRupiahInput(event.target.value))}
+                  />
+                </div>
+              </div>
+              <div>
+                <span className="priceLabel">Max</span>
+                <div className="priceInputBox">
+                  <span className="pricePrefix">Rp</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatRupiah(priceMax)}
+                    onChange={(event) => updateMaxPrice(parseRupiahInput(event.target.value))}
+                  />
+                </div>
+              </div>
             </div>
           </section>
 
           <section className="filterCard">
             <h4>AC</h4>
+            <p className="filterHint">Tidak pilih AC/Non-AC: semua kos ditampilkan</p>
             {AC_OPTIONS.map((option) => (
               <label key={option.key} className="filterOption">
                 <span className="filterOptionMain">
@@ -426,12 +433,17 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
 
         .priceRange {
           position: relative;
+          height: 20px;
           margin-bottom: 10px;
         }
 
         .rangeTrack {
-          position: relative;
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
           height: 6px;
+          transform: translateY(-50%);
           border-radius: 999px;
           background: #e2e8f0;
           overflow: hidden;
@@ -450,20 +462,21 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
           top: 0;
           left: 0;
           right: 0;
-          height: 100%;
+          bottom: 0;
         }
 
         .rangeInputs input[type="range"] {
           position: absolute;
-          top: 50%;
+          top: 0;
           left: 0;
           width: 100%;
-          height: 18px;
+          height: 100%;
           margin: 0;
-          transform: translateY(-50%);
+          padding: 0;
           background: transparent;
           pointer-events: none;
           -webkit-appearance: none;
+          appearance: none;
         }
 
         .rangeInputs input[type="range"]::-webkit-slider-thumb {
@@ -475,6 +488,7 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
           border: 2px solid #ffffff;
           box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
           -webkit-appearance: none;
+          margin-top: 1px;
         }
 
         .rangeInputs input[type="range"]::-moz-range-thumb {
@@ -488,15 +502,15 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
         }
 
         .rangeInputs input[type="range"]::-webkit-slider-runnable-track {
-          height: 6px;
-          border-radius: 999px;
+          height: 100%;
           background: transparent;
+          border: none;
         }
 
         .rangeInputs input[type="range"]::-moz-range-track {
-          height: 6px;
-          border-radius: 999px;
+          height: 100%;
           background: transparent;
+          border: none;
         }
 
         .priceInputs {
@@ -507,24 +521,44 @@ function FilterPanel({ side = "left" }: FilterPanelProps) {
           width: 100%;
         }
 
-        .priceInputs label {
-          display: grid;
-          gap: 6px;
-          font-size: 12px;
-          color: #64748b;
+        .priceInputs > div {
           min-width: 0;
         }
 
-        .priceInputs input {
-          width: 100%;
+        .priceLabel {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 12px;
+          color: #64748b;
+        }
+
+        .priceInputBox {
+          display: flex;
+          align-items: center;
           min-width: 0;
-          box-sizing: border-box;
           border: 1px solid #cbd5e1;
           border-radius: 10px;
-          padding: 8px 10px;
+          background: #ffffff;
+          overflow: hidden;
+        }
+
+        .pricePrefix {
+          padding: 8px 0 8px 10px;
+          font-size: 13px;
+          color: #64748b;
+          font-weight: 500;
+          user-select: none;
+        }
+
+        .priceInputBox input {
+          flex: 1;
+          min-width: 0;
+          border: none;
+          padding: 8px 10px 8px 6px;
           font-size: 13px;
           color: #1f2937;
-          background: #ffffff;
+          background: transparent;
+          outline: none;
         }
 
         .filterFooter {
