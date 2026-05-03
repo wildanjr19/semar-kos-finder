@@ -1,28 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import type { CleanKos } from "../../../../types/kos";
 import { formatPrice } from "../../../../lib/kos-helpers";
 import styles from "./PreviewList.module.css";
 
 type PreviewListProps = {
   items: CleanKos[];
+  expanded: boolean;
+  onToggleExpand: () => void;
   onItemClick: (kos: CleanKos) => void;
 };
 
-export function PreviewList({ items, onItemClick }: PreviewListProps) {
-  const [expanded, setExpanded] = useState(false);
+export function PreviewList({ items, expanded, onToggleExpand, onItemClick }: PreviewListProps) {
   const previewItems = items.slice(0, 5);
 
   return (
     <div className={styles.container}>
       <div className={styles.sectionLabel}>Preview data</div>
       {!expanded ? (
-        <button
-          type="button"
-          className={styles.toggleLink}
-          onClick={() => setExpanded(true)}
-        >
+        <button type="button" className={styles.toggleLink} onClick={onToggleExpand}>
           Lihat {previewItems.length} data
         </button>
       ) : (
@@ -43,11 +39,7 @@ export function PreviewList({ items, onItemClick }: PreviewListProps) {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className={styles.toggleLink}
-            onClick={() => setExpanded(false)}
-          >
+          <button type="button" className={styles.toggleLink} onClick={onToggleExpand}>
             Tutup
           </button>
         </>

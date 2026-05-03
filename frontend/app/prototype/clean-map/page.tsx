@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import type { CleanKos, Destination, RawDestination } from "../../types/kos";
-import { normalizeCleanKos, toNumber } from "../../lib/kos-helpers";
-import MapView from "../app/prototype/clean-map/MapView";
+import { useEffect, useRef, useState } from "react";
+import type { CleanKos, Destination, RawDestination } from "../../../types/kos";
+import { normalizeCleanKos, toNumber } from "../../../lib/kos-helpers";
+import MapView from "./MapView";
+import type { MapViewHandle } from "./MapView";
 import {
   Sidebar,
   StatsBar,
@@ -11,15 +12,17 @@ import {
   LoadingState,
   ErrorState,
   EmptyState,
-} from "../app/prototype/clean-map/components";
+} from "./components";
+import styles from "./page.module.css";
 
-export default function CleanMapPrototype() {
+export default function CleanMapPage() {
   const [items, setItems] = useState<CleanKos[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [mapInstance, setMapInstance] = useState<import("maplibre-gl").default.Map | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+  const mapViewRef = useRef<MapViewHandle>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,31 +80,21 @@ export default function CleanMapPrototype() {
     };
   }, []);
 
-  const handleFlyTo = useCallback(
-    (item: CleanKos) => {
-      mapInstance?.flyTo({ center: [item.lon, item.lat], zoom: 16, duration: 700 });
-    },
-    [mapInstance],
-  );
-
   return (
-    <div
-      style={{
-        position: "relative",
-        height: "100dvh",
-        width: "100%",
-        overflow: "hidden",
-        backgroundColor: "#e2e8f0",
-      }}
-    >
-      <MapView items={items} destinations={destinations} onMapReady={setMapInstance} />
-      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)}>
+    <div className={styles.page}>
+      <MapView ref={mapViewRef} items={items} destinations={destinations} />
+      <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)}>
         <StatsBar items={items} />
         {loading && <LoadingState />}
         {error && <ErrorState message={error} />}
         {!loading && !error && items.length === 0 && <EmptyState />}
         {!loading && items.length > 0 && (
-          <PreviewList items={items} onItemClick={handleFlyTo} />
+          <PreviewList
+            items={items}
+            expanded={previewExpanded}
+            onToggleExpand={() => setPreviewExpanded((v) => !v)}
+            onItemClick={(kos) => mapViewRef.current?.flyTo(kos)}
+          />
         )}
       </Sidebar>
     </div>
