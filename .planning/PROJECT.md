@@ -23,7 +23,7 @@ Users can quickly narrow down kos listings on the map to find options that match
 
 ### Active
 
-- [ ] Filter UI prototype page at `frontend/prototype/clean-map`
+- [x] Filter UI prototype page at `frontend/prototype/clean-map` (Phase 1)
 - [ ] Prototype fetches real kos data from existing `/api/kos` endpoint
 - [ ] Filter panel covers all `KosClean` fields: jenis_kos, ac_status, harga range, fasilitas categories, peraturan rules, tipe_pembayaran
 - [ ] UI is a full mock with real data displayed but no active filtering logic wired

@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Prototype Foundation** — Map renders with real kos data at /prototype/clean-map
+- [x] **Phase 1: Prototype Foundation** — Map renders with real kos data at /prototype/clean-map (2026-05-03)
 - [ ] **Phase 2: Filter Panel UI** — All KosClean filter controls visible and grouped
 - [ ] **Phase 3: Responsive UX Scaffolding** — Active filter chips, result count, and adaptive layout
 
@@ -28,10 +28,10 @@
 **Plans**: 4 plans
 
 Plans:
-- [ ] `01-01-PLAN.md` — Extract shared types and helpers
-- [ ] `01-02-PLAN.md` — Decompose prototype presentational components + Sidebar
-- [ ] `01-03-PLAN.md` — Extract MapView container + wire page composition with lifted state
-- [ ] `01-04-PLAN.md` — Refactor production Map.tsx to use shared types/helpers and CSS modules
+- [x] `01-01-PLAN.md` — Extract shared types and helpers (✓)
+- [x] `01-02-PLAN.md` — Decompose prototype presentational components + Sidebar (✓)
+- [x] `01-03-PLAN.md` — Extract MapView container + wire page composition with lifted state (✓)
+- [x] `01-04-PLAN.md` — Refactor production Map.tsx to use shared types/helpers and CSS modules (✓)
 **UI hint**: yes
 
 ### Phase 2: Filter Panel UI
@@ -61,6 +61,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Prototype Foundation | 0/4 | Planned | - |
+| 1. Prototype Foundation | 4/4 | Complete | 2026-05-03 |
 | 2. Filter Panel UI | 0/3 | Not started | - |
 | 3. Responsive UX Scaffolding | 0/2 | Not started | - |
