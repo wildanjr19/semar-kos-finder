@@ -2,260 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
-
-type Destination = {
-  id: string;
-  nama: string;
-  lat: number;
-  lon: number;
-};
-
-type RawDestination = {
-  id?: string;
-  nama?: string;
-  lat?: string | number;
-  lon?: string | number;
-};
-
-type RouteApiResponse = {
-  distanceMeters: number;
-  duration: string;
-  encodedPolyline: string;
-};
-
-type HargaItem = {
-  min: number;
-  max: number;
-  periode: string;
-  tipe_kamar: string | null;
-  catatan: string | null;
-};
-
-type FasilitasCleaned = {
-  dalam_kamar: string[];
-  bersama: string[];
-  utilitas: string[];
-  catatan: string;
-};
-
-type PeraturanCleaned = {
-  jam_malam: string | null;
-  tamu_lawan_jenis: string | null;
-  tamu_menginap: boolean | null;
-  boleh_hewan: boolean | null;
-  lainnya: string[];
-};
-
-type KontakItem = {
-  nama: string;
-  nomor_wa: string;
-  url_wa: string;
-};
-
-type KosClean = {
-  harga: HargaItem[];
-  fasilitas: FasilitasCleaned;
-  peraturan: PeraturanCleaned;
-  kontak: KontakItem[];
-};
-
-type Kos = {
-  id: string;
-  nama: string;
-  jenis: string;
-  lat: number;
-  lon: number;
-  alamat: string;
-  plus_code: string;
-  harga: string;
-  fasilitas: string;
-  peraturan: string;
-  narahubung: string;
-  narahubung_nama: string;
-  ac_status: string;
-  tipe_pembayaran: string[];
-  data_status: string;
-  parsed_data?: KosClean | null;
-};
-
-type RawKos = {
-  id?: string;
-  nama?: string;
-  jenis_kos?: string;
-  alamat?: string;
-  plus_code?: string;
-  harga?: string;
-  fasilitas?: string;
-  peraturan?: string;
-  narahubung?: string;
-  lat?: string | number;
-  long?: string | number;
-  ac_status?: string;
-  tipe_pembayaran?: string[] | null;
-  data_status?: string;
-  parsed_data?: KosClean | null;
-};
-
-function isCleanData(kos: Kos): boolean {
-  return kos.data_status === "reviewed" && kos.parsed_data != null;
-}
-
-function toNumber(value: string | number | undefined): number {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const normalized = value.trim().replace(",", ".");
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : Number.NaN;
-  }
-  return Number.NaN;
-}
-
-function decodeEncodedPolyline(encoded: string): Array<[number, number]> {
-  const coordinates: Array<[number, number]> = [];
-  let index = 0;
-  let lat = 0;
-  let lon = 0;
-
-  while (index < encoded.length) {
-    let result = 0;
-    let shift = 0;
-    let byte = 0;
-
-    do {
-      byte = encoded.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-
-    lat += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-
-    result = 0;
-    shift = 0;
-
-    do {
-      byte = encoded.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-
-    lon += (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-
-    coordinates.push([lon / 1e5, lat / 1e5]);
-  }
-
-  return coordinates;
-}
-
-function formatDistanceMeters(distanceMeters: number): string {
-  if (distanceMeters >= 1000) {
-    return `${(distanceMeters / 1000).toFixed(1)} km`;
-  }
-  return `${Math.round(distanceMeters)} m`;
-}
-
-function formatDuration(durationValue: string): string {
-  const seconds = Number.parseInt(durationValue.replace("s", ""), 10);
-  if (!Number.isFinite(seconds) || seconds <= 0) {
-    return durationValue;
-  }
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (hours > 0) {
-    return `${hours} jam ${minutes} menit`;
-  }
-  if (minutes > 0) {
-    return `${minutes} menit`;
-  }
-  return `${seconds} detik`;
-}
-
-type ParsedContact = {
-  href: string | null;
-  label: string;
-};
-
-function normalizeWaHref(rawUrl: string): string | null {
-  const trimmed = rawUrl.trim();
-  if (!trimmed) return null;
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    if (/wa\.me\//i.test(trimmed)) {
-      return trimmed;
-    }
-    const phoneMatch = trimmed.match(/https?:\/\/(\d{8,15})\/?/i);
-    if (phoneMatch?.[1]) {
-      return `https://wa.me/${phoneMatch[1]}`;
-    }
-    return trimmed;
-  }
-
-  const phoneOnlyMatch = trimmed.match(/^\d{8,15}$/);
-  if (phoneOnlyMatch) {
-    return `https://wa.me/${trimmed}`;
-  }
-
-  return null;
-}
-
-function parseContact(raw: string): ParsedContact {
-  const cleaned = raw.trim();
-  if (!cleaned || cleaned === "-") {
-    return { href: null, label: "-" };
-  }
-
-  const parts = cleaned.match(/^(\S+)(?:\s*\(([^)]+)\))?$/);
-  const rawUrl = parts?.[1] ?? cleaned;
-  const name = parts?.[2]?.trim();
-  const href = normalizeWaHref(rawUrl);
-
-  if (href) {
-    return {
-      href,
-      label: name ? `${href} (${name})` : href,
-    };
-  }
-
-  return { href: null, label: cleaned };
-}
-
-function normalizeJenisKos(raw: string): string {
-  const cleaned = raw.trim().toLowerCase();
-  if (cleaned.includes("putri")) return "Putri";
-  if (cleaned.includes("putra")) return "Putra";
-  if (cleaned.includes("campur")) return "Campuran";
-  return "Tidak diketahui";
-}
-
-function getJenisBadgeColor(jenis: string): { bg: string; text: string; border: string } {
-  if (jenis === "Putri") {
-    return { bg: "#FCE7F3", text: "#9D174D", border: "#F9A8D4" };
-  }
-  if (jenis === "Putra") {
-    return { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" };
-  }
-  if (jenis === "Campuran") {
-    return { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" };
-  }
-  return { bg: "#E2E8F0", text: "#334155", border: "#CBD5E1" };
-}
-
-function getMarkerGradient(jenis: string): string {
-  if (jenis === "Putri") return "linear-gradient(135deg, #f9a8d4 0%, #fce7f3 100%)";
-  if (jenis === "Putra") return "linear-gradient(135deg, #93c5fd 0%, #dbeafe 100%)";
-  return "linear-gradient(135deg, #86efac 0%, #dcfce7 100%)";
-}
-
-function getMarkerTextColor(jenis: string): string {
-  if (jenis === "Putri") return "#9d174d";
-  if (jenis === "Putra") return "#1d4ed8";
-  return "#166534";
-}
-
-function getMarkerLetter(jenis: string): string {
-  if (jenis === "Putri") return "P";
-  if (jenis === "Putra") return "L";
-  return "C";
-}
+import {
+  Destination, RawDestination, RouteApiResponse,
+  Kos, RawKos, KosClean
+} from "../types/kos";
+import {
+  isCleanData, toNumber, decodeEncodedPolyline,
+  formatDistanceMeters, formatDuration,
+  normalizeJenisKos, normalizeTamuLawanJenis,
+  getJenisBadgeColor, getMarkerGradient,
+  getMarkerTextColor, getMarkerLetter,
+  parseContact
+} from "../lib/kos-helpers";
 
 function createSectionLabel(text: string): HTMLDivElement {
   const el = document.createElement("div");
@@ -743,7 +501,9 @@ export default function Map() {
         peraturanWrap.style.flexWrap = "wrap";
         peraturanWrap.style.gap = "4px";
         if (p.jam_malam) peraturanWrap.appendChild(createChip(`⏰ ${p.jam_malam}`));
-        if (p.tamu_lawan_jenis) peraturanWrap.appendChild(createChip(`👫 ${p.tamu_lawan_jenis}`));
+        normalizeTamuLawanJenis(p.tamu_lawan_jenis).forEach((rule) => {
+          peraturanWrap.appendChild(createChip(`👫 ${rule}`));
+        });
         if (p.tamu_menginap === true) peraturanWrap.appendChild(createChip("🛏 Tamu menginap"));
         if (p.boleh_hewan === true) peraturanWrap.appendChild(createChip("🐕 Hewan diizinkan"));
         p.lainnya.forEach((r) => peraturanWrap.appendChild(createChip(r)));
