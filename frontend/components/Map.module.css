@@ -1,0 +1,334 @@
+/* Map component styles - green/natural theme */
+
+/* ── Page layout ── */
+
+.pageContainer {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+}
+
+.mapContainer {
+  height: 100%;
+  width: 100%;
+}
+
+/* ── Welcome dialog ── */
+
+.welcomeOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(15, 23, 42, 0.32);
+  padding: 20px;
+}
+
+.welcomeDialog {
+  width: 100%;
+  max-width: 540px;
+  border-radius: 18px;
+  border: 1px solid #c4d1bc;
+  background: linear-gradient(150deg, #ffffff 0%, #eef4ea 60%, #f7eee8 100%);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.24);
+  color: #2f3a2f;
+  padding: 18px;
+  position: relative;
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+}
+
+.welcomeCloseBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid #b7c6ac;
+  background-color: #ffffff;
+  color: #334155;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.welcomeTitle {
+  margin: 0 36px 8px 0;
+  font-size: 22px;
+  color: #2e3c2a;
+}
+
+.welcomeParagraph {
+  margin: 0 0 12px 0;
+  line-height: 1.55;
+  color: #3f4f3c;
+}
+
+.welcomeSection {
+  margin-bottom: 10px;
+}
+
+.welcomeLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: #334155;
+}
+
+.welcomeList {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.welcomeWarning {
+  margin-top: 12px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background-color: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  font-weight: 700;
+}
+
+.welcomeInfo {
+  margin-top: 10px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background-color: #e8eef3;
+  border: 1px solid #c5d4e2;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.welcomePrimaryBtn {
+  margin-top: 14px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 12px;
+  background: linear-gradient(145deg, #829ab1 0%, #9caf88 100%);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Marker ── */
+
+.marker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 14px;
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  user-select: none;
+}
+
+/* ── Popup ── */
+
+.popupContent {
+  max-width: 340px;
+  max-height: 70vh;
+  overflow-y: auto;
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(156, 175, 136, 0.25);
+  background: linear-gradient(160deg, #ffffff 0%, #f3f7ef 50%, #faf5f0 100%);
+  color: #3f4f3c;
+  box-shadow: 0 20px 40px rgba(47, 63, 57, 0.14);
+  scrollbar-width: thin;
+}
+
+.popupHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.popupTitle {
+  display: block;
+  font-size: 17px;
+  line-height: 1.35;
+  color: #2a3b28;
+  flex: 1;
+}
+
+.popupBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.popupMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.popupSection {
+  margin-bottom: 8px;
+}
+
+.popupAlamatText {
+  font-size: 12px;
+  color: #5a6b55;
+  line-height: 1.45;
+}
+
+.popupPlusCode {
+  font-size: 11px;
+  color: #7a8a70;
+  font-family: monospace;
+  margin-top: 3px;
+}
+
+.popupTagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.priceTag {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #ecf2e8;
+  color: #3a4a35;
+}
+
+.priceTagUnavailable {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.fasilitasWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fasilitasNote {
+  font-size: 11px;
+  color: #7a8a70;
+  margin-top: 4px;
+}
+
+.fasilitasFallback {
+  font-size: 12px;
+  color: #4a5a45;
+  line-height: 1.45;
+  background-color: #f0f4eb;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.peraturanWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.peraturanFallback {
+  font-size: 12px;
+  color: #4a5a45;
+  line-height: 1.45;
+}
+
+.kontakSection {
+  margin-top: 10px;
+}
+
+.kontakWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kontakLink {
+  color: #2563eb;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+.kontakFallback {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.routeSection {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #c4d1bc;
+}
+
+.routeLabel {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 13px;
+}
+
+.destinationSelect {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid #bfc9d6;
+  background-color: #ffffff;
+  color: #334155;
+  outline: none;
+  font-size: 13px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.routeButton {
+  padding: 6px 12px;
+  border: 1px solid #bfc9d6;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.clearRouteButton {
+  padding: 6px 12px;
+  margin-left: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.routeResult {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.45;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background-color: #edf2f7;
+}

@@ -14,6 +14,7 @@ import {
   getMarkerTextColor, getMarkerLetter,
   parseContact
 } from "../lib/kos-helpers";
+import styles from "./Map.module.css";
 
 function createSectionLabel(text: string): HTMLDivElement {
   const el = document.createElement("div");
@@ -266,75 +267,35 @@ export default function Map() {
 
       // Marker element
       const el = document.createElement("div");
-      el.style.width = "36px";
-      el.style.height = "36px";
-      el.style.borderRadius = "50%";
+      el.className = styles.marker;
       el.style.background = getMarkerGradient(jenis);
-      el.style.border = "3px solid #ffffff";
-      el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.8)";
-      el.style.display = "flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
-      el.style.cursor = "pointer";
-      el.style.fontWeight = "800";
-      el.style.fontSize = "14px";
       el.style.color = getMarkerTextColor(jenis);
-      el.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
-      el.style.userSelect = "none";
       el.textContent = getMarkerLetter(jenis);
 
       // Popup content
       const popupNode = document.createElement("div");
-      popupNode.style.maxWidth = "340px";
-      popupNode.style.maxHeight = "70vh";
-      popupNode.style.overflowY = "auto";
-      popupNode.style.fontFamily = "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif";
-      popupNode.style.padding = "14px";
-      popupNode.style.borderRadius = "16px";
-      popupNode.style.border = "1px solid rgba(156, 175, 136, 0.25)";
-      popupNode.style.background = "linear-gradient(160deg, #ffffff 0%, #f3f7ef 50%, #faf5f0 100%)";
-      popupNode.style.color = "#2f3a2f";
-      popupNode.style.boxShadow = "0 20px 40px rgba(47, 63, 57, 0.14)";
-      popupNode.style.scrollbarWidth = "thin";
+      popupNode.className = styles.popupContent;
 
       // Header: Title + Jenis badge
       const header = document.createElement("div");
-      header.style.display = "flex";
-      header.style.alignItems = "flex-start";
-      header.style.justifyContent = "space-between";
-      header.style.gap = "10px";
-      header.style.marginBottom = "8px";
+      header.className = styles.popupHeader;
 
       const title = document.createElement("strong");
       title.textContent = kos.nama;
-      title.style.display = "block";
-      title.style.fontSize = "17px";
-      title.style.lineHeight = "1.35";
-      title.style.color = "#2a3b28";
-      title.style.flex = "1";
+      title.className = styles.popupTitle;
 
       const jenisBadge = document.createElement("span");
       jenisBadge.textContent = jenis;
-      jenisBadge.style.display = "inline-flex";
-      jenisBadge.style.alignItems = "center";
-      jenisBadge.style.padding = "4px 10px";
-      jenisBadge.style.borderRadius = "999px";
-      jenisBadge.style.fontSize = "11px";
-      jenisBadge.style.fontWeight = "700";
-      jenisBadge.style.whiteSpace = "nowrap";
+      jenisBadge.className = styles.popupBadge;
       jenisBadge.style.backgroundColor = jenisColor.bg;
       jenisBadge.style.color = jenisColor.text;
       jenisBadge.style.border = `1px solid ${jenisColor.border}`;
-      jenisBadge.style.flexShrink = "0";
 
       header.append(title, jenisBadge);
 
       // Meta row: AC + Payment
       const metaRow = document.createElement("div");
-      metaRow.style.display = "flex";
-      metaRow.style.flexWrap = "wrap";
-      metaRow.style.gap = "6px";
-      metaRow.style.marginBottom = "8px";
+      metaRow.className = styles.popupMetaRow;
 
       const acChip = createChip(kos.ac_status === "ac" ? "🧊 AC" : "Non-AC", {
         backgroundColor: kos.ac_status === "ac" ? "#e0f2fe" : "#f1f5f9",
@@ -354,34 +315,27 @@ export default function Map() {
 
       // Alamat
       const alamatSection = document.createElement("div");
-      alamatSection.style.marginBottom = "8px";
+      alamatSection.className = styles.popupSection;
       const alamatText = document.createElement("div");
       alamatText.textContent = `📍 ${kos.alamat || "Alamat tidak tersedia"}`;
-      alamatText.style.fontSize = "12px";
-      alamatText.style.color = "#5a6b55";
-      alamatText.style.lineHeight = "1.45";
+      alamatText.className = styles.popupAlamatText;
       alamatSection.appendChild(alamatText);
 
       if (kos.plus_code) {
         const plusCode = document.createElement("div");
         plusCode.textContent = `Plus Code: ${kos.plus_code}`;
-        plusCode.style.fontSize = "11px";
-        plusCode.style.color = "#7a8a70";
-        plusCode.style.fontFamily = "monospace";
-        plusCode.style.marginTop = "3px";
+        plusCode.className = styles.popupPlusCode;
         alamatSection.appendChild(plusCode);
       }
 
       // Harga
       const hargaSection = document.createElement("div");
-      hargaSection.style.marginBottom = "8px";
+      hargaSection.className = styles.popupSection;
       const hargaLabel = createSectionLabel("Harga");
       hargaSection.appendChild(hargaLabel);
 
       const hargaTags = document.createElement("div");
-      hargaTags.style.display = "flex";
-      hargaTags.style.flexWrap = "wrap";
-      hargaTags.style.gap = "6px";
+      hargaTags.className = styles.popupTagContainer;
 
       if (isCleanData(kos) && kos.parsed_data) {
         const clean = kos.parsed_data;
@@ -390,25 +344,13 @@ export default function Map() {
             const tag = document.createElement("span");
             const tipe = h.tipe_kamar ? `${h.tipe_kamar} · ` : "";
             tag.textContent = `${tipe}Rp ${h.min.toLocaleString()}${h.min !== h.max ? ` - ${h.max.toLocaleString()}` : ""} / ${h.periode}`;
-            tag.style.display = "inline-block";
-            tag.style.padding = "6px 10px";
-            tag.style.borderRadius = "8px";
-            tag.style.fontSize = "12px";
-            tag.style.fontWeight = "600";
-            tag.style.backgroundColor = "#ecf2e8";
-            tag.style.color = "#3a4a35";
+            tag.className = styles.priceTag;
             hargaTags.appendChild(tag);
           });
         } else {
           const tag = document.createElement("span");
           tag.textContent = "Harga belum tersedia";
-          tag.style.display = "inline-block";
-          tag.style.padding = "6px 10px";
-          tag.style.borderRadius = "8px";
-          tag.style.fontSize = "12px";
-          tag.style.fontWeight = "600";
-          tag.style.backgroundColor = "#f1f5f9";
-          tag.style.color = "#64748b";
+          tag.className = styles.priceTagUnavailable;
           hargaTags.appendChild(tag);
         }
       } else if (kos.harga && kos.harga !== "-") {
@@ -417,89 +359,60 @@ export default function Map() {
           parts.forEach((part) => {
             const tag = document.createElement("span");
             tag.textContent = part;
-            tag.style.display = "inline-block";
-            tag.style.padding = "6px 10px";
-            tag.style.borderRadius = "8px";
-            tag.style.fontSize = "12px";
-            tag.style.fontWeight = "600";
-            tag.style.backgroundColor = "#ecf2e8";
-            tag.style.color = "#3a4a35";
+            tag.className = styles.priceTag;
             hargaTags.appendChild(tag);
           });
         } else {
           const tag = document.createElement("span");
           tag.textContent = kos.harga;
-          tag.style.display = "inline-block";
-          tag.style.padding = "6px 10px";
-          tag.style.borderRadius = "8px";
-          tag.style.fontSize = "12px";
-          tag.style.fontWeight = "600";
-          tag.style.backgroundColor = "#ecf2e8";
-          tag.style.color = "#3a4a35";
+          tag.className = styles.priceTag;
           hargaTags.appendChild(tag);
         }
       } else {
         const tag = document.createElement("span");
         tag.textContent = "Harga belum tersedia";
-        tag.style.display = "inline-block";
-        tag.style.padding = "6px 10px";
-        tag.style.borderRadius = "8px";
-        tag.style.fontSize = "12px";
-        tag.style.fontWeight = "600";
-        tag.style.backgroundColor = "#f1f5f9";
-        tag.style.color = "#64748b";
+        tag.className = styles.priceTagUnavailable;
         hargaTags.appendChild(tag);
       }
       hargaSection.appendChild(hargaTags);
 
       // Fasilitas
       const fasilitasSection = document.createElement("div");
-      fasilitasSection.style.marginBottom = "8px";
+      fasilitasSection.className = styles.popupSection;
       const fasilitasLabel = createSectionLabel("Fasilitas");
       fasilitasSection.appendChild(fasilitasLabel);
 
       if (isCleanData(kos) && kos.parsed_data) {
         const f = kos.parsed_data.fasilitas;
         const fasilitasWrap = document.createElement("div");
-        fasilitasWrap.style.display = "flex";
-        fasilitasWrap.style.flexWrap = "wrap";
-        fasilitasWrap.style.gap = "4px";
+        fasilitasWrap.className = styles.fasilitasWrap;
         f.dalam_kamar.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
         f.bersama.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
         f.utilitas.forEach((item) => fasilitasWrap.appendChild(createChip(item)));
         if (f.catatan) {
           const note = document.createElement("div");
           note.textContent = f.catatan;
-          note.style.fontSize = "11px";
-          note.style.color = "#7a8a70";
-          note.style.marginTop = "4px";
+          note.className = styles.fasilitasNote;
           fasilitasWrap.appendChild(note);
         }
         fasilitasSection.appendChild(fasilitasWrap);
       } else {
         const fasilitasText = document.createElement("div");
         fasilitasText.textContent = kos.fasilitas || "-";
-        fasilitasText.style.fontSize = "12px";
-        fasilitasText.style.color = "#4a5a45";
-        fasilitasText.style.lineHeight = "1.45";
-        fasilitasText.style.backgroundColor = "#f0f4eb";
-        fasilitasText.style.padding = "6px 8px";
-        fasilitasText.style.borderRadius = "8px";
+        fasilitasText.className = styles.fasilitasFallback;
         fasilitasSection.appendChild(fasilitasText);
       }
 
       // Peraturan
       const peraturanSection = document.createElement("div");
-      peraturanSection.style.marginBottom = "8px";
+      peraturanSection.className = styles.popupSection;
       const peraturanLabel = createSectionLabel("Peraturan");
       peraturanSection.appendChild(peraturanLabel);
 
       if (isCleanData(kos) && kos.parsed_data) {
         const p = kos.parsed_data.peraturan;
         const peraturanWrap = document.createElement("div");
-        peraturanWrap.style.display = "flex";
-        peraturanWrap.style.flexWrap = "wrap";
-        peraturanWrap.style.gap = "4px";
+        peraturanWrap.className = styles.peraturanWrap;
         if (p.jam_malam) peraturanWrap.appendChild(createChip(`⏰ ${p.jam_malam}`));
         normalizeTamuLawanJenis(p.tamu_lawan_jenis).forEach((rule) => {
           peraturanWrap.appendChild(createChip(`👫 ${rule}`));
@@ -509,44 +422,36 @@ export default function Map() {
         p.lainnya.forEach((r) => peraturanWrap.appendChild(createChip(r)));
         if (peraturanWrap.childNodes.length === 0) {
           peraturanWrap.textContent = "-";
-          peraturanWrap.style.fontSize = "12px";
-          peraturanWrap.style.color = "#4a5a45";
+          peraturanWrap.className = styles.peraturanFallback;
         }
         peraturanSection.appendChild(peraturanWrap);
       } else {
         const peraturanText = document.createElement("div");
         peraturanText.textContent = kos.peraturan || "-";
-        peraturanText.style.fontSize = "12px";
-        peraturanText.style.color = "#4a5a45";
-        peraturanText.style.lineHeight = "1.45";
+        peraturanText.className = styles.peraturanFallback;
         peraturanSection.appendChild(peraturanText);
       }
 
       // Kontak
       const kontakSection = document.createElement("div");
-      kontakSection.style.marginTop = "10px";
+      kontakSection.className = styles.kontakSection;
 
       if (isCleanData(kos) && kos.parsed_data) {
         const kontakWrap = document.createElement("div");
-        kontakWrap.style.display = "flex";
-        kontakWrap.style.flexDirection = "column";
-        kontakWrap.style.gap = "4px";
+        kontakWrap.className = styles.kontakWrap;
         kos.parsed_data.kontak.forEach((k) => {
           const waLink = document.createElement("a");
           waLink.href = k.url_wa;
           waLink.target = "_blank";
           waLink.rel = "noopener noreferrer";
           waLink.textContent = `${k.nama || "Kontak"} — ${k.nomor_wa}`;
-          waLink.style.color = "#2563eb";
-          waLink.style.fontSize = "12px";
-          waLink.style.textDecoration = "underline";
+          waLink.className = styles.kontakLink;
           kontakWrap.appendChild(waLink);
         });
         if (kos.parsed_data.kontak.length === 0) {
           const fallback = document.createElement("span");
           fallback.textContent = "-";
-          fallback.style.fontSize = "12px";
-          fallback.style.color = "#64748b";
+          fallback.className = styles.kontakFallback;
           kontakWrap.appendChild(fallback);
         }
         kontakSection.appendChild(kontakWrap);
@@ -558,43 +463,26 @@ export default function Map() {
           waLink.target = "_blank";
           waLink.rel = "noopener noreferrer";
           waLink.textContent = parsedContact.label || kos.narahubung;
-          waLink.style.color = "#2563eb";
-          waLink.style.fontSize = "12px";
-          waLink.style.textDecoration = "underline";
+          waLink.className = styles.kontakLink;
           kontakSection.appendChild(waLink);
         } else {
           const fallback = document.createElement("span");
           fallback.textContent = parsedContact.label;
-          fallback.style.fontSize = "12px";
-          fallback.style.color = "#64748b";
+          fallback.className = styles.kontakFallback;
           kontakSection.appendChild(fallback);
         }
       }
 
       // Route section
       const routeSection = document.createElement("div");
-      routeSection.style.marginTop = "10px";
-      routeSection.style.paddingTop = "10px";
-      routeSection.style.borderTop = "1px dashed #c4d1bc";
+      routeSection.className = styles.routeSection;
 
       const routeLabel = document.createElement("div");
       routeLabel.textContent = "Rute ke kampus";
-      routeLabel.style.fontWeight = "700";
-      routeLabel.style.marginBottom = "8px";
-      routeLabel.style.color = "#334155";
-      routeLabel.style.fontSize = "13px";
+      routeLabel.className = styles.routeLabel;
 
       const destinationSelect = document.createElement("select");
-      destinationSelect.style.width = "100%";
-      destinationSelect.style.marginBottom = "8px";
-      destinationSelect.style.padding = "9px 11px";
-      destinationSelect.style.borderRadius = "10px";
-      destinationSelect.style.border = "1px solid #bfc9d6";
-      destinationSelect.style.backgroundColor = "#ffffff";
-      destinationSelect.style.color = "#334155";
-      destinationSelect.style.outline = "none";
-      destinationSelect.style.fontSize = "13px";
-      destinationSelect.style.transition = "border-color 180ms ease, box-shadow 180ms ease";
+      destinationSelect.className = styles.destinationSelect;
 
       destinationSelect.onfocus = () => {
         destinationSelect.style.borderColor = "#829AB1";
@@ -622,36 +510,15 @@ export default function Map() {
       const routeButton = document.createElement("button");
       routeButton.type = "button";
       routeButton.textContent = "Tampilkan Rute";
-      routeButton.style.padding = "6px 12px";
-      routeButton.style.border = "1px solid #bfc9d6";
-      routeButton.style.borderRadius = "6px";
-      routeButton.style.backgroundColor = "#ffffff";
-      routeButton.style.color = "#334155";
-      routeButton.style.cursor = "pointer";
-      routeButton.style.fontWeight = "500";
-      routeButton.style.fontSize = "12px";
+      routeButton.className = styles.routeButton;
 
       const clearRouteButton = document.createElement("button");
       clearRouteButton.type = "button";
       clearRouteButton.textContent = "Hapus Rute";
-      clearRouteButton.style.padding = "6px 12px";
-      clearRouteButton.style.marginLeft = "6px";
-      clearRouteButton.style.border = "1px solid #e2e8f0";
-      clearRouteButton.style.borderRadius = "6px";
-      clearRouteButton.style.backgroundColor = "#f8fafc";
-      clearRouteButton.style.color = "#64748b";
-      clearRouteButton.style.cursor = "pointer";
-      clearRouteButton.style.fontSize = "12px";
-      clearRouteButton.style.fontWeight = "500";
+      clearRouteButton.className = styles.clearRouteButton;
 
       const routeResult = document.createElement("div");
-      routeResult.style.marginTop = "8px";
-      routeResult.style.fontSize = "13px";
-      routeResult.style.color = "#334155";
-      routeResult.style.lineHeight = "1.45";
-      routeResult.style.padding = "8px 10px";
-      routeResult.style.borderRadius = "10px";
-      routeResult.style.backgroundColor = "#edf2f7";
+      routeResult.className = styles.routeResult;
 
       routeButton.onclick = async () => {
         const selectedId = destinationSelect.value;
@@ -745,120 +612,56 @@ export default function Map() {
   }, [data.length, destinations.length, mapReady]);
 
   return (
-    <div style={{ position: "relative", height: "100vh", width: "100%" }}>
-      <div ref={mapContainerRef} style={{ height: "100%", width: "100%" }} />
+    <div className={styles.pageContainer}>
+      <div ref={mapContainerRef} className={styles.mapContainer} />
 
       {isHydrated && showWelcome && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1200,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(15, 23, 42, 0.32)",
-            padding: "20px",
-          }}
-        >
+        <div className={styles.welcomeOverlay}>
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Informasi awal UNSKosFinder"
-            style={{
-              width: "100%",
-              maxWidth: "540px",
-              borderRadius: "18px",
-              border: "1px solid #c4d1bc",
-              background: "linear-gradient(150deg, #ffffff 0%, #eef4ea 60%, #f7eee8 100%)",
-              boxShadow: "0 16px 38px rgba(15, 23, 42, 0.24)",
-              color: "#2f3a2f",
-              padding: "18px",
-              position: "relative",
-              fontFamily: "var(--font-plus-jakarta), 'Plus Jakarta Sans', sans-serif",
-            }}
+            className={styles.welcomeDialog}
           >
             <button
               type="button"
               aria-label="Tutup informasi awal"
               onClick={closeWelcome}
-              style={{
-                position: "absolute",
-                top: "12px",
-                right: "12px",
-                width: "30px",
-                height: "30px",
-                borderRadius: "999px",
-                border: "1px solid #b7c6ac",
-                backgroundColor: "#ffffff",
-                color: "#334155",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              className={styles.welcomeCloseBtn}
             >
               ✕
             </button>
 
-            <h2 style={{ margin: "0 36px 8px 0", fontSize: "22px", color: "#2e3c2a" }}>
+            <h2 className={styles.welcomeTitle}>
               Selamat datang di UNSKosFinder
             </h2>
-            <p style={{ margin: "0 0 12px 0", lineHeight: "1.55", color: "#3f4f3c" }}>
+            <p className={styles.welcomeParagraph}>
               Cari kos sekitar UNS jadi lebih cepat lewat peta interaktif.
             </p>
 
-            <div style={{ marginBottom: "10px" }}>
-              <strong style={{ display: "block", marginBottom: "6px", color: "#334155" }}>
+            <div className={styles.welcomeSection}>
+              <strong className={styles.welcomeLabel}>
                 Cara pakai:
               </strong>
-              <ul style={{ margin: 0, paddingLeft: "18px", lineHeight: "1.6", color: "#334155" }}>
+              <ul className={styles.welcomeList}>
                 <li>Klik pin kos di peta untuk lihat detail.</li>
                 <li>Pilih tujuan kampus lalu klik Tampilkan Rute.</li>
                 <li>Gunakan kontak yang tertera untuk menghubungi pemilik.</li>
               </ul>
             </div>
 
-            <div
-              style={{
-                marginTop: "12px",
-                borderRadius: "12px",
-                padding: "10px 12px",
-                backgroundColor: "#fff7ed",
-                border: "1px solid #fdba74",
-                color: "#9a3412",
-                fontWeight: 700,
-              }}
-            >
+            <div className={styles.welcomeWarning}>
               Waspada Penipuan
             </div>
 
-            <div
-              style={{
-                marginTop: "10px",
-                borderRadius: "12px",
-                padding: "10px 12px",
-                backgroundColor: "#e8eef3",
-                border: "1px solid #c5d4e2",
-                color: "#334155",
-                lineHeight: "1.5",
-              }}
-            >
+            <div className={styles.welcomeInfo}>
               Informasi harga dapat berubah sewaktu-waktu.
             </div>
 
             <button
               type="button"
               onClick={closeWelcome}
-              style={{
-                marginTop: "14px",
-                width: "100%",
-                border: "none",
-                borderRadius: "12px",
-                padding: "11px 12px",
-                background: "linear-gradient(145deg, #829AB1 0%, #9CAF88 100%)",
-                color: "#ffffff",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              className={styles.welcomePrimaryBtn}
             >
               Saya mengerti
             </button>
