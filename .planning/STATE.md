@@ -32,7 +32,7 @@
 
 ## Session Continuity
 
-- **Last Action**: Phase 1 executed and verified
+- **Last Action**: Phase 2 context gathered
 - **Next Expected Action**: `/gsd-plan-phase 2`
 - **Open Questions**: None.
 
@@ -45,3 +45,11 @@
   - Phase 1 context captured in `.planning/phases/01-prototype-foundation/01-CONTEXT.md`.
   - Phase 1 UI design contract approved: `.planning/phases/01-prototype-foundation/01-UI-SPEC.md`.
   - Phase 1 execution complete: shared types/helpers extracted, prototype components decomposed with CSS modules, MapView + page composition with lifted state, Map.tsx refactored to shared imports + CSS modules.
+  - Phase 2 context captured in `.planning/phases/02-filter-panel-ui/02-CONTEXT.md`.
+
+### Phase 2 Key Decisions
+- Install shadcn/ui + Tailwind CSS v4 for filter controls
+- 4 accordion sections: Room, Billing, Facilities, Rules (Search+Location standalone)
+- Campus building selector for location (no geolocation)
+- Stats bar removed entirely
+- Chips for binary/ternary filters, checkboxes for facilities, inputs for price
