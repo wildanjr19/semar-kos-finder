@@ -33,10 +33,22 @@ class FasilitasCleaned(BaseModel):
 
 class PeraturanCleaned(BaseModel):
     jam_malam: str | None = None
-    tamu_lawan_jenis: Literal["dilarang", "terbatas", "bebas"] | None = None
+    tamu_lawan_jenis: list[Literal["dilarang", "terbatas", "bebas"]] = []
     tamu_menginap: bool | None = None
     boleh_hewan: bool | None = None
     lainnya: list[str] = []
+
+    @field_validator("tamu_lawan_jenis", mode="before")
+    @classmethod
+    def _normalize_tamu_lawan_jenis(cls, value):
+        if value is None:
+            return []
+        if isinstance(value, str):
+            v = value.strip()
+            return [v] if v else []
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        return []
 
 
 class KontakItem(BaseModel):

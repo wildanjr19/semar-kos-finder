@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
+from time import monotonic
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -13,6 +15,15 @@ from app.job_queue import cancel_job, create_job, get_job, list_jobs
 from app.parse_engine import parse_single_entry, test_llm_connection
 
 router = APIRouter(prefix="/api/admin/actions", tags=["admin-actions"])
+logger = logging.getLogger(__name__)
+
+
+def _duration_ms(start: float) -> int:
+    return round((monotonic() - start) * 1000)
+
+
+def _entry_id(entry: dict) -> str:
+    return str(entry.get("id") or entry.get("_id") or entry.get("No") or "")
 
 
 def _user_llm_coll():
@@ -77,6 +88,15 @@ class LlmConfigSaveRequest(BaseModel):
 @router.post("/parse/entry")
 async def parse_entry(req: ParseEntryRequest, username: str = Depends(require_auth)) -> dict:
     """Parse single entry synchronously (blocking, returns clean data immediately)."""
+    started = monotonic()
+    entry_id = _entry_id(req.entry)
+    logger.info(
+        "parse_entry_request_started username=%s entry_id=%s has_override_config=%s has_custom_prompt=%s",
+        username,
+        entry_id,
+        req.override_config is not None,
+        bool(req.custom_prompt),
+    )
     try:
         merged = await _get_merged_llm_config(username, req.override_config)
         result = await parse_single_entry(
@@ -84,10 +104,30 @@ async def parse_entry(req: ParseEntryRequest, username: str = Depends(require_au
             custom_prompt=req.custom_prompt,
             override_config=merged,
         )
+        logger.info(
+            "parse_entry_request_finished username=%s entry_id=%s duration_ms=%s",
+            username,
+            entry_id,
+            _duration_ms(started),
+        )
         return result
     except ValueError as e:
+        logger.warning(
+            "parse_entry_request_invalid username=%s entry_id=%s duration_ms=%s error=%s",
+            username,
+            entry_id,
+            _duration_ms(started),
+            str(e),
+        )
         raise HTTPException(status_code=422, detail={"error": str(e)}) from e
     except Exception as e:
+        logger.exception(
+            "parse_entry_request_failed username=%s entry_id=%s duration_ms=%s error=%s",
+            username,
+            entry_id,
+            _duration_ms(started),
+            str(e),
+        )
         raise HTTPException(status_code=500, detail={"error": str(e)}) from e
 
 
@@ -96,12 +136,27 @@ async def parse_bulk(req: ParseBulkRequest, username: str = Depends(require_auth
     """Start background batch parse job. Returns job_id immediately."""
     if not req.entries:
         raise HTTPException(status_code=400, detail={"error": "No entries provided"})
+    started = monotonic()
+    logger.info(
+        "parse_bulk_request_started username=%s total=%s has_override_config=%s prompt_override_count=%s",
+        username,
+        len(req.entries),
+        req.override_config is not None,
+        len(req.prompt_overrides or {}),
+    )
     merged = await _get_merged_llm_config(username, req.override_config)
     job = await create_job(
         req.entries,
         username=username,
         prompt_overrides=req.prompt_overrides,
         override_config=merged,
+    )
+    logger.info(
+        "parse_bulk_request_finished username=%s job_id=%s total=%s duration_ms=%s",
+        username,
+        job.job_id,
+        job.total,
+        _duration_ms(started),
     )
     return {
         "job_id": job.job_id,

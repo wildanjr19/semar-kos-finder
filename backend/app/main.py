@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -6,6 +8,19 @@ from fastapi.responses import JSONResponse
 
 from app.db import init_db, close_db, is_ready
 from app.routers import admin_actions, admin_kos, admin_master_uns, auth, kos, master_uns
+
+
+def _configure_logging() -> None:
+    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+    logging.getLogger("app").setLevel(level)
+
+
+_configure_logging()
 
 
 async def _cleanup_loop() -> None:

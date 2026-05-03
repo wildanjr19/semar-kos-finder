@@ -1,4 +1,4 @@
-import type maplibregl from "maplibre-gl";
+import maplibregl from "maplibre-gl";
 
 const routeSourceId = "clean-map-route-source";
 const routeLayerId = "clean-map-route-layer";

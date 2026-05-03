@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from time import monotonic
 
 from app.db import get_collection
 from app.parse_engine import parse_single_entry
@@ -21,6 +23,8 @@ class Job:
     total: int
     completed: int = 0
     failed: int = 0
+    current_index: int | None = None
+    items: list[dict] = field(default_factory=list)
     results: list[dict] = field(default_factory=list)
     errors: list[dict] = field(default_factory=list)
     created_at: str = ""
@@ -36,6 +40,8 @@ class Job:
             "total": self.total,
             "completed": self.completed,
             "failed": self.failed,
+            "current_index": self.current_index,
+            "items": self.items,
             "results": self.results,
             "errors": self.errors,
             "created_at": self.created_at,
@@ -54,6 +60,65 @@ def _jobs_coll():
 
 def _kos_coll():
     return get_collection("kos")
+
+
+def _entry_name(entry: dict) -> str:
+    return str(
+        entry.get("Nama kos")
+        or entry.get("nama")
+        or entry.get("name")
+        or entry.get("id")
+        or "Kos tanpa nama"
+    )
+
+
+def _entry_id(entry: dict) -> str:
+    return str(entry.get("id") or entry.get("_id") or entry.get("No") or "")
+
+
+def _duration_ms(start: float) -> int:
+    return round((monotonic() - start) * 1000)
+
+
+def _error_text(exc: Exception, limit: int = 500) -> str:
+    text = str(exc).replace("\n", " ")
+    return text[:limit]
+
+
+def _job_concurrency() -> int:
+    raw = os.getenv("PARSE_JOB_CONCURRENCY", "3")
+    try:
+        value = int(raw)
+    except ValueError:
+        logger.warning("Invalid PARSE_JOB_CONCURRENCY=%s, using 3", raw)
+        return 3
+    return max(1, min(value, 10))
+
+
+def _refresh_current_index(job: Job) -> None:
+    active = [item.get("index") for item in job.items if item.get("status") == "in_progress"]
+    job.current_index = min(active) if active else None
+
+
+def _job_item(index: int, entry: dict) -> dict:
+    return {
+        "index": index,
+        "id": _entry_id(entry),
+        "name": _entry_name(entry),
+        "status": "todo",
+        "error": None,
+        "started_at": None,
+        "finished_at": None,
+        "duration_ms": None,
+    }
+
+
+def _mark_remaining_cancelled(job: Job) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    for item in job.items:
+        if item.get("status") in ("todo", "in_progress"):
+            item["status"] = "cancelled"
+            item["finished_at"] = now
 
 
 async def _persist_parsed_result(raw_entry: dict, clean: dict) -> None:
@@ -94,6 +159,8 @@ async def _persist_job(job: Job) -> None:
                     "total": job.total,
                     "completed": job.completed,
                     "failed": job.failed,
+                    "current_index": job.current_index,
+                    "items": job.items,
                     "results": job.results,
                     "errors": job.errors,
                     "created_at": job.created_at,
@@ -119,6 +186,7 @@ async def create_job(
         job_id=job_id,
         status="pending",
         total=len(entries),
+        items=[_job_item(index, entry) for index, entry in enumerate(entries)],
         prompt_overrides=prompt_overrides,
         override_config=override_config,
         created_at=now,
@@ -127,6 +195,13 @@ async def create_job(
     _jobs[job_id] = job
     await _persist_job(job)
     job._task = asyncio.create_task(_run_job(job, entries))
+    logger.info(
+        "parse_job_created job_id=%s username=%s total=%s concurrency=%s",
+        job.job_id,
+        username,
+        job.total,
+        _job_concurrency(),
+    )
     return job
 
 
@@ -146,6 +221,8 @@ async def get_job(job_id: str) -> Job | None:
                 total=doc["total"],
                 completed=doc.get("completed", 0),
                 failed=doc.get("failed", 0),
+                current_index=doc.get("current_index"),
+                items=doc.get("items", []),
                 results=doc.get("results", []),
                 errors=doc.get("errors", []),
                 created_at=doc.get("created_at", ""),
@@ -176,6 +253,7 @@ async def list_jobs(username: str | None = None, status: str | None = None) -> l
                 "total": d["total"],
                 "completed": d.get("completed", 0),
                 "failed": d.get("failed", 0),
+                "current_index": d.get("current_index"),
                 "created_at": d.get("created_at", ""),
                 "updated_at": d.get("updated_at", ""),
             }
@@ -187,15 +265,21 @@ async def list_jobs(username: str | None = None, status: str | None = None) -> l
 
 
 async def cancel_job(job_id: str) -> bool:
+    job_to_persist: Job | None = None
     async with _lock:
         job = _jobs.get(job_id)
         if job and job.status in ("pending", "running"):
             if job._task:
                 job._task.cancel()
             job.status = "cancelled"
-            await _persist_job(job)
-            return True
-    return False
+            _mark_remaining_cancelled(job)
+            _refresh_current_index(job)
+            job_to_persist = job
+    if not job_to_persist:
+        return False
+    await _persist_job(job_to_persist)
+    logger.info("parse_job_cancel_requested job_id=%s", job_id)
+    return True
 
 
 def cleanup_old_jobs(max_age_seconds: int = 3600) -> None:
@@ -223,14 +307,35 @@ def cleanup_old_jobs(max_age_seconds: int = 3600) -> None:
         logger.warning("DB cleanup_old_jobs failed: %s", exc)
 
 
-async def _run_job(job: Job, entries: list[dict]) -> None:
-    job.status = "running"
-    await _persist_job(job)
+async def _run_job_item(job: Job, idx: int, entry: dict, semaphore: asyncio.Semaphore) -> None:
+    async with semaphore:
+        started = monotonic()
+        item_id = _entry_id(entry)
+        item_name = _entry_name(entry)
+        now = datetime.now(timezone.utc).isoformat()
 
-    for idx, entry in enumerate(entries):
         async with _lock:
             if job.status == "cancelled":
+                if idx < len(job.items):
+                    job.items[idx]["status"] = "cancelled"
+                    job.items[idx]["finished_at"] = now
+                _refresh_current_index(job)
                 return
+            if idx < len(job.items):
+                job.items[idx]["status"] = "in_progress"
+                job.items[idx]["started_at"] = now
+                job.items[idx]["error"] = None
+                job.items[idx]["duration_ms"] = None
+            _refresh_current_index(job)
+
+        await _persist_job(job)
+        logger.info(
+            "parse_job_item_started job_id=%s index=%s entry_id=%s entry_name=%s",
+            job.job_id,
+            idx,
+            item_id,
+            item_name,
+        )
 
         try:
             custom = None
@@ -242,9 +347,24 @@ async def _run_job(job: Job, entries: list[dict]) -> None:
                 custom_prompt=custom,
                 override_config=job.override_config,
             )
-            await _persist_parsed_result(entry, result)
 
             async with _lock:
+                if job.status == "cancelled":
+                    if idx < len(job.items):
+                        job.items[idx]["status"] = "cancelled"
+                        job.items[idx]["finished_at"] = datetime.now(timezone.utc).isoformat()
+                        job.items[idx]["duration_ms"] = _duration_ms(started)
+                    _refresh_current_index(job)
+                    return
+
+            await _persist_parsed_result(entry, result)
+            duration_ms = _duration_ms(started)
+
+            async with _lock:
+                if idx < len(job.items):
+                    job.items[idx]["status"] = "done"
+                    job.items[idx]["finished_at"] = datetime.now(timezone.utc).isoformat()
+                    job.items[idx]["duration_ms"] = duration_ms
                 job.results.append({
                     "index": idx,
                     "raw": entry,
@@ -252,24 +372,114 @@ async def _run_job(job: Job, entries: list[dict]) -> None:
                     "error": None,
                 })
                 job.completed += 1
+                _refresh_current_index(job)
+            logger.info(
+                "parse_job_item_done job_id=%s index=%s entry_id=%s duration_ms=%s completed=%s failed=%s total=%s",
+                job.job_id,
+                idx,
+                item_id,
+                duration_ms,
+                job.completed,
+                job.failed,
+                job.total,
+            )
         except asyncio.CancelledError:
+            duration_ms = _duration_ms(started)
             async with _lock:
-                job.status = "cancelled"
+                if idx < len(job.items):
+                    job.items[idx]["status"] = "cancelled"
+                    job.items[idx]["finished_at"] = datetime.now(timezone.utc).isoformat()
+                    job.items[idx]["duration_ms"] = duration_ms
+                _mark_remaining_cancelled(job)
+                _refresh_current_index(job)
             await _persist_job(job)
-            return
+            logger.info(
+                "parse_job_item_cancelled job_id=%s index=%s entry_id=%s duration_ms=%s",
+                job.job_id,
+                idx,
+                item_id,
+                duration_ms,
+            )
+            raise
         except Exception as e:
+            duration_ms = _duration_ms(started)
             async with _lock:
+                if idx < len(job.items):
+                    job.items[idx]["status"] = "error"
+                    job.items[idx]["error"] = str(e)
+                    job.items[idx]["finished_at"] = datetime.now(timezone.utc).isoformat()
+                    job.items[idx]["duration_ms"] = duration_ms
                 job.errors.append({
                     "index": idx,
                     "raw": entry,
                     "error": str(e),
                 })
                 job.failed += 1
+                _refresh_current_index(job)
+            logger.exception(
+                "parse_job_item_failed job_id=%s index=%s entry_id=%s duration_ms=%s error=%s",
+                job.job_id,
+                idx,
+                item_id,
+                duration_ms,
+                _error_text(e),
+            )
 
-        # Persist incremental progress every 3 items or on last item
-        if (idx + 1) % 3 == 0 or idx == len(entries) - 1:
-            await _persist_job(job)
+        await _persist_job(job)
+
+
+async def _run_job(job: Job, entries: list[dict]) -> None:
+    started = monotonic()
+    concurrency = _job_concurrency()
+    job.status = "running"
+    await _persist_job(job)
+    logger.info(
+        "parse_job_started job_id=%s username=%s total=%s concurrency=%s",
+        job.job_id,
+        job.username,
+        job.total,
+        concurrency,
+    )
+
+    semaphore = asyncio.Semaphore(concurrency)
+    tasks = [
+        asyncio.create_task(_run_job_item(job, idx, entry, semaphore))
+        for idx, entry in enumerate(entries)
+    ]
+
+    try:
+        await asyncio.gather(*tasks)
+    except asyncio.CancelledError:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        async with _lock:
+            job.status = "cancelled"
+            _mark_remaining_cancelled(job)
+            _refresh_current_index(job)
+        await _persist_job(job)
+        logger.info(
+            "parse_job_cancelled job_id=%s duration_ms=%s completed=%s failed=%s total=%s",
+            job.job_id,
+            _duration_ms(started),
+            job.completed,
+            job.failed,
+            job.total,
+        )
+        return
 
     async with _lock:
-        job.status = "done"
+        if job.status != "cancelled":
+            job.status = "done"
+        _refresh_current_index(job)
     await _persist_job(job)
+    logger.info(
+        "parse_job_finished job_id=%s status=%s duration_ms=%s completed=%s failed=%s total=%s concurrency=%s",
+        job.job_id,
+        job.status,
+        _duration_ms(started),
+        job.completed,
+        job.failed,
+        job.total,
+        concurrency,
+    )

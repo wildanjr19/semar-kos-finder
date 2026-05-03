@@ -1,0 +1,31 @@
+# Jangan index instruksi agent/AI sendiri
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Folder konfigurasi assistant
+.codex/
+.gemini/
+.opencode/
+.cursor/
+.kiro/
+.agents/
+
+# Output graphify sendiri
+graphify-out/
+
+# Dependency / build / cache umum
+node_modules/
+vendor/
+dist/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+
+# Environment / secret
+.env
+.env.*
+*.log
+

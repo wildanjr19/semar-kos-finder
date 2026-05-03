@@ -124,7 +124,7 @@ export function FasilitasEditor({ value, onChange }: { value: FasilitasValue; on
 
 interface PeraturanValue {
   jam_malam: string | null;
-  tamu_lawan_jenis: 'dilarang' | 'terbatas' | 'bebas' | null;
+  tamu_lawan_jenis: Array<'dilarang' | 'terbatas' | 'bebas'>;
   tamu_menginap: boolean | null;
   boleh_hewan: boolean | null;
   lainnya: string[];
@@ -132,6 +132,15 @@ interface PeraturanValue {
 
 export function PeraturanEditor({ value, onChange }: { value: PeraturanValue; onChange: (v: PeraturanValue) => void }) {
   const [ruleInput, setRuleInput] = useState('');
+  const toggleGuestRule = (option: 'dilarang' | 'terbatas' | 'bebas') => {
+    const has = value.tamu_lawan_jenis.includes(option);
+    onChange({
+      ...value,
+      tamu_lawan_jenis: has
+        ? value.tamu_lawan_jenis.filter((v) => v !== option)
+        : [...value.tamu_lawan_jenis, option],
+    });
+  };
   const addRule = () => {
     const v = ruleInput.trim();
     if (v && !value.lainnya.includes(v)) onChange({ ...value, lainnya: [...value.lainnya, v] });
@@ -147,12 +156,32 @@ export function PeraturanEditor({ value, onChange }: { value: PeraturanValue; on
       </label>
       <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>
         Tamu Lawan Jenis
-        <select value={value.tamu_lawan_jenis ?? ''} onChange={(e) => onChange({ ...value, tamu_lawan_jenis: (e.target.value || null) as PeraturanValue['tamu_lawan_jenis'] })} style={{ width: '100%', marginTop: '2px', fontSize: '0.8rem' }}>
-          <option value="">Tidak diketahui</option>
-          <option value="dilarang">Dilarang</option>
-          <option value="terbatas">Terbatas</option>
-          <option value="bebas">Bebas</option>
-        </select>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+          {([
+            ['dilarang', 'Dilarang'],
+            ['terbatas', 'Terbatas'],
+            ['bebas', 'Bebas'],
+          ] as const).map(([key, label]) => {
+            const active = value.tamu_lawan_jenis.includes(key);
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleGuestRule(key)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '4px 10px',
+                  borderRadius: '999px',
+                  border: `1px solid ${active ? 'var(--success-border)' : 'var(--border)'}`,
+                  background: active ? 'var(--success-bg)' : 'var(--surface-raised)',
+                  color: active ? 'var(--success)' : 'var(--text-secondary)',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </label>
       <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>
         Tamu Menginap

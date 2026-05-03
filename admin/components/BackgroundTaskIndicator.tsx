@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useJobPoller, JobState } from '@/hooks/useJobPoller';
 
 const JOBS_STORAGE_KEY = 'parse_jobs';
@@ -14,7 +14,6 @@ interface Banner {
 export default function BackgroundTaskIndicator() {
   const [storedIds, setStoredIds] = useState<string[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
-  const prevJobs = useRef<Record<string, JobState>>({});
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -28,9 +27,16 @@ export default function BackgroundTaskIndicator() {
   }, []);
 
   const handleComplete = useCallback((job: JobState) => {
+    const hasFailedItems = job.failed > 0;
     setBanners((prev) => [
       ...prev,
-      { id: job.job_id, type: 'done', message: `Job ${job.job_id} completed (${job.completed}/${job.total})` },
+      {
+        id: job.job_id,
+        type: hasFailedItems ? 'error' : 'done',
+        message: hasFailedItems
+          ? `Job ${job.job_id} selesai dengan gagal ${job.failed}/${job.total}`
+          : `Job ${job.job_id} selesai (${job.completed}/${job.total})`,
+      },
     ]);
     setTimeout(() => {
       setStoredIds((prev) => {
@@ -55,15 +61,11 @@ export default function BackgroundTaskIndicator() {
     }, 5000);
   }, []);
 
-  const jobs = useJobPoller(storedIds, {
+  useJobPoller(storedIds, {
     interval: 2000,
     onComplete: handleComplete,
     onError: handleError,
   });
-
-  const activeJobs = storedIds
-    .map((id) => jobs[id])
-    .filter((j): j is JobState => !!j && (j.status === 'running' || j.status === 'pending'));
 
   const dismissBanner = (id: string) => {
     setBanners((prev) => prev.filter((b) => b.id !== id));
@@ -71,59 +73,6 @@ export default function BackgroundTaskIndicator() {
 
   return (
     <>
-      {/* Floating indicator */}
-      {activeJobs.length > 0 && (
-        <div style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '16px',
-          zIndex: 100,
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '10px 14px',
-          boxShadow: 'var(--shadow-lg)',
-          fontSize: '0.8rem',
-          minWidth: '220px',
-        }}>
-          {activeJobs.map((j) => {
-            const pctDone = j.total ? (j.completed / j.total) * 100 : 0;
-            const pctFailed = j.total ? (j.failed / j.total) * 100 : 0;
-            return (
-              <div key={j.job_id} style={{ marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span>🔄</span>
-                  <span>Parse {j.completed}/{j.total}</span>
-                  <a href="/actions/parse" style={{ color: 'var(--accent)', textDecoration: 'underline', marginLeft: 'auto' }}>Lihat</a>
-                </div>
-                {/* Segmented progress bar */}
-                <div style={{
-                  height: '6px',
-                  background: 'var(--border)',
-                  borderRadius: '3px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                }}>
-                  <div style={{
-                    width: `${pctDone}%`,
-                    background: '#22c55e',
-                    transition: 'width 0.3s ease',
-                  }} />
-                  <div style={{
-                    width: `${pctFailed}%`,
-                    background: '#ef4444',
-                    transition: 'width 0.3s ease',
-                  }} />
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px', textAlign: 'right' }}>
-                  {Math.round(pctDone)}% done{j.failed > 0 ? ` · ${j.failed} failed` : ''}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       {/* In-app banners */}
       {banners.length > 0 && (
         <div style={{

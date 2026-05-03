@@ -42,7 +42,7 @@ interface FasilitasCleaned {
 
 interface PeraturanCleaned {
   jam_malam: string | null;
-  tamu_lawan_jenis: 'dilarang' | 'terbatas' | 'bebas' | null;
+  tamu_lawan_jenis: Array<'dilarang' | 'terbatas' | 'bebas'>;
   tamu_menginap: boolean | null;
   boleh_hewan: boolean | null;
   lainnya: string[];
@@ -176,6 +176,18 @@ function isNeedsReview(entry: ParseEntryState): boolean {
   return (entry.parseStatus === 'done' || entry.parseStatus === 'error') && entry.reviewStatus === 'pending';
 }
 
+function normalizeKosClean(value: unknown): KosClean | null {
+  if (!value || typeof value !== 'object') return null;
+  const clean = value as KosClean;
+  const tamu = clean?.peraturan?.tamu_lawan_jenis;
+  if (typeof tamu === 'string') {
+    clean.peraturan.tamu_lawan_jenis = [tamu as 'dilarang' | 'terbatas' | 'bebas'];
+  } else if (!Array.isArray(tamu)) {
+    clean.peraturan.tamu_lawan_jenis = [];
+  }
+  return clean;
+}
+
 function matchesInboxFilter(entry: ParseEntryState, filter: InboxFilter): boolean {
   const dataStatus = entry.raw.data_status || 'raw';
   if (filter === 'all') return true;
@@ -287,7 +299,7 @@ export default function ParseAction() {
         if (!next[idx]) continue;
         next[idx] = {
           ...next[idx],
-          clean: r.clean as KosClean,
+          clean: normalizeKosClean(r.clean),
           parseStatus: 'done',
           parseError: null,
           reviewStatus: next[idx].reviewStatus === 'approved' ? 'approved' : 'pending',
@@ -332,7 +344,7 @@ export default function ParseAction() {
         loaded.map((raw, idx) => ({
           index: idx,
           raw,
-          clean: (raw.parsed_data as KosClean | null) ?? null,
+          clean: normalizeKosClean(raw.parsed_data),
           parseStatus: raw.parsed_data ? 'done' : 'idle',
           parseError: null,
           reviewStatus: raw.data_status === 'reviewed' ? 'approved' : raw.data_status === 'rejected' ? 'rejected' : 'pending',
@@ -480,7 +492,7 @@ export default function ParseAction() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       updateEntry(idx, {
-        clean: data as KosClean,
+        clean: normalizeKosClean(data),
         parseStatus: 'done',
         parseError: null,
         reviewStatus: 'pending',
@@ -947,7 +959,7 @@ export default function ParseAction() {
                           <PeraturanEditor value={effectiveClean.peraturan} onChange={(v) => updateEdit({ peraturan: v })} />
                         ) : (
                           <div className={styles.textMuted}>
-                            Jam malam: {effectiveClean.peraturan.jam_malam ?? '-'} | Tamu lawan jenis: {effectiveClean.peraturan.tamu_lawan_jenis ?? '-'}
+                            Jam malam: {effectiveClean.peraturan.jam_malam ?? '-'} | Tamu lawan jenis: {effectiveClean.peraturan.tamu_lawan_jenis.join(', ') || '-'}
                           </div>
                         )}
                       </div>
