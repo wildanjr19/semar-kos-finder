@@ -10,8 +10,8 @@
 ## Current Position
 
 - **Phase**: 3 — Responsive UX Scaffolding
-- **Plan**: Next
-- **Status**: Pending
+- **Plan**: 2 plans created
+- **Status**: Ready to execute
 - **Progress**: [66%] ██████░░░░
 
 ## Performance Metrics
@@ -32,8 +32,8 @@
 
 ## Session Continuity
 
-- **Last Action**: Phase 2 execution complete — all 8 filter controls visible in 4 accordion sections
-- **Next Expected Action**: `/gsd-plan-phase 3` or `/gsd-execute-phase 3`
+- **Last Action**: Phase 3 planning complete — 2 plans created for active chips/count/badges and responsive sidebar/bottom sheet
+- **Next Expected Action**: `/gsd-execute-phase 3`
 - **Open Questions**: None.
 
 ## Accumulated Context (updated)
@@ -53,3 +53,10 @@
 - Campus building selector for location (no geolocation)
 - Stats bar removed entirely
 - Chips for binary/ternary filters, checkboxes for facilities, inputs for price
+
+### Phase 3 Key Decisions
+- Result count displays total loaded kos only: `X kos ditemukan`
+- Active chips reflect non-default controls and support remove-one plus `Hapus semua`
+- Mobile filter UI is a bottom sheet collapsed to handle/count summary and opens to bottom 70dvh
+- Desktop keeps existing collapsible left sidebar behavior
+- Mobile keeps PreviewList below filters inside bottom sheet

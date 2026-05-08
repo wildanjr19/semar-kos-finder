@@ -72,7 +72,23 @@ Plans:
   2. User sees a live result count indicator (e.g., "X kos ditemukan").
   3. On desktop, the filter panel renders as a collapsible left sidebar.
   4. On mobile, the filter panel renders as a bottom sheet keeping the map visible.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] `03-01-PLAN.md` — Active filter chips, loaded result count, and accordion active-count badges (Wave 1)
+- [ ] `03-02-PLAN.md` — Responsive desktop sidebar and mobile bottom sheet scaffold (Wave 2)
+
+**Wave dependencies:**
+- **Wave 1** *(active-state UX foundation)*
+- **Wave 2** *(blocked on Wave 1: reuses total count and preserves chip/filter panel flow inside responsive shell)*
+
+**Cross-cutting constraints:**
+- Result count shows total loaded kos only (`X kos ditemukan`), not mock filtered count (per D-01)
+- Active chips exclude default filter state and support one-by-one remove plus `Hapus semua` (per D-02, D-03)
+- Mobile bottom sheet opens to bottom 70dvh and keeps map visible (per D-04)
+- Desktop sidebar remains existing collapsible left sidebar unless responsive changes require minimal CSS adaptation (per D-05)
+- Preview list remains available below filters inside mobile bottom sheet (per D-06)
+- Accordion sections show active-count badges (per D-07)
 **UI hint**: yes
 
 ## Progress
