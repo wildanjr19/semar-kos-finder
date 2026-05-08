@@ -12,7 +12,7 @@
 ## Phases
 
 - [x] **Phase 1: Prototype Foundation** — Map renders with real kos data at /prototype/clean-map (2026-05-03)
-- [ ] **Phase 2: Filter Panel UI** — All KosClean filter controls visible and grouped
+- [x] **Phase 2: Filter Panel UI** — All KosClean filter controls visible and grouped
 - [ ] **Phase 3: Responsive UX Scaffolding** — Active filter chips, result count, and adaptive layout
 
 ## Phase Details
@@ -45,9 +45,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] `02-01-PLAN.md` — Foundation: shadcn/Tailwind setup, StatsBar removal, filter state scaffolding (Wave 1)
-- [ ] `02-02-PLAN.md` — Core FilterPanel: SearchBar, LocationSelector, Room + Billing accordion sections wired to page (Wave 2)
-- [ ] `02-03-PLAN.md` — Facilities + Rules accordion sections, complete all 8 filter controls (Wave 3)
+- [x] `02-01-PLAN.md` — Foundation: shadcn/Tailwind setup, StatsBar removal, filter state scaffolding (Wave 1)
+- [x] `02-02-PLAN.md` — Core FilterPanel: SearchBar, LocationSelector, Room + Billing accordion sections wired to page (Wave 2)
+- [x] `02-03-PLAN.md` — Facilities + Rules accordion sections, complete all 8 filter controls (Wave 3)
 
 **Wave dependencies:**
 - **Wave 1** *(foundation)*
@@ -80,5 +80,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Prototype Foundation | 4/4 | Complete | 2026-05-03 |
-| 2. Filter Panel UI | 0/3 | Planned | - |
+| 2. Filter Panel UI | 3/3 | Complete | 2026-05-08 |
 | 3. Responsive UX Scaffolding | 0/2 | Not started | - |
