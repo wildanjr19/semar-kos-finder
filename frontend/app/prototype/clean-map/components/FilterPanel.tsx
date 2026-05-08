@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import type { FilterState } from "./filter-types";
 import {
   Accordion,
   AccordionItem,
@@ -18,23 +19,6 @@ type FilterPanelProps = {
   filterState: FilterState;
   setFilterState: Dispatch<SetStateAction<FilterState>>;
   campusList: string[];
-};
-
-// Re-declare or import FilterState type (it's local to page.tsx — can extract to shared types file)
-type FilterState = {
-  searchText: string;
-  selectedCampus: string | null;
-  selectedGender: string | null;
-  selectedAc: string | null;
-  priceMin: string;
-  priceMax: string;
-  pricePeriod: string;
-  selectedPaymentTypes: string[];
-  selectedFacilities: string[];
-  selectedJamMalam: string | null;
-  selectedTamuLawanJenis: string | null;
-  selectedTamuMenginap: string | null;
-  selectedBolehHewan: string | null;
 };
 
 export function FilterPanel({ filterState, setFilterState, campusList }: FilterPanelProps) {

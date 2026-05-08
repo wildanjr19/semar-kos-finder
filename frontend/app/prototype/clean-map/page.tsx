@@ -5,47 +5,17 @@ import type { CleanKos, Destination, RawDestination } from "../../../types/kos";
 import { normalizeCleanKos, toNumber } from "../../../lib/kos-helpers";
 import MapView from "./MapView";
 import type { MapViewHandle } from "./MapView";
+import type { FilterState } from "./components/filter-types";
+import { DEFAULT_FILTER_STATE } from "./components/filter-types";
 import {
   Sidebar,
   PreviewList,
   LoadingState,
   ErrorState,
   EmptyState,
+  FilterPanel,
 } from "./components";
 import styles from "./page.module.css";
-
-// ── Filter state types ──
-type FilterState = {
-  searchText: string;
-  selectedCampus: string | null;
-  selectedGender: string | null;       // "Putra" | "Putri" | "Campuran" | null
-  selectedAc: string | null;           // "ac" | "non_ac" | "keduanya" | null
-  priceMin: string;
-  priceMax: string;
-  pricePeriod: string;                 // "bulanan" | "semesteran" | "tahunan" | "per 3 bulan" | "mingguan"
-  selectedPaymentTypes: string[];
-  selectedFacilities: string[];        // flat array of selected facility names
-  selectedJamMalam: string | null;
-  selectedTamuLawanJenis: string | null; // "dilarang" | "terbatas" | "bebas" | null
-  selectedTamuMenginap: string | null;   // "Semua" | "Ya" | "Tidak"
-  selectedBolehHewan: string | null;     // "Semua" | "Ya" | "Tidak"
-};
-
-const DEFAULT_FILTER_STATE: FilterState = {
-  searchText: "",
-  selectedCampus: null,
-  selectedGender: null,
-  selectedAc: null,
-  priceMin: "",
-  priceMax: "",
-  pricePeriod: "bulanan",
-  selectedPaymentTypes: [],
-  selectedFacilities: [],
-  selectedJamMalam: null,
-  selectedTamuLawanJenis: null,
-  selectedTamuMenginap: "Semua",
-  selectedBolehHewan: "Semua",
-};
 
 export default function CleanMapPage() {
   const [items, setItems] = useState<CleanKos[]>([]);
@@ -136,6 +106,11 @@ export default function CleanMapPage() {
     <div className={styles.page}>
       <MapView ref={mapViewRef} items={items} destinations={destinations} />
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)}>
+        <FilterPanel
+          filterState={filterState}
+          setFilterState={setFilterState}
+          campusList={campusList}
+        />
         {loading && <LoadingState />}
         {error && <ErrorState message={error} />}
         {!loading && !error && items.length === 0 && <EmptyState />}
