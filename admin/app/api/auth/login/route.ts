@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const API_INTERNAL_URL = process.env.API_INTERNAL_URL || 'http://localhost:8000';
+const ACCESS_MAX_AGE = 60 * 60; // 1 hour
+const REFRESH_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -25,7 +27,15 @@ export async function POST(request: NextRequest) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24,
+    maxAge: ACCESS_MAX_AGE,
+  });
+
+  response.cookies.set('admin_refresh', data.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: REFRESH_MAX_AGE,
   });
 
   return response;

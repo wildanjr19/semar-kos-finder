@@ -13,6 +13,54 @@ class GeoJSONPoint(BaseModel):
     )
 
 
+# --- Clean data schemas (for LLM parsing output) ---
+
+
+class HargaItem(BaseModel):
+    min: int
+    max: int
+    periode: Literal["bulanan", "semesteran", "tahunan", "per3bulan", "mingguan"]
+    tipe_kamar: str | None = None
+    catatan: str | None = None
+
+
+class FasilitasCleaned(BaseModel):
+    dalam_kamar: list[str] = []
+    bersama: list[str] = []
+    utilitas: list[str] = []
+    catatan: str = ""
+
+
+class PeraturanCleaned(BaseModel):
+    jam_malam: str | None = None
+    tamu_lawan_jenis: Literal["dilarang", "terbatas", "bebas"] | None = None
+    tamu_menginap: bool | None = None
+    boleh_hewan: bool | None = None
+    lainnya: list[str] = []
+
+
+class KontakItem(BaseModel):
+    nama: str = ""
+    nomor_wa: str
+    url_wa: str
+
+
+class KosClean(BaseModel):
+    id: str
+    nama: str
+    jenis_kos: Literal["Putri", "Putra", "Campuran"]
+    alamat: str
+    plus_code: str
+    lat: float
+    lon: float
+    ac_status: Literal["ac", "non_ac", "keduanya"]
+    tipe_pembayaran: list[str]
+    harga: list[HargaItem]
+    fasilitas: FasilitasCleaned
+    peraturan: PeraturanCleaned
+    kontak: list[KontakItem]
+
+
 class KosBulkItem(BaseModel):
     No: str | None = None
     Nama_kos: str = Field(alias="Nama kos")
@@ -93,6 +141,11 @@ class KosOut(BaseModel):
     long: float
     ac_status: str = ""
     tipe_pembayaran: list[str] | None = None
+    data_status: str = "raw"
+    parsed_data: KosClean | None = None
+    last_parsed_at: datetime | None = None
+    reviewed_at: datetime | None = None
+    reviewed_by: str | None = None
 
 
 class Kos(BaseModel):
@@ -113,6 +166,11 @@ class Kos(BaseModel):
     source_id: str = ""
     location: GeoJSONPoint | None = None
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    data_status: str = "raw"
+    parsed_data: KosClean | None = None
+    last_parsed_at: datetime | None = None
+    reviewed_at: datetime | None = None
+    reviewed_by: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -175,3 +233,29 @@ class MasterUnsOut(BaseModel):
     nama: str
     lat: float
     lon: float
+
+
+# --- Admin settings & job persistence ---
+
+
+class UserLlmConfig(BaseModel):
+    username: str
+    api_base: str = "https://api.openai.com/v1"
+    api_key: str = ""
+    model: str = "gpt-4o"
+    max_tokens: int = 4096
+    temperature: float = 0.1
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class PersistedJob(BaseModel):
+    job_id: str
+    username: str
+    status: Literal["pending", "running", "done", "cancelled", "error"]
+    total: int
+    completed: int = 0
+    failed: int = 0
+    results: list[dict] = []
+    errors: list[dict] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

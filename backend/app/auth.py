@@ -45,8 +45,26 @@ def record_failure(ip: str) -> None:
 def create_access_token(subject: str) -> str:
     config = load_config()
     expire = datetime.now(timezone.utc) + timedelta(minutes=config.jwt_expire_minutes)
-    payload = {"sub": subject, "exp": expire}
+    payload = {"sub": subject, "exp": expire, "type": "access"}
     return jwt.encode(payload, config.jwt_secret, algorithm=ALGORITHM)
+
+
+def create_refresh_token(subject: str) -> str:
+    config = load_config()
+    expire = datetime.now(timezone.utc) + timedelta(days=config.jwt_refresh_expire_days)
+    payload = {"sub": subject, "exp": expire, "type": "refresh"}
+    return jwt.encode(payload, config.jwt_secret, algorithm=ALGORITHM)
+
+
+def verify_refresh_token(token: str) -> str:
+    config = load_config()
+    payload = jwt.decode(token, config.jwt_secret, algorithms=[ALGORITHM])
+    if payload.get("type") != "refresh":
+        raise JWTError("Invalid token type")
+    username: str | None = payload.get("sub")
+    if username is None:
+        raise JWTError("Missing subject")
+    return username
 
 
 async def require_auth(

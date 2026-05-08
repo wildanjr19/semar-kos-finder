@@ -124,6 +124,17 @@
   font-weight: 500;
 }
 
+.successBanner {
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
 .searchBar {
   position: relative;
   margin-bottom: 1.5rem;
@@ -399,6 +410,54 @@
   color: var(--text-secondary);
 }
 
+.badgeRaw {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+.badgeParsed {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.badgeReviewed {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.badgeRejected {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.statusFilter {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusFilterItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+
+.statusFilterItem:hover {
+  border-color: var(--accent);
+}
+
+.statusFilterItem input {
+  margin: 0;
+}
+
 .editBtn {
   color: var(--accent);
   text-decoration: none;
@@ -606,6 +665,41 @@
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+}
+
+/* ─── New: Stat Cards ─── */
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .statCards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statCardValue {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.statCardLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 @media (max-width: 768px) {

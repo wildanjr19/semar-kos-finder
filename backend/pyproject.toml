@@ -13,6 +13,7 @@ dependencies = [
   "bcrypt>=4.0,<5.0",
   "pydantic-settings",
   "orjson",
+  "openai>=1.0,<2.0",
 ]
 
 [tool.uv]
