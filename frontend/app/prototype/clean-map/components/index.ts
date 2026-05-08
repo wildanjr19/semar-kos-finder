@@ -16,3 +16,5 @@ export * from "./ChipGroup";
 export * from "./RoomSection";
 export * from "./BillingSection";
 export * from "./filter-types";
+export * from "./FacilitiesSection";
+export * from "./RulesSection";

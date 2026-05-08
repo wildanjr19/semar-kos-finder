@@ -112,9 +112,9 @@ export function RulesSection({
         options={TRI_STATE_OPTIONS}
         value={selectedTamuMenginap}
         onChange={(value) => {
-          if (typeof value === "string" || value === null) {
-            handleTamuMenginap(value ?? "Semua");
-          }
+          // ChipGroup radio mode always returns string | null
+          if (value === null) handleTamuMenginap("Semua");
+          else if (typeof value === "string") handleTamuMenginap(value);
         }}
         mode="radio"
       />
@@ -125,9 +125,8 @@ export function RulesSection({
         options={TRI_STATE_OPTIONS}
         value={selectedBolehHewan}
         onChange={(value) => {
-          if (typeof value === "string" || value === null) {
-            handleBolehHewan(value ?? "Semua");
-          }
+          if (value === null) handleBolehHewan("Semua");
+          else if (typeof value === "string") handleBolehHewan(value);
         }}
         mode="radio"
       />

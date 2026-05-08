@@ -12,8 +12,8 @@ import { SearchBar } from "./SearchBar";
 import { LocationSelector } from "./LocationSelector";
 import { RoomSection } from "./RoomSection";
 import { BillingSection } from "./BillingSection";
-
-// Plan 03 will import and wire FacilitiesSection and RulesSection here
+import { FacilitiesSection } from "./FacilitiesSection";
+import { RulesSection } from "./RulesSection";
 
 type FilterPanelProps = {
   filterState: FilterState;
@@ -72,29 +72,35 @@ export function FilterPanel({ filterState, setFilterState, campusList }: FilterP
           </AccordionContent>
         </AccordionItem>
 
-        {/* Fasilitas — TODO: Plan 03 */}
+        {/* Fasilitas */}
         <AccordionItem value="fasilitas">
           <AccordionTrigger className="text-base font-semibold px-2">
             Fasilitas
           </AccordionTrigger>
           <AccordionContent>
-            {/* FacilitiesSection goes here in Plan 03 */}
-            <p className="text-sm text-muted-foreground px-2 py-4">
-              Fasilitas filter akan ditambahkan.
-            </p>
+            <FacilitiesSection
+              selectedFacilities={filterState.selectedFacilities}
+              onChange={updater("selectedFacilities")}
+            />
           </AccordionContent>
         </AccordionItem>
 
-        {/* Peraturan — TODO: Plan 03 */}
+        {/* Peraturan */}
         <AccordionItem value="peraturan">
           <AccordionTrigger className="text-base font-semibold px-2">
             Peraturan
           </AccordionTrigger>
           <AccordionContent>
-            {/* RulesSection goes here in Plan 03 */}
-            <p className="text-sm text-muted-foreground px-2 py-4">
-              Peraturan filter akan ditambahkan.
-            </p>
+            <RulesSection
+              selectedJamMalam={filterState.selectedJamMalam}
+              selectedTamuLawanJenis={filterState.selectedTamuLawanJenis}
+              selectedTamuMenginap={filterState.selectedTamuMenginap}
+              selectedBolehHewan={filterState.selectedBolehHewan}
+              onJamMalamChange={updater("selectedJamMalam")}
+              onTamuLawanJenisChange={updater("selectedTamuLawanJenis")}
+              onTamuMenginapChange={updater("selectedTamuMenginap")}
+              onBolehHewanChange={updater("selectedBolehHewan")}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
