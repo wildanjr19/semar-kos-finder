@@ -7,13 +7,45 @@ import MapView from "./MapView";
 import type { MapViewHandle } from "./MapView";
 import {
   Sidebar,
-  StatsBar,
   PreviewList,
   LoadingState,
   ErrorState,
   EmptyState,
 } from "./components";
 import styles from "./page.module.css";
+
+// ── Filter state types ──
+type FilterState = {
+  searchText: string;
+  selectedCampus: string | null;
+  selectedGender: string | null;       // "Putra" | "Putri" | "Campuran" | null
+  selectedAc: string | null;           // "ac" | "non_ac" | "keduanya" | null
+  priceMin: string;
+  priceMax: string;
+  pricePeriod: string;                 // "bulanan" | "semesteran" | "tahunan" | "per 3 bulan" | "mingguan"
+  selectedPaymentTypes: string[];
+  selectedFacilities: string[];        // flat array of selected facility names
+  selectedJamMalam: string | null;
+  selectedTamuLawanJenis: string | null; // "dilarang" | "terbatas" | "bebas" | null
+  selectedTamuMenginap: string | null;   // "Semua" | "Ya" | "Tidak"
+  selectedBolehHewan: string | null;     // "Semua" | "Ya" | "Tidak"
+};
+
+const DEFAULT_FILTER_STATE: FilterState = {
+  searchText: "",
+  selectedCampus: null,
+  selectedGender: null,
+  selectedAc: null,
+  priceMin: "",
+  priceMax: "",
+  pricePeriod: "bulanan",
+  selectedPaymentTypes: [],
+  selectedFacilities: [],
+  selectedJamMalam: null,
+  selectedTamuLawanJenis: null,
+  selectedTamuMenginap: "Semua",
+  selectedBolehHewan: "Semua",
+};
 
 export default function CleanMapPage() {
   const [items, setItems] = useState<CleanKos[]>([]);
@@ -22,6 +54,8 @@ export default function CleanMapPage() {
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [previewExpanded, setPreviewExpanded] = useState(false);
+  const [filterState, setFilterState] = useState<FilterState>(DEFAULT_FILTER_STATE);
+  const [campusList, setCampusList] = useState<string[]>([]);
   const mapViewRef = useRef<MapViewHandle>(null);
 
   useEffect(() => {
@@ -80,11 +114,28 @@ export default function CleanMapPage() {
     };
   }, []);
 
+  // Extract unique campus building names from master-uns data
+  useEffect(() => {
+    async function loadCampusList() {
+      try {
+        const response = await fetch("/api/master-uns", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        const campuses = (Array.isArray(payload) ? payload : [])
+          .map((item: Record<string, unknown>) => String(item.nama ?? "").trim())
+          .filter((name: string) => name.length > 0);
+        setCampusList([...new Set(campuses)].sort());
+      } catch {
+        setCampusList([]);
+      }
+    }
+    loadCampusList();
+  }, []);
+
   return (
     <div className={styles.page}>
       <MapView ref={mapViewRef} items={items} destinations={destinations} />
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)}>
-        <StatsBar items={items} />
         {loading && <LoadingState />}
         {error && <ErrorState message={error} />}
         {!loading && !error && items.length === 0 && <EmptyState />}

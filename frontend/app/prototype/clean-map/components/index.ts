@@ -2,7 +2,6 @@ export * from "./constants";
 export * from "./MarkerBuilder";
 export * from "./PopupContentBuilder";
 export * from "./Popup";
-export * from "./StatsBar";
 export * from "./PreviewList";
 export * from "./LoadingState";
 export * from "./ErrorState";

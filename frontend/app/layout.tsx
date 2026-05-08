@@ -1,4 +1,5 @@
 import "maplibre-gl/dist/maplibre-gl.css";
+import "./globals.css";
 import type { ReactNode } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
