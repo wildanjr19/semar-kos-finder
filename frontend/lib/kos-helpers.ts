@@ -1,6 +1,6 @@
 /** Shared kos-related helper functions. */
 
-import type { HargaItem, Kos, KosClean } from "../types/kos";
+import type { HargaItem, Kos } from "../types/kos";
 
 export function toNumber(value: string | number | undefined): number {
   if (typeof value === "number") return Number.isFinite(value) ? value : Number.NaN;
@@ -156,24 +156,21 @@ export function parseContact(raw: string): { href: string | null; label: string 
   return { href: null, label: cleaned };
 }
 
-export function normalizeCleanKos(raw: unknown): import("../types/kos").CleanKos | null {
-  if (!isRecord(raw)) return null;
-  const item = raw as Record<string, unknown>;
-  if (String(item.data_status ?? "").toLowerCase() !== "reviewed") return null;
-  if (!isRecord(item.parsed_data)) return null;
-
-  const clean = item.parsed_data as unknown as Record<string, unknown>;
+function normalizeCleanKosRecord(
+  clean: Record<string, unknown>,
+  sourceIdFallback: string,
+): import("../types/kos").CleanKos | null {
   const lat = toNumber(clean.lat as string | number | undefined);
-  const lon = toNumber(clean.lon as string | number | undefined);
+  const lon = toNumber((clean.lon ?? clean.long) as string | number | undefined);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
 
   const fasilitasRaw = isRecord(clean.fasilitas) ? clean.fasilitas : {};
   const peraturanRaw = isRecord(clean.peraturan) ? clean.peraturan : {};
   const kontakRaw = Array.isArray(clean.kontak) ? clean.kontak : [];
 
-  const normalized: import("../types/kos").CleanKos = {
-    sourceId: String(item.id ?? clean.id ?? ""),
-    id: String(clean.id ?? item.id ?? ""),
+  return {
+    sourceId: String(clean.sourceId ?? clean.id ?? sourceIdFallback),
+    id: String(clean.id ?? sourceIdFallback),
     nama: String(clean.nama ?? "Kos tanpa nama"),
     jenis_kos: normalizeJenisKos(String(clean.jenis_kos ?? "Tidak diketahui")),
     alamat: String(clean.alamat ?? ""),
@@ -218,8 +215,19 @@ export function normalizeCleanKos(raw: unknown): import("../types/kos").CleanKos
       }))
       .filter((kontak) => kontak.nomor_wa || kontak.url_wa),
   };
+}
 
-  return normalized;
+export function normalizeCleanKos(raw: unknown): import("../types/kos").CleanKos | null {
+  if (!isRecord(raw)) return null;
+  const item = raw as Record<string, unknown>;
+
+  if (Object.prototype.hasOwnProperty.call(item, "data_status")) {
+    if (String(item.data_status ?? "").toLowerCase() !== "reviewed") return null;
+    if (!isRecord(item.parsed_data)) return null;
+    return normalizeCleanKosRecord(item.parsed_data, String(item.id ?? ""));
+  }
+
+  return normalizeCleanKosRecord(item, String(item.id ?? item.sourceId ?? ""));
 }
 
 export function getJenisBadgeColor(jenis: string): { bg: string; text: string; border: string } {

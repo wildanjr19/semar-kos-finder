@@ -14,6 +14,7 @@ from app.db import get_collection
 from app.parse_engine import parse_single_entry
 
 logger = logging.getLogger(__name__)
+RESTART_INTERRUPTED_MESSAGE = "Job interrupted by server restart; please re-run batch"
 
 
 @dataclass
@@ -86,6 +87,7 @@ def _error_text(exc: Exception, limit: int = 500) -> str:
 
 
 def _job_concurrency() -> int:
+    # Backend should run one Uvicorn worker for in-memory parse jobs until durable external queue exists
     raw = os.getenv("PARSE_JOB_CONCURRENCY", "3")
     try:
         value = int(raw)
@@ -214,6 +216,27 @@ async def get_job(job_id: str) -> Job | None:
     try:
         doc = await _jobs_coll().find_one({"job_id": job_id})
         if doc:
+            if doc.get("status") in ("pending", "running"):
+                now = datetime.now(timezone.utc).isoformat()
+                errors = [*doc.get("errors", []), {"error": RESTART_INTERRUPTED_MESSAGE}]
+                doc = {
+                    **doc,
+                    "status": "error",
+                    "current_index": None,
+                    "errors": errors,
+                    "updated_at": now,
+                }
+                await _jobs_coll().update_one(
+                    {"job_id": job_id},
+                    {
+                        "$set": {
+                            "status": "error",
+                            "current_index": None,
+                            "errors": errors,
+                            "updated_at": now,
+                        }
+                    },
+                )
             # Rehydrate minimal Job for read-only usage
             job = Job(
                 job_id=doc["job_id"],

@@ -12,6 +12,7 @@ export type FilterState = {
   selectedTamuLawanJenis: string | null;
   selectedTamuMenginap: string | null;
   selectedBolehHewan: string | null;
+  distanceMaxKm: string;
 };
 
 export const DEFAULT_FILTER_STATE: FilterState = {
@@ -28,4 +29,5 @@ export const DEFAULT_FILTER_STATE: FilterState = {
   selectedTamuLawanJenis: null,
   selectedTamuMenginap: "Semua",
   selectedBolehHewan: "Semua",
+  distanceMaxKm: "Semua",
 };

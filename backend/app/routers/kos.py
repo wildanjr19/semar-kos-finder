@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import logging
+import math
+
 from fastapi import APIRouter, HTTPException
 from pymongo import ASCENDING
 
 from app.db import get_collection
-from app.models import KosOut
+from app.models import KosClean, KosOut
 
 router = APIRouter(prefix="/api/kos", tags=["kos"])
 
 COLLECTION = "kos"
+logger = logging.getLogger(__name__)
 
 
 def _doc_to_kos(doc: dict) -> dict:
@@ -33,6 +37,23 @@ def _doc_to_kos(doc: dict) -> dict:
     return doc
 
 
+def _doc_to_clean_kos(doc: dict) -> dict | None:
+    parsed = doc.get("parsed_data")
+    if not isinstance(parsed, dict):
+        return None
+
+    lat = parsed.get("lat")
+    lon = parsed.get("lon")
+    if not isinstance(lat, int | float) or not isinstance(lon, int | float):
+        return None
+    if not math.isfinite(lat) or not math.isfinite(lon):
+        return None
+
+    clean = parsed.copy()
+    clean["id"] = str(clean.get("id") or doc.get("_id"))
+    return clean
+
+
 @router.get("", response_model=list[KosOut])
 async def list_kos() -> list[dict]:
     """Return all kos sorted by nama ascending."""
@@ -41,6 +62,27 @@ async def list_kos() -> list[dict]:
     results = []
     async for doc in cursor:
         results.append(_doc_to_kos(doc))
+    return results
+
+
+@router.get("/map", response_model=list[KosClean])
+async def list_kos_map() -> list[dict]:
+    """Return reviewed kos with valid parsed map data."""
+    coll = get_collection(COLLECTION)
+    cursor = coll.find(
+        {"data_status": "reviewed", "parsed_data": {"$exists": True}},
+        sort=[("nama", ASCENDING)],
+    )
+    results = []
+    skipped = 0
+    async for doc in cursor:
+        clean = _doc_to_clean_kos(doc)
+        if clean is None:
+            skipped += 1
+            continue
+        results.append(clean)
+    if skipped:
+        logger.warning("Skipped %s reviewed kos docs with invalid parsed_data", skipped)
     return results
 
 

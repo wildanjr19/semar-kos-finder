@@ -7,6 +7,7 @@ import MapView from "./MapView";
 import type { MapViewHandle } from "./MapView";
 import type { FilterState } from "./components/filter-types";
 import { DEFAULT_FILTER_STATE } from "./components/filter-types";
+import { filterItems } from "./components/filtering";
 import {
   Sidebar,
   PreviewList,
@@ -15,6 +16,7 @@ import {
   EmptyState,
   FilterPanel,
 } from "./components";
+import { useMemo } from "react";
 import styles from "./page.module.css";
 
 export default function CleanMapPage() {
@@ -27,6 +29,8 @@ export default function CleanMapPage() {
   const [filterState, setFilterState] = useState<FilterState>(DEFAULT_FILTER_STATE);
   const [campusList, setCampusList] = useState<string[]>([]);
   const mapViewRef = useRef<MapViewHandle>(null);
+  const filteredItems = useMemo(() => filterItems(items, filterState, destinations), [items, filterState, destinations]);
+  const showFilteredEmptyState = !loading && !error && items.length > 0 && filteredItems.length === 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -35,7 +39,7 @@ export default function CleanMapPage() {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch("/api/kos", { cache: "no-store" });
+const response = await fetch("/api/kos/map", { cache: "no-store" });
         if (!response.ok) throw new Error(`Gagal memuat data kos (${response.status})`);
         const payload = await response.json();
         const nextItems = (Array.isArray(payload) ? payload : [])
@@ -104,19 +108,34 @@ export default function CleanMapPage() {
 
   return (
     <div className={styles.page}>
-      <MapView ref={mapViewRef} items={items} destinations={destinations} />
+      <MapView ref={mapViewRef} items={filteredItems} destinations={destinations} />
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)}>
         <FilterPanel
           filterState={filterState}
           setFilterState={setFilterState}
           campusList={campusList}
         />
+        <div className="px-4 pb-2 text-sm text-muted-foreground">
+          Menampilkan {filteredItems.length} dari {items.length} kos
+        </div>
         {loading && <LoadingState />}
         {error && <ErrorState message={error} />}
         {!loading && !error && items.length === 0 && <EmptyState />}
-        {!loading && items.length > 0 && (
+        {showFilteredEmptyState && (
+          <div className="px-4 py-6 text-sm text-muted-foreground">
+            <div>Tidak ada kos yang cocok dengan filter</div>
+            <button
+              type="button"
+              onClick={() => setFilterState(DEFAULT_FILTER_STATE)}
+              className="mt-3 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              Reset Filter
+            </button>
+          </div>
+        )}
+        {!loading && !error && items.length > 0 && filteredItems.length > 0 && (
           <PreviewList
-            items={items}
+            items={filteredItems}
             expanded={previewExpanded}
             onToggleExpand={() => setPreviewExpanded((v) => !v)}
             onItemClick={(kos) => mapViewRef.current?.flyTo(kos)}

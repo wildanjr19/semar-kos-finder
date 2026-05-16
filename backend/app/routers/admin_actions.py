@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import logging
+import json
+import asyncio
 from datetime import datetime
 from time import monotonic
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from starlette.responses import StreamingResponse
 
 from app.auth import require_auth
 from app.db import get_collection
@@ -16,6 +19,8 @@ from app.parse_engine import parse_single_entry, test_llm_connection
 
 router = APIRouter(prefix="/api/admin/actions", tags=["admin-actions"])
 logger = logging.getLogger(__name__)
+SSE_HEARTBEAT_SECONDS = 15.0
+SSE_POLL_SECONDS = 0.25
 
 
 def _duration_ms(start: float) -> int:
@@ -24,6 +29,39 @@ def _duration_ms(start: float) -> int:
 
 def _entry_id(entry: dict) -> str:
     return str(entry.get("id") or entry.get("_id") or entry.get("No") or "")
+
+
+def _job_event_id(job: dict) -> str:
+    return ":".join(
+        [
+            str(job.get("job_id", "")),
+            str(job.get("status", "")),
+            str(job.get("completed", 0)),
+            str(job.get("failed", 0)),
+            str(job.get("current_index")),
+        ]
+    )
+
+
+def _job_progress_signature(job: dict) -> tuple:
+    return (
+        job.get("status"),
+        job.get("completed"),
+        job.get("failed"),
+        job.get("current_index"),
+    )
+
+
+def _sse_frame(event: str, data: dict, event_id: str) -> str:
+    return f"event: {event}\nid: {event_id}\ndata: {json.dumps(data, separators=(',', ':'))}\n\n"
+
+
+def _terminal_job_event(status: str) -> str | None:
+    return {
+        "done": "job.completed",
+        "error": "job.error",
+        "cancelled": "job.cancelled",
+    }.get(status)
 
 
 def _user_llm_coll():
@@ -175,17 +213,91 @@ async def list_parse_jobs(
 
 
 @router.get("/parse/jobs/{job_id}")
-async def get_parse_job(job_id: str, _username: str = Depends(require_auth)) -> dict:
+async def get_parse_job(job_id: str, username: str = Depends(require_auth)) -> dict:
     """Poll job status and partial results."""
     job = await get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail={"error": "Job not found"})
+    if job.username != username:
+        raise HTTPException(status_code=403, detail={"error": "Forbidden"})
     return job.to_dict()
 
 
+@router.get("/parse/jobs/{job_id}/events")
+async def stream_parse_job_events(
+    job_id: str,
+    request: Request,
+    username: str = Depends(require_auth),
+) -> StreamingResponse:
+    """Stream job state changes via manually-framed Server-Sent Events."""
+    # SSE proxy buffering must be disabled (X-Accel-Buffering: no, no-transform cache)
+    job = await get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail={"error": "Job not found"})
+    if job.username != username:
+        raise HTTPException(status_code=403, detail={"error": "Forbidden"})
+
+    async def event_stream():
+        current = job.to_dict()
+        last_signature = _job_progress_signature(current)
+        last_event_at = monotonic()
+        yield _sse_frame("job.snapshot", current, _job_event_id(current))
+
+        terminal_event = _terminal_job_event(str(current.get("status")))
+        if terminal_event:
+            yield _sse_frame(terminal_event, current, _job_event_id(current))
+            return
+
+        while True:
+            if await request.is_disconnected():
+                return
+
+            await asyncio.sleep(SSE_POLL_SECONDS)
+            latest_job = await get_job(job_id)
+            if not latest_job:
+                payload = {"job_id": job_id, "status": "error", "error": "Job not found"}
+                yield _sse_frame("job.error", payload, f"{job_id}:missing")
+                return
+
+            payload = latest_job.to_dict()
+            signature = _job_progress_signature(payload)
+            event_id = _job_event_id(payload)
+            terminal_event = _terminal_job_event(str(payload.get("status")))
+
+            if terminal_event:
+                yield _sse_frame(terminal_event, payload, event_id)
+                return
+
+            if signature != last_signature:
+                last_signature = signature
+                last_event_at = monotonic()
+                yield _sse_frame("job.progress", payload, event_id)
+                continue
+
+            if monotonic() - last_event_at >= SSE_HEARTBEAT_SECONDS:
+                last_event_at = monotonic()
+                yield _sse_frame("heartbeat", {}, f"{job_id}:heartbeat")
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 @router.post("/parse/jobs/{job_id}/cancel")
-async def cancel_parse_job(job_id: str, _username: str = Depends(require_auth)) -> dict:
+async def cancel_parse_job(job_id: str, username: str = Depends(require_auth)) -> dict:
     """Cancel a running parse job."""
+    job = await get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail={"error": "Job not found"})
+    if job.username != username:
+        raise HTTPException(status_code=403, detail={"error": "Forbidden"})
     ok = await cancel_job(job_id)
     if not ok:
         raise HTTPException(

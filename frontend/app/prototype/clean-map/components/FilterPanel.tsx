@@ -35,6 +35,24 @@ export function FilterPanel({ filterState, setFilterState, campusList }: FilterP
         value={filterState.selectedCampus}
         onChange={updater("selectedCampus")}
       />
+      <div className="px-4 pb-2">
+        <label htmlFor="distance-max-km" className="text-sm font-medium text-muted-foreground mb-1.5 block">
+          Jarak Maksimum (km)
+        </label>
+        <select
+          id="distance-max-km"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          value={filterState.distanceMaxKm}
+          onChange={(e) => updater("distanceMaxKm")(e.target.value)}
+        >
+          <option value="0.5">0.5</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="5">5</option>
+          <option value="Semua">Semua</option>
+        </select>
+      </div>
 
       {/* ── Accordion sections ── */}
       <Accordion type="multiple" className="w-full px-2">
